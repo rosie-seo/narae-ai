@@ -1,0 +1,883 @@
+/* ============================================================
+   조직 데이터 (3 depth)
+   depth0 실  →  depth1 관/국  →  depth2 과/담당관(leaf)
+   ============================================================ */
+const ORG = [
+  { name:"기획조정실", children:[
+    { name:"정책기획관", children:[
+      { name:"기획예산담당관", members:[
+        { name:"김민준", role:"과장",  position:"서기관",     email:"minjun.kim@gov.kr",    phone:"02-1234-5601" },
+        { name:"이서연", role:"담당자", position:"행정주사",   email:"seoyeon.lee@gov.kr",   phone:"02-1234-5602" },
+        { name:"박지훈", role:"담당자", position:"행정주사",   email:"jihun.park@gov.kr",    phone:"02-1234-5603" },
+        { name:"최수아", role:"담당자", position:"행정서기",   email:"sua.choi@gov.kr",      phone:"02-1234-5604" },
+        { name:"정태양", role:"담당자", position:"행정주사보", email:"taeyang.jung@gov.kr",  phone:"02-1234-5605" },
+        { name:"한도윤", role:"담당자", position:"행정주사",   email:"doyun.han@gov.kr",     phone:"02-1234-5606" },
+        { name:"오시우", role:"담당자", position:"행정서기",   email:"siwoo.oh@gov.kr",      phone:"02-1234-5607" },
+        { name:"임나은", role:"담당자", position:"행정주사보", email:"naeun.lim@gov.kr",     phone:"02-1234-5608" },
+      ], tasks:[
+        { title:"2025년 예산안 편성 및 배분 계획 수립", status:"progress", owner:"이서연", start:"2025-01-01", end:"2025-12-31" },
+        { title:"재정성과 평가 체계 개선", status:"wait",     owner:"박지훈", start:"2025-03-01", end:"2025-09-30" },
+        { title:"2024년 결산 검토 및 보고",              status:"done",     owner:"최수아", start:"2024-10-01", end:"2025-02-28" },
+      ]},
+      { name:"혁신행정담당관", members:[
+        { name:"강현우", role:"과장",  position:"서기관",     email:"hyunwoo.kang@gov.kr",  phone:"02-1234-5701" },
+        { name:"윤지아", role:"담당자", position:"행정주사",   email:"jia.yoon@gov.kr",      phone:"02-1234-5702" },
+        { name:"장민서", role:"담당자", position:"행정주사",   email:"minseo.jang@gov.kr",   phone:"02-1234-5703" },
+        { name:"조하은", role:"담당자", position:"행정서기",   email:"haeun.jo@gov.kr",      phone:"02-1234-5704" },
+        { name:"신예준", role:"담당자", position:"행정주사보", email:"yejun.shin@gov.kr",    phone:"02-1234-5705" },
+        { name:"류채원", role:"담당자", position:"행정서기",   email:"chaewon.ryu@gov.kr",   phone:"02-1234-5706" },
+      ], tasks:[
+        { title:"정부혁신 실행계획 수립 및 추진", status:"progress", owner:"윤지아", start:"2025-02-01", end:"2025-11-30" },
+        { title:"업무프로세스 재설계 추진",       status:"wait",     owner:"장민서", start:"2025-04-01", end:"2025-10-31" },
+        { title:"민원서비스 만족도 조사",         status:"done",     owner:"조하은", start:"2024-09-01", end:"2025-01-31" },
+      ]},
+      { name:"정보화담당관", members:[
+        { name:"이준혁", role:"과장",  position:"서기관",     email:"junhyuk.lee@gov.kr",   phone:"02-1234-5801" },
+        { name:"김아린", role:"담당자", position:"행정주사",   email:"arin.kim@gov.kr",      phone:"02-1234-5802" },
+        { name:"박서준", role:"담당자", position:"공업주사",   email:"seojun.park@gov.kr",   phone:"02-1234-5803" },
+        { name:"최유나", role:"담당자", position:"행정주사",   email:"yuna.choi@gov.kr",     phone:"02-1234-5804" },
+        { name:"정우진", role:"담당자", position:"공업서기",   email:"woojin.jung@gov.kr",   phone:"02-1234-5805" },
+        { name:"한소율", role:"담당자", position:"행정주사보", email:"soyul.han@gov.kr",     phone:"02-1234-5806" },
+        { name:"오지민", role:"담당자", position:"행정서기",   email:"jimin.oh@gov.kr",      phone:"02-1234-5807" },
+      ], tasks:[
+        { title:"정보화 기본계획 수립",           status:"progress", owner:"김아린", start:"2025-01-15", end:"2025-06-30" },
+        { title:"행정정보시스템 고도화 사업",     status:"progress", owner:"박서준", start:"2025-03-01", end:"2025-12-31" },
+        { title:"개인정보 보호 실태점검",         status:"done",     owner:"최유나", start:"2024-11-01", end:"2025-02-28" },
+      ]},
+    ]},
+    { name:"국제협력관", children:[
+      { name:"국제협력담당관", members:[
+        { name:"송민재", role:"과장",  position:"서기관",     email:"minjae.song@gov.kr",   phone:"02-1234-5901" },
+        { name:"배하늘", role:"담당자", position:"행정주사",   email:"haneul.bae@gov.kr",    phone:"02-1234-5902" },
+        { name:"심수현", role:"담당자", position:"외무주사",   email:"suhyun.shim@gov.kr",   phone:"02-1234-5903" },
+        { name:"고태민", role:"담당자", position:"행정주사보", email:"taemin.ko@gov.kr",     phone:"02-1234-5904" },
+        { name:"문지수", role:"담당자", position:"행정서기",   email:"jisu.moon@gov.kr",     phone:"02-1234-5905" },
+      ], tasks:[
+        { title:"국제기구 연계 협력과제 발굴",   status:"progress", owner:"배하늘", start:"2025-02-01", end:"2025-10-31" },
+        { title:"해외 정책 연수 프로그램 운영",  status:"wait",     owner:"심수현", start:"2025-05-01", end:"2025-08-31" },
+        { title:"국제협력 성과보고서 작성",      status:"done",     owner:"고태민", start:"2024-12-01", end:"2025-03-31" },
+      ]},
+      { name:"통상지원담당관", members:[
+        { name:"권나래", role:"과장",  position:"서기관",     email:"narae.kwon@gov.kr",    phone:"02-1234-6001" },
+        { name:"안재원", role:"담당자", position:"행정주사",   email:"jaewon.an@gov.kr",     phone:"02-1234-6002" },
+        { name:"남가은", role:"담당자", position:"행정서기",   email:"gaeun.nam@gov.kr",     phone:"02-1234-6003" },
+        { name:"서동현", role:"담당자", position:"행정주사보", email:"donghyun.seo@gov.kr",  phone:"02-1234-6004" },
+      ], tasks:[
+        { title:"통상협력 지원체계 구축",        status:"progress", owner:"안재원", start:"2025-01-01", end:"2025-09-30" },
+        { title:"수출기업 애로사항 해소 TF 운영",status:"wait",     owner:"남가은", start:"2025-04-01", end:"2025-12-31" },
+      ]},
+    ]},
+  ]},
+  { name:"운영지원실", children:[
+    { name:"총무국", children:[
+      { name:"인사과", members:[
+        { name:"황민호", role:"과장",  position:"서기관",     email:"minho.hwang@gov.kr",   phone:"02-1234-6101" },
+        { name:"천소희", role:"담당자", position:"행정주사",   email:"sohee.chun@gov.kr",    phone:"02-1234-6102" },
+        { name:"변준서", role:"담당자", position:"행정주사",   email:"junseo.byun@gov.kr",   phone:"02-1234-6103" },
+        { name:"석다은", role:"담당자", position:"행정서기",   email:"daeun.suk@gov.kr",     phone:"02-1234-6104" },
+        { name:"방태현", role:"담당자", position:"행정주사보", email:"taehyun.bang@gov.kr",  phone:"02-1234-6105" },
+        { name:"도지원", role:"담당자", position:"행정주사",   email:"jiwon.do@gov.kr",      phone:"02-1234-6106" },
+        { name:"표미래", role:"담당자", position:"행정서기",   email:"mirae.pyo@gov.kr",     phone:"02-1234-6107" },
+        { name:"구하준", role:"담당자", position:"행정주사보", email:"hajun.goo@gov.kr",     phone:"02-1234-6108" },
+        { name:"허세진", role:"담당자", position:"행정서기",   email:"sejin.heo@gov.kr",     phone:"02-1234-6109" },
+      ], tasks:[
+        { title:"인사혁신 중장기 계획 수립",     status:"progress", owner:"천소희", start:"2025-01-01", end:"2025-12-31" },
+        { title:"성과평가 제도 개선 TF 운영",   status:"progress", owner:"변준서", start:"2025-03-01", end:"2025-09-30" },
+        { title:"2024년 인사통계 연보 작성",    status:"done",     owner:"석다은", start:"2024-11-01", end:"2025-02-28" },
+        { title:"비공개 채용 절차 개선 연구",    status:"wait",     owner:"방태현", start:"2025-06-01", end:"2025-11-30" },
+      ]},
+      { name:"재무과", members:[
+        { name:"진수빈", role:"과장",  position:"서기관",     email:"subin.jin@gov.kr",     phone:"02-1234-6201" },
+        { name:"마이준", role:"담당자", position:"세무주사",   email:"ijun.ma@gov.kr",       phone:"02-1234-6202" },
+        { name:"선가람", role:"담당자", position:"행정주사",   email:"garam.sun@gov.kr",     phone:"02-1234-6203" },
+        { name:"용태민", role:"담당자", position:"세무서기",   email:"taemin.yong@gov.kr",   phone:"02-1234-6204" },
+        { name:"엄서아", role:"담당자", position:"행정주사보", email:"seoa.um@gov.kr",       phone:"02-1234-6205" },
+        { name:"태준호", role:"담당자", position:"행정서기",   email:"junho.tae@gov.kr",     phone:"02-1234-6206" },
+        { name:"봉지연", role:"담당자", position:"세무주사보", email:"jiyeon.bong@gov.kr",   phone:"02-1234-6207" },
+      ], tasks:[
+        { title:"회계제도 개선 TF 운영",        status:"progress", owner:"마이준", start:"2025-02-01", end:"2025-08-31" },
+        { title:"예산절감 추진계획 수립",        status:"wait",     owner:"선가람", start:"2025-04-01", end:"2025-10-31" },
+        { title:"2024 회계연도 결산",           status:"done",     owner:"용태민", start:"2025-01-01", end:"2025-04-30" },
+      ]},
+      { name:"총무과", members:[
+        { name:"은도현", role:"과장",  position:"서기관",     email:"dohyun.eun@gov.kr",    phone:"02-1234-6301" },
+        { name:"가민주", role:"담당자", position:"행정주사",   email:"minju.ga@gov.kr",      phone:"02-1234-6302" },
+        { name:"나지훈", role:"담당자", position:"행정서기",   email:"jihun.na@gov.kr",      phone:"02-1234-6303" },
+        { name:"다하은", role:"담당자", position:"행정주사보", email:"haeun.da@gov.kr",      phone:"02-1234-6304" },
+        { name:"라세은", role:"담당자", position:"행정서기",   email:"seun.ra@gov.kr",       phone:"02-1234-6305" },
+        { name:"마지호", role:"담당자", position:"행정주사",   email:"jiho.ma@gov.kr",       phone:"02-1234-6306" },
+      ], tasks:[
+        { title:"청사 시설관리 현대화 계획",    status:"progress", owner:"가민주", start:"2025-01-01", end:"2025-12-31" },
+        { title:"친환경 사무환경 조성 사업",    status:"wait",     owner:"나지훈", start:"2025-05-01", end:"2025-10-31" },
+        { title:"물품 재고 실태조사",           status:"done",     owner:"다하은", start:"2025-01-15", end:"2025-03-31" },
+      ]},
+    ]},
+    { name:"정보관리국", children:[
+      { name:"시스템운영과", members:[
+        { name:"백현준", role:"과장",  position:"서기관",     email:"hyunjun.baek@gov.kr",  phone:"02-1234-6401" },
+        { name:"채태양", role:"담당자", position:"전산주사",   email:"taeyang.chae@gov.kr",  phone:"02-1234-6402" },
+        { name:"지민아", role:"담당자", position:"공업주사",   email:"mina.ji@gov.kr",       phone:"02-1234-6403" },
+        { name:"차정우", role:"담당자", position:"전산서기",   email:"jungwoo.cha@gov.kr",   phone:"02-1234-6404" },
+        { name:"하율이", role:"담당자", position:"공업주사보", email:"yuri.ha@gov.kr",       phone:"02-1234-6405" },
+        { name:"서연이", role:"담당자", position:"전산주사",   email:"seoyoni.seo@gov.kr",   phone:"02-1234-6406" },
+        { name:"지아름", role:"담당자", position:"전산서기",   email:"areum.ji@gov.kr",      phone:"02-1234-6407" },
+        { name:"류성민", role:"담당자", position:"전산주사보", email:"sungmin.ryu@gov.kr",   phone:"02-1234-6408" },
+      ], tasks:[
+        { title:"노후 서버 교체 사업",          status:"progress", owner:"채태양", start:"2025-02-01", end:"2025-11-30" },
+        { title:"사이버보안 강화 대책 수립",    status:"progress", owner:"지민아", start:"2025-01-01", end:"2025-06-30" },
+        { title:"전산장비 유지보수 계약",       status:"done",     owner:"차정우", start:"2024-12-01", end:"2025-01-31" },
+        { title:"재해복구 시스템 점검",         status:"wait",     owner:"하율이", start:"2025-07-01", end:"2025-09-30" },
+      ]},
+      { name:"데이터관리과", members:[
+        { name:"나민재", role:"과장",  position:"서기관",     email:"minjae.na@gov.kr",     phone:"02-1234-6501" },
+        { name:"황나래", role:"담당자", position:"전산주사",   email:"narae.hwang@gov.kr",   phone:"02-1234-6502" },
+        { name:"임서준", role:"담당자", position:"행정주사",   email:"seojun.lim@gov.kr",    phone:"02-1234-6503" },
+        { name:"전유나", role:"담당자", position:"전산서기",   email:"yuna.jeon@gov.kr",     phone:"02-1234-6504" },
+        { name:"홍우진", role:"담당자", position:"전산주사보", email:"woojin.hong@gov.kr",   phone:"02-1234-6505" },
+        { name:"류소율", role:"담당자", position:"행정서기",   email:"soyul.ryu@gov.kr",     phone:"02-1234-6506" },
+      ], tasks:[
+        { title:"공공데이터 개방 확대 계획",    status:"progress", owner:"황나래", start:"2025-01-01", end:"2025-12-31" },
+        { title:"데이터 품질 관리 체계 구축",  status:"progress", owner:"임서준", start:"2025-03-01", end:"2025-09-30" },
+        { title:"개인정보 비식별 처리 가이드라인 수립", status:"done", owner:"전유나", start:"2024-10-01", end:"2025-01-31" },
+      ]},
+    ]},
+  ]},
+  { name:"감사실", children:[
+    { name:"감사담당관", children:[
+      { name:"일반감사과", members:[
+        { name:"배민호", role:"과장",  position:"서기관",     email:"minho.bae@gov.kr",     phone:"02-1234-6601" },
+        { name:"신소희", role:"담당자", position:"감사주사",   email:"sohee.shin@gov.kr",    phone:"02-1234-6602" },
+        { name:"장준서", role:"담당자", position:"행정주사",   email:"junseo.jang@gov.kr",   phone:"02-1234-6603" },
+        { name:"조다은", role:"담당자", position:"행정서기",   email:"daeun.jo@gov.kr",      phone:"02-1234-6604" },
+        { name:"강태현", role:"담당자", position:"감사주사보", email:"taehyun.kang@gov.kr",  phone:"02-1234-6605" },
+      ], tasks:[
+        { title:"2025년 정기감사 계획 수립",   status:"progress", owner:"신소희", start:"2025-01-01", end:"2025-06-30" },
+        { title:"감사결과 이행 점검",          status:"progress", owner:"장준서", start:"2025-02-01", end:"2025-12-31" },
+        { title:"2024년 감사 결과보고서 작성", status:"done",     owner:"조다은", start:"2024-11-01", end:"2025-03-31" },
+      ]},
+      { name:"청렴조사과", members:[
+        { name:"윤지원", role:"과장",  position:"서기관",     email:"jiwon.yoon@gov.kr",    phone:"02-1234-6701" },
+        { name:"오미래", role:"담당자", position:"행정주사",   email:"mirae.oh@gov.kr",      phone:"02-1234-6702" },
+        { name:"문하준", role:"담당자", position:"감사서기",   email:"hajun.moon@gov.kr",    phone:"02-1234-6703" },
+        { name:"정세진", role:"담당자", position:"행정주사보", email:"sejin.jung@gov.kr",    phone:"02-1234-6704" },
+      ], tasks:[
+        { title:"청렴도 향상 종합대책 수립",   status:"progress", owner:"오미래", start:"2025-01-01", end:"2025-12-31" },
+        { title:"부패취약분야 집중 점검",      status:"wait",     owner:"문하준", start:"2025-05-01", end:"2025-08-31" },
+        { title:"청렴 교육 프로그램 운영",     status:"done",     owner:"정세진", start:"2024-09-01", end:"2025-02-28" },
+      ]},
+    ]},
+  ]},
+];
+
+/* ---- 인원 합산 + id 부여 + 부모 추적 ---- */
+let _id = 0;
+function prepare(nodes, depth, parent) {
+  let total = 0;
+  for (const n of nodes) {
+    n._id     = "n" + (_id++);
+    n._depth  = depth;
+    n._parent = parent || null;
+    if (n.children && n.children.length) {
+      n.head = prepare(n.children, depth + 1, n);
+    } else {
+      n.head = n.members ? n.members.length : 0;
+    }
+    total += n.head;
+  }
+  return total;
+}
+const TOTAL_HEAD = prepare(ORG, 0, null);
+const TOTAL_SIL  = ORG.length;
+
+/* ---- 엘리먼트 ---- */
+const tree    = document.getElementById("navTree");
+const empty   = document.getElementById("navEmpty");
+const search  = document.getElementById("navSearch");
+const clear   = document.getElementById("navClear");
+const summary = document.getElementById("navSummary");
+
+const caretSVG = '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" aria-hidden="true"><path d="M6 8L10 12L14 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const arrowSVG = '<svg viewBox="0 0 20 20" width="20" height="20" fill="none" aria-hidden="true"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+let selectedId = null;
+
+/* ---- 헬퍼 ---- */
+function getAllLeaves(node) {
+  if (!node.children || node.children.length === 0) return [node];
+  return node.children.flatMap(c => getAllLeaves(c));
+}
+
+function findNodeById(id) {
+  function search(nodes) {
+    for (const n of nodes) {
+      if (n._id === id) return n;
+      if (n.children) { const f = search(n.children); if (f) return f; }
+    }
+    return null;
+  }
+  return search(ORG);
+}
+
+function openAncestorsOf(node) {
+  let cur = node._parent;
+  while (cur) {
+    const li = tree.querySelector('[data-id="' + cur._id + '"]');
+    if (li && !li.classList.contains('is-open')) toggle(li);
+    cur = cur._parent;
+  }
+}
+
+/* ---- 트리 렌더 ---- */
+function renderNodes(nodes) {
+  const ul = document.createElement("ul");
+  ul.setAttribute("role", "group");
+  for (const n of nodes) {
+    const isLeaf = !n.children || n.children.length === 0;
+
+    const li = document.createElement("li");
+    li.className    = "nav-node nav-node--depth" + n._depth + (isLeaf ? " nav-node--leaf" : "");
+    li.dataset.id   = n._id;
+    li.dataset.name = n.name;
+    li.setAttribute("role", "treeitem");
+    if (!isLeaf) li.setAttribute("aria-expanded", "false");
+
+    const row = document.createElement("div");
+    row.className = "nav-node__row";
+    row.style.setProperty("--depth", n._depth);
+    row.tabIndex  = 0;
+    row.innerHTML =
+      '<span class="nav-node__caret">' + caretSVG + '</span>' +
+      '<span class="nav-node__label">' + escapeHtml(n.name) + '</span>' +
+      '<span class="nav-node__count">' + n.head + '명</span>';
+
+    row.addEventListener("click", () => {
+      if (isLeaf) {
+        activateNode(li, row, n);
+      } else {
+        toggle(li);
+        activateNode(li, row, n);
+      }
+    });
+    row.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); row.click(); }
+    });
+
+    li.appendChild(row);
+    if (!isLeaf) {
+      const box = document.createElement("div");
+      box.className = "nav-node__children";
+      box.appendChild(renderNodes(n.children));
+      li.appendChild(box);
+    }
+    ul.appendChild(li);
+  }
+  return ul;
+}
+
+function toggle(li) {
+  const open = li.classList.toggle("is-open");
+  li.setAttribute("aria-expanded", open ? "true" : "false");
+}
+
+/* 사이드바 선택 상태 갱신 + 컨텐츠 렌더 */
+function activateNode(li, row, nodeData) {
+  if (selectedId) {
+    const prev = tree.querySelector('[data-id="' + selectedId + '"] > .nav-node__row');
+    if (prev) prev.classList.remove("is-selected");
+  }
+  row.classList.add("is-selected");
+  selectedId = li.dataset.id;
+  if (currentView === 'org') {
+    navigateOrgChartTo(nodeData);
+  } else {
+    renderContent(nodeData);
+  }
+}
+
+/* 카드 클릭으로 해당 노드로 이동 (사이드바 + 컨텐츠 동기화) */
+function selectNode(nodeData) {
+  openAncestorsOf(nodeData);
+  const navLi = tree.querySelector('[data-id="' + nodeData._id + '"]');
+  if (!navLi) return;
+  const navRow = navLi.querySelector(':scope > .nav-node__row');
+  if (nodeData.children && !navLi.classList.contains('is-open')) toggle(navLi);
+  navRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  activateNode(navLi, navRow, nodeData);
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+}
+
+/* ---- 콘텐츠 렌더 ---- */
+function getBreadcrumbPath(node) {
+  const path = [];
+  let cur = node;
+  while (cur) { path.unshift(cur.name); cur = cur._parent; }
+  return path;
+}
+
+function memberCardHTML(m) {
+  return `<li class="member-card">
+    <span class="member-card__avatar"></span>
+    <div class="member-card__info">
+      <p class="member-card__name">${escapeHtml(m.name)}</p>
+      <p class="member-card__position">${escapeHtml(m.position)}</p>
+      <p class="member-card__contact">
+        ${escapeHtml(m.email)}<span class="member-card__sep">|</span>${escapeHtml(m.phone)}
+      </p>
+    </div>
+  </li>`;
+}
+
+const STATUS_LABEL = { wait:"계획서 업로드 대기", progress:"진행중", done:"종결" };
+const STATUS_CLASS = { wait:"krds-badge bg-gray", progress:"krds-badge bg-primary", done:"krds-badge bg-success" };
+
+function taskCardHTML(t) {
+  return `<li class="task-card">
+    <div class="task-card__body">
+      <div class="task-card__head">
+        <span class="${STATUS_CLASS[t.status]}">${STATUS_LABEL[t.status]}</span>
+        <span class="task-card__title">${escapeHtml(t.title)}</span>
+      </div>
+      <div class="task-card__meta">
+        <span class="task-card__avatar"></span>
+        <span class="task-card__owner">${escapeHtml(t.owner)}</span>
+        <span class="task-card__sep">|</span>
+        <span class="task-card__date">${escapeHtml(t.start)} ~ ${escapeHtml(t.end)}</span>
+      </div>
+    </div>
+    <span class="task-card__arrow">${arrowSVG}</span>
+  </li>`;
+}
+
+function renderContent(node) {
+  /* 제목 */
+  const titleEl = document.querySelector(".organization-title");
+  if (titleEl) titleEl.textContent = node.name;
+
+  /* 상단 뱃지 인원수 */
+  const badge = document.querySelector(".krds-badge.small");
+  if (badge) badge.textContent = "총 " + node.head + "명";
+
+  /* breadcrumb */
+  const bc = document.querySelector("#breadcrumb .breadcrumb");
+  if (bc) {
+    const path = getBreadcrumbPath(node);
+    bc.innerHTML = path.map(name =>
+      `<li><a href="#" class="txt">${escapeHtml(name)}</a></li>`
+    ).join("");
+  }
+
+  const isLeaf = !node.children || node.children.length === 0;
+  if (isLeaf) {
+    renderLeafMembers(node);
+    renderLeafTasks(node);
+  } else {
+    renderParentMembers(node);
+    renderParentTasks(node);
+  }
+}
+
+/* 과 단위 팀원 구성 */
+function renderLeafMembers(node) {
+  const memberSection = document.querySelector(".member-section");
+  if (!memberSection) return;
+  if (!node.members) { memberSection.innerHTML = ""; return; }
+  const managers = node.members.filter(m => m.role === "과장");
+  const workers  = node.members.filter(m => m.role === "담당자");
+  let html = "";
+  if (managers.length) {
+    html += `<div class="member-group">
+      <div class="member-group__head"><span class="krds-badge outline-primary">과장</span></div>
+      <ul class="member-list">${managers.map(memberCardHTML).join("")}</ul>
+    </div>`;
+  }
+  if (workers.length) {
+    html += `<div class="member-group">
+      <div class="member-group__head">
+        <span class="krds-badge outline-secondary">담당자</span>
+        <span class="member-group__count">(${workers.length}명)</span>
+      </div>
+      <ul class="member-list">${workers.map(memberCardHTML).join("")}</ul>
+    </div>`;
+  }
+  memberSection.innerHTML = html;
+}
+
+/* 과 단위 연계과제 */
+function renderLeafTasks(node) {
+  const taskList = document.getElementById("taskList");
+  if (!taskList) return;
+  taskList.classList.remove("task-list--grouped");
+  if (node.tasks && node.tasks.length) {
+    taskList.innerHTML = node.tasks.map(taskCardHTML).join("");
+  } else {
+    taskList.innerHTML = `<li class="task-empty">등록된 연계과제가 없습니다.</li>`;
+  }
+}
+
+/* 실/관 단위 — 하위 조직 카드 개요 */
+function renderParentMembers(node) {
+  const memberSection = document.querySelector(".member-section");
+  if (!memberSection) return;
+
+  const isDepth0 = node._depth === 0;
+  const childLabel = isDepth0 ? "관" : "과";
+  const totalTasks = getAllLeaves(node).reduce((s, l) => s + (l.tasks ? l.tasks.length : 0), 0);
+
+  const statsHtml = `<div class="org-stats">
+    <span class="org-stat"><b>${node.children.length}</b>개 ${childLabel}</span>
+    <span class="org-stat__sep">·</span>
+    <span class="org-stat"><b>${node.head}</b>명</span>
+    <span class="org-stat__sep">·</span>
+    <span class="org-stat">연계과제 <b>${totalTasks}</b>건</span>
+  </div>`;
+
+  const cardsHtml = node.children.map(child => {
+    if (isDepth0) {
+      // 실 → 관 카드: 하위 과 이름 목록
+      const subNames = child.children
+        ? child.children.map(g => escapeHtml(g.name)).join(' · ')
+        : '';
+      return `<div class="child-card" data-child-id="${child._id}" role="button" tabindex="0">
+        <div class="child-card__body">
+          <p class="child-card__name">${escapeHtml(child.name)}</p>
+          <p class="child-card__sub">${subNames}</p>
+        </div>
+        <div class="child-card__right">
+          <span class="krds-badge small bg-light-gray">총 ${child.head}명</span>
+          <span class="child-card__arrow">${arrowSVG}</span>
+        </div>
+      </div>`;
+    } else {
+      // 관 → 과 카드: 과장 이름
+      const manager = child.members ? child.members.find(m => m.role === "과장") : null;
+      const managerInfo = manager ? `과장 · ${escapeHtml(manager.name)}` : '';
+      return `<div class="child-card" data-child-id="${child._id}" role="button" tabindex="0">
+        <div class="child-card__body">
+          <p class="child-card__name">${escapeHtml(child.name)}</p>
+          ${managerInfo ? `<p class="child-card__sub">${managerInfo}</p>` : ''}
+        </div>
+        <div class="child-card__right">
+          <span class="krds-badge small bg-light-gray">총 ${child.head}명</span>
+          <span class="child-card__arrow">${arrowSVG}</span>
+        </div>
+      </div>`;
+    }
+  }).join('');
+
+  memberSection.innerHTML = statsHtml + `<div class="child-grid">${cardsHtml}</div>`;
+
+  memberSection.querySelectorAll('.child-card').forEach(card => {
+    const childNode = findNodeById(card.dataset.childId);
+    if (!childNode) return;
+    card.addEventListener('click', () => selectNode(childNode));
+    card.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectNode(childNode); }
+    });
+  });
+}
+
+/* 실/관 단위 — 하위 과제 집계 (과별 그룹) */
+function renderParentTasks(node) {
+  const taskList = document.getElementById("taskList");
+  if (!taskList) return;
+
+  const grouped = getAllLeaves(node).filter(l => l.tasks && l.tasks.length);
+  taskList.classList.toggle("task-list--grouped", grouped.length > 0);
+
+  if (!grouped.length) {
+    taskList.innerHTML = `<li class="task-empty">등록된 연계과제가 없습니다.</li>`;
+    return;
+  }
+
+  taskList.innerHTML = grouped.map(leaf => `
+    <li class="task-group">
+      <div class="task-group__head">
+        <span class="task-group__name">${escapeHtml(leaf.name)}</span>
+        <span class="krds-badge small bg-light-gray">${leaf.tasks.length}건</span>
+      </div>
+      <ul class="task-list task-list--nested">
+        ${leaf.tasks.map(taskCardHTML).join('')}
+      </ul>
+    </li>
+  `).join('');
+}
+
+/* ---- 검색 ---- */
+function applySearch(q) {
+  q = q.trim().toLowerCase();
+  clear.classList.toggle("is-visible", q.length > 0);
+
+  const allNodes = tree.querySelectorAll(".nav-node");
+
+  if (!q) {
+    allNodes.forEach(li => {
+      li.style.display = "";
+      li.classList.remove("is-open");
+      if (li.hasAttribute("aria-expanded")) li.setAttribute("aria-expanded", "false");
+      restoreLabel(li);
+    });
+    const firstSil = tree.querySelector(".nav-node--depth0");
+    if (firstSil) { firstSil.classList.add("is-open"); firstSil.setAttribute("aria-expanded", "true"); }
+    empty.classList.remove("is-visible");
+    return;
+  }
+
+  let anyMatch = false;
+  allNodes.forEach(li => {
+    const name      = li.dataset.name.toLowerCase();
+    const selfMatch = name.includes(q);
+    const descMatch = [...li.querySelectorAll(".nav-node")].some(d => d.dataset.name.toLowerCase().includes(q));
+
+    if (selfMatch || descMatch) {
+      li.style.display = "";
+      if (li.hasAttribute("aria-expanded")) {
+        li.classList.add("is-open");
+        li.setAttribute("aria-expanded", "true");
+      }
+      highlightLabel(li, q, selfMatch);
+      anyMatch = true;
+    } else {
+      li.style.display = "none";
+      restoreLabel(li);
+    }
+  });
+
+  empty.classList.toggle("is-visible", !anyMatch);
+}
+
+function highlightLabel(li, q, match) {
+  const label = li.querySelector(":scope > .nav-node__row > .nav-node__label");
+  const name  = li.dataset.name;
+  if (match) {
+    const i = name.toLowerCase().indexOf(q);
+    label.innerHTML =
+      escapeHtml(name.slice(0, i)) +
+      '<mark class="nav-mark">' + escapeHtml(name.slice(i, i + q.length)) + '</mark>' +
+      escapeHtml(name.slice(i + q.length));
+  } else {
+    label.textContent = name;
+  }
+}
+
+function restoreLabel(li) {
+  const label = li.querySelector(":scope > .nav-node__row > .nav-node__label");
+  if (label) label.textContent = li.dataset.name;
+}
+
+/* ---- 초기화 ---- */
+const builtUl = renderNodes(ORG);
+while (builtUl.firstChild) { tree.appendChild(builtUl.firstChild); }
+
+const firstSil = tree.querySelector(".nav-node--depth0");
+if (firstSil) toggle(firstSil);
+
+summary.innerHTML = '<b>' + TOTAL_SIL + '</b>개 실 · <b>' + TOTAL_HEAD + '</b>명';
+
+search.addEventListener("input",  e => applySearch(e.target.value));
+clear.addEventListener("click", () => { search.value = ""; applySearch(""); search.focus(); });
+
+/* ---- 조직도 뷰 ---- */
+
+const ocCanvas  = document.getElementById('ocCanvas');
+const ocGrid    = document.getElementById('ocGrid');
+const ocLines   = document.getElementById('ocLines');
+const ocWrapper = document.getElementById('ocWrapper');
+
+/* 레이아웃 상수 */
+const BOX_W = 144;
+const BOX_H = 64;
+const H_GAP = 24;   // 같은 레벨 박스 간 수평 간격
+const V_GAP = 80;   // 레벨 간 수직 간격
+const PAD   = 56;   // 캔버스 외부 여백
+
+/* zoom / pan 상태 */
+let ocScale = 1;
+let ocTx = 0, ocTy = 0;
+let currentView = 'list';
+
+function updateOcTransform() {
+  ocCanvas.style.transform = `translate(${ocTx}px,${ocTy}px) scale(${ocScale})`;
+  const el = document.getElementById('ocZoomLevel');
+  if (el) el.textContent = Math.round(ocScale * 100) + '%';
+}
+
+function zoomAt(factor, cx, cy) {
+  const s = Math.max(0.15, Math.min(3, ocScale * factor));
+  ocTx = cx - (cx - ocTx) * (s / ocScale);
+  ocTy = cy - (cy - ocTy) * (s / ocScale);
+  ocScale = s;
+  updateOcTransform();
+}
+
+function fitOrgChart(cw, ch) {
+  const ww = ocWrapper.offsetWidth;
+  const wh = ocWrapper.offsetHeight;
+  ocScale = Math.max(0.15, Math.min(1, Math.min(ww / (cw + 80), wh / (ch + 80)) * 0.92));
+  ocTx = (ww - cw * ocScale) / 2;
+  ocTy = (wh - ch * ocScale) / 2;
+  updateOcTransform();
+}
+
+/* 각 노드의 leaf 컬럼 번호 (1-based) */
+const colMap = new Map();
+
+function assignColumns(node, col) {
+  if (!node.children || node.children.length === 0) {
+    colMap.set(node._id, { start: col, end: col });
+    return col + 1;
+  }
+  const start = col;
+  let next = col;
+  for (const c of node.children) next = assignColumns(c, next);
+  colMap.set(node._id, { start, end: next - 1 });
+  return next;
+}
+
+/* 절대 좌표 계산 */
+function calcPositions() {
+  const pos = new Map();
+
+  function calc(node, depth) {
+    const isLeaf = !node.children || node.children.length === 0;
+    if (isLeaf) {
+      const col = colMap.get(node._id).start;
+      pos.set(node._id, {
+        x: PAD + (col - 1) * (BOX_W + H_GAP),
+        y: PAD + depth * (BOX_H + V_GAP)
+      });
+      return;
+    }
+    for (const child of node.children) calc(child, depth + 1);
+    const fc = pos.get(node.children[0]._id);
+    const lc = pos.get(node.children[node.children.length - 1]._id);
+    pos.set(node._id, {
+      x: fc.x + (lc.x + BOX_W - fc.x) / 2 - BOX_W / 2,
+      y: PAD + depth * (BOX_H + V_GAP)
+    });
+  }
+
+  for (const sil of ORG) calc(sil, 0);
+  return pos;
+}
+
+function buildOrgChart() {
+  colMap.clear();
+  let col = 1;
+  for (const sil of ORG) col = assignColumns(sil, col);
+  const leafCount = col - 1;
+  const maxDepth  = 2;
+
+  const canvasW = PAD * 2 + leafCount * (BOX_W + H_GAP) - H_GAP;
+  const canvasH = PAD * 2 + maxDepth  * (BOX_H + V_GAP);
+
+  ocCanvas.style.width  = canvasW + 'px';
+  ocCanvas.style.height = canvasH + 'px';
+  ocLines.style.width   = canvasW + 'px';
+  ocLines.style.height  = canvasH + 'px';
+  ocLines.setAttribute('viewBox', `0 0 ${canvasW} ${canvasH}`);
+
+  const positions = calcPositions();
+  ocGrid.innerHTML  = '';
+  ocLines.innerHTML = '';
+
+  /* 모든 노드 수집 */
+  const allNodes = [];
+  (function collect(nodes) {
+    for (const n of nodes) {
+      allNodes.push(n);
+      if (n.children) collect(n.children);
+    }
+  })(ORG);
+
+  /* 박스 렌더 */
+  for (const n of allNodes) {
+    const p = positions.get(n._id);
+    const isLeaf = !n.children || n.children.length === 0;
+
+    const box = document.createElement('div');
+    box.className = 'oc-box oc-box--depth' + n._depth + (isLeaf ? ' oc-box--leaf' : '');
+    box.dataset.id = n._id;
+    box.style.left = p.x + 'px';
+    box.style.top  = p.y + 'px';
+
+    const label = isLeaf
+      ? `<span class="oc-badge oc-badge--leaf">${n._depth === 2 ? '과' : '관'}</span>`
+      : (n._depth === 0
+          ? `<span class="oc-badge oc-badge--sil">실</span>`
+          : `<span class="oc-badge oc-badge--gwan">관</span>`);
+
+    box.innerHTML =
+      `<div class="oc-box__inner">
+         ${label}
+         <span class="oc-box__name">${escapeHtml(n.name)}</span>
+       </div>
+       <span class="oc-box__count">${n.head}명</span>`;
+
+    box.addEventListener('click', () => { switchView('list'); selectNode(n); });
+    ocGrid.appendChild(box);
+  }
+
+  /* SVG 연결선 */
+  for (const n of allNodes) {
+    if (!n.children) continue;
+    const pp = positions.get(n._id);
+    const px = pp.x + BOX_W / 2;
+    const py = pp.y + BOX_H;
+
+    for (const child of n.children) {
+      const cp = positions.get(child._id);
+      const cx = cp.x + BOX_W / 2;
+      const cy = cp.y;
+      const my = py + (cy - py) * 0.45;
+
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', `M${px},${py} C${px},${my} ${cx},${my} ${cx},${cy}`);
+      path.setAttribute('class', 'oc-line');
+      ocLines.appendChild(path);
+    }
+  }
+
+  fitOrgChart(canvasW, canvasH);
+}
+
+/* 사이드 네비게이션 선택 노드를 조직도에서 중앙 줌 인 */
+function navigateOrgChartTo(node) {
+  const box = ocGrid.querySelector('[data-id="' + node._id + '"]');
+  if (!box) return;
+
+  const bx = parseFloat(box.style.left) + BOX_W / 2;
+  const by = parseFloat(box.style.top)  + BOX_H / 2;
+
+  const TARGET_SCALES = [0.85, 1.2, 1.6];
+  const targetScale = Math.max(0.15, Math.min(3, TARGET_SCALES[node._depth] !== undefined ? TARGET_SCALES[node._depth] : 1.2));
+
+  const ww = ocWrapper.offsetWidth;
+  const wh = ocWrapper.offsetHeight;
+
+  ocScale = targetScale;
+  ocTx = ww / 2 - bx * ocScale;
+  ocTy = wh / 2 - by * ocScale;
+
+  ocCanvas.style.transition = 'transform 0.45s cubic-bezier(0.4,0,0.2,1)';
+  updateOcTransform();
+  setTimeout(() => { ocCanvas.style.transition = ''; }, 500);
+
+  ocGrid.querySelectorAll('.oc-box--selected').forEach(b => b.classList.remove('oc-box--selected'));
+  box.classList.add('oc-box--selected');
+}
+
+/* 뷰 전환 */
+function switchView(view) {
+  currentView = view;
+  const listBtn   = document.getElementById('btnListView');
+  const orgBtn    = document.getElementById('btnOrgView');
+  const listPanel = document.getElementById('listViewContent');
+  const orgPanel  = document.getElementById('orgChartPanel');
+  const contents  = document.querySelector('.organization-contents');
+
+  if (view === 'org') {
+    listPanel.style.display = 'none';
+    orgPanel.style.display  = 'block';
+    contents.classList.add('is-orgchart');
+    listBtn.classList.remove('is-active');
+    orgBtn.classList.add('is-active');
+    buildOrgChart();
+    if (selectedId) {
+      const sel = findNodeById(selectedId);
+      if (sel) navigateOrgChartTo(sel);
+    }
+  } else {
+    orgPanel.style.display  = 'none';
+    listPanel.style.display = 'block';
+    contents.classList.remove('is-orgchart');
+    orgBtn.classList.remove('is-active');
+    listBtn.classList.add('is-active');
+    if (selectedId) {
+      const sel = findNodeById(selectedId);
+      if (sel) renderContent(sel);
+    }
+  }
+}
+
+document.getElementById('btnListView').addEventListener('click', () => switchView('list'));
+document.getElementById('btnOrgView').addEventListener('click',  () => switchView('org'));
+
+/* 줌 / 팬 이벤트 (최초 한 번만) */
+;(function initOcEvents() {
+  /* 마우스 휠 줌 */
+  ocWrapper.addEventListener('wheel', e => {
+    e.preventDefault();
+    const r = ocWrapper.getBoundingClientRect();
+    zoomAt(e.deltaY < 0 ? 1.12 : 1 / 1.12, e.clientX - r.left, e.clientY - r.top);
+  }, { passive: false });
+
+  /* 드래그 팬 */
+  let drag = null;
+  ocWrapper.addEventListener('mousedown', e => {
+    if (e.button !== 0 || e.target.closest('.oc-box') || e.target.closest('.oc-controls')) return;
+    drag = { mx: e.clientX, my: e.clientY, tx: ocTx, ty: ocTy };
+    ocWrapper.classList.add('is-dragging');
+  });
+  window.addEventListener('mousemove', e => {
+    if (!drag) return;
+    ocTx = drag.tx + (e.clientX - drag.mx);
+    ocTy = drag.ty + (e.clientY - drag.my);
+    updateOcTransform();
+  });
+  window.addEventListener('mouseup', () => {
+    drag = null;
+    ocWrapper.classList.remove('is-dragging');
+  });
+
+  /* 터치 팬/핀치 줌 */
+  let lastT = null;
+  ocWrapper.addEventListener('touchstart', e => { lastT = e.touches; }, { passive: true });
+  ocWrapper.addEventListener('touchmove', e => {
+    e.preventDefault();
+    if (e.touches.length === 1 && lastT.length === 1) {
+      ocTx += e.touches[0].clientX - lastT[0].clientX;
+      ocTy += e.touches[0].clientY - lastT[0].clientY;
+      updateOcTransform();
+    } else if (e.touches.length === 2 && lastT.length >= 2) {
+      const prev = Math.hypot(lastT[0].clientX - lastT[1].clientX, lastT[0].clientY - lastT[1].clientY);
+      const curr = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+      const r = ocWrapper.getBoundingClientRect();
+      const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - r.left;
+      const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2 - r.top;
+      if (prev > 0) zoomAt(curr / prev, cx, cy);
+    }
+    lastT = e.touches;
+  }, { passive: false });
+
+  /* 버튼 */
+  document.getElementById('ocZoomIn').addEventListener('click',  () => zoomAt(1.25, ocWrapper.offsetWidth / 2, ocWrapper.offsetHeight / 2));
+  document.getElementById('ocZoomOut').addEventListener('click', () => zoomAt(1 / 1.25, ocWrapper.offsetWidth / 2, ocWrapper.offsetHeight / 2));
+  document.getElementById('ocFit').addEventListener('click', () => {
+    const cw = parseInt(ocCanvas.style.width)  || 800;
+    const ch = parseInt(ocCanvas.style.height) || 400;
+    fitOrgChart(cw, ch);
+  });
+})();
+
+/* ---- 탭 전환 ---- */
+document.querySelectorAll(".krds-tab-area.layer").forEach(tabArea => {
+  const tabs   = tabArea.querySelectorAll(".tab > ul > li");
+  const panels = tabArea.querySelectorAll(".tab-conts-wrap > .tab-conts");
+
+  tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      const targetId = tab.getAttribute("aria-controls");
+
+      tabs.forEach(t => { t.classList.remove("active"); t.setAttribute("aria-selected", "false"); });
+      panels.forEach(p => p.classList.remove("active"));
+
+      tab.classList.add("active");
+      tab.setAttribute("aria-selected", "true");
+      const panel = document.getElementById(targetId);
+      if (panel) panel.classList.add("active");
+    });
+  });
+});
