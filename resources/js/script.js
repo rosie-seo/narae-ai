@@ -200,6 +200,7 @@ const caretSVG = '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" ar
 const arrowSVG = '<svg viewBox="0 0 20 20" width="20" height="20" fill="none" aria-hidden="true"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
 let selectedId = null;
+let currentView = 'list';
 
 /* ---- 헬퍼 ---- */
 function getAllLeaves(node) {
@@ -567,17 +568,135 @@ function restoreLabel(li) {
   if (label) label.textContent = li.dataset.name;
 }
 
-/* ---- 초기화 ---- */
-const builtUl = renderNodes(ORG);
-while (builtUl.firstChild) { tree.appendChild(builtUl.firstChild); }
+/* ---- 초기화: 조직도 페이지 ---- */
+if (tree) {
+  const builtUl = renderNodes(ORG);
+  while (builtUl.firstChild) { tree.appendChild(builtUl.firstChild); }
 
-const firstSil = tree.querySelector(".nav-node--depth0");
-if (firstSil) toggle(firstSil);
+  const firstSil = tree.querySelector(".nav-node--depth0");
+  if (firstSil) {
+    toggle(firstSil);
+    const firstSilRow = firstSil.querySelector(":scope > .nav-node__row");
+    activateNode(firstSil, firstSilRow, ORG[0]);
+  }
 
-summary.innerHTML = '<b>' + TOTAL_SIL + '</b>개 실 · <b>' + TOTAL_HEAD + '</b>명';
+  summary.innerHTML = '<b>' + TOTAL_SIL + '</b>개 실 · <b>' + TOTAL_HEAD + '</b>명';
 
-search.addEventListener("input",  e => applySearch(e.target.value));
-clear.addEventListener("click", () => { search.value = ""; applySearch(""); search.focus(); });
+  search.addEventListener("input",  e => applySearch(e.target.value));
+  clear.addEventListener("click", () => { search.value = ""; applySearch(""); search.focus(); });
+}
+
+/* ---- 초기화: 업무 페이지 ---- */
+const operatingTaskList = document.getElementById("operatingTaskList");
+if (operatingTaskList) {
+  const allLeaves         = ORG.flatMap(sil => getAllLeaves(sil)).filter(l => l.tasks && l.tasks.length);
+  const PAGE_SIZE         = 10;
+  let filteredTasks       = [];
+  let currentPage         = 1;
+  let currentStatusFilter = 'all';
+
+  const pagination = document.querySelector('.krds-pagination');
+  const pageLinks  = pagination?.querySelector('.page-links');
+  const prevNav    = pagination?.querySelector('.page-navi.prev');
+  const nextNav    = pagination?.querySelector('.page-navi.next');
+
+  /* ---- 페이지 렌더 ---- */
+  function renderPage() {
+    const totalPages = Math.max(1, Math.ceil(filteredTasks.length / PAGE_SIZE));
+    const slice = filteredTasks.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+    operatingTaskList.className = 'task-list';
+    operatingTaskList.innerHTML = slice.length
+      ? slice.map(taskCardHTML).join('')
+      : '<li class="task-empty">해당하는 업무가 없습니다.</li>';
+
+    if (prevNav) prevNav.classList.toggle('disabled', currentPage === 1);
+    if (nextNav) nextNav.classList.toggle('disabled', currentPage >= totalPages);
+
+    if (!pageLinks) return;
+    const pages = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (currentPage > 3) pages.push('…');
+      for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) pages.push(i);
+      if (currentPage < totalPages - 2) pages.push('…');
+      pages.push(totalPages);
+    }
+    pageLinks.innerHTML = pages.map(p =>
+      p === '…'
+        ? '<span class="page-link link-dot"></span>'
+        : `<a class="page-link${p === currentPage ? ' active' : ''}" href="#" data-page="${p}">${p === currentPage ? '<span class="sr-only">현재페이지 </span>' : ''}${p}</a>`
+    ).join('');
+  }
+
+  /* ---- 통합 필터 ---- */
+  function applyFilters() {
+    const teamVal = document.getElementById('filterTeam')?.value || '';
+    const rawDate = document.getElementById('filterDate')?.value || '';
+    const dateVal = rawDate.replace(/\./g, '-');  // KRDS sets "YYYY.MM.DD" → compare as "YYYY-MM-DD"
+
+    let tasks = allLeaves.flatMap(leaf =>
+      (teamVal && leaf.name !== teamVal) ? [] : leaf.tasks
+    );
+    if (currentStatusFilter !== 'all') tasks = tasks.filter(t => t.status === currentStatusFilter);
+    if (dateVal) tasks = tasks.filter(t => t.start <= dateVal && t.end >= dateVal);
+
+    filteredTasks = tasks.sort((a, b) => a.start < b.start ? -1 : a.start > b.start ? 1 : 0);
+    currentPage = 1;
+    renderPage();
+  }
+
+  /* ---- 팀 선택 ---- */
+  const teamSelect = document.getElementById('filterTeam');
+  if (teamSelect) {
+    allLeaves.forEach(leaf => {
+      const opt = document.createElement('option');
+      opt.value = leaf.name;
+      opt.textContent = leaf.name;
+      teamSelect.appendChild(opt);
+    });
+    teamSelect.addEventListener('change', applyFilters);
+  }
+
+  /* ---- KRDS 기간 선택: 확인 클릭 후 필터 적용 ---- */
+  const calConfirmBtn = document.querySelector('.krds-calendar-area .calendar-btn-wrap .krds-btn.primary');
+  if (calConfirmBtn) {
+    calConfirmBtn.addEventListener('click', () => setTimeout(applyFilters, 0));
+  }
+
+  /* ---- 탭 ---- */
+  applyFilters();
+
+  document.querySelectorAll('.tab-bar .tab[data-filter]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-bar .tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentStatusFilter = btn.dataset.filter;
+      applyFilters();
+    });
+  });
+
+  /* ---- 페이지네이션 ---- */
+  if (pagination) {
+    pagination.addEventListener('click', e => {
+      e.preventDefault();
+      const totalPages = Math.max(1, Math.ceil(filteredTasks.length / PAGE_SIZE));
+      const link = e.target.closest('[data-page]');
+      if (link) {
+        currentPage = parseInt(link.dataset.page, 10);
+      } else if (e.target.closest('.page-navi.prev:not(.disabled)')) {
+        currentPage = Math.max(1, currentPage - 1);
+      } else if (e.target.closest('.page-navi.next:not(.disabled)')) {
+        currentPage = Math.min(totalPages, currentPage + 1);
+      } else {
+        return;
+      }
+      renderPage();
+    });
+  }
+}
 
 /* ---- 조직도 뷰 ---- */
 
@@ -596,7 +715,6 @@ const PAD   = 56;   // 캔버스 외부 여백
 /* zoom / pan 상태 */
 let ocScale = 1;
 let ocTx = 0, ocTy = 0;
-let currentView = 'list';
 
 function updateOcTransform() {
   ocCanvas.style.transform = `translate(${ocTx}px,${ocTy}px) scale(${ocScale})`;
@@ -802,11 +920,11 @@ function switchView(view) {
   }
 }
 
-document.getElementById('btnListView').addEventListener('click', () => switchView('list'));
-document.getElementById('btnOrgView').addEventListener('click',  () => switchView('org'));
+document.getElementById('btnListView')?.addEventListener('click', () => switchView('list'));
+document.getElementById('btnOrgView')?.addEventListener('click',  () => switchView('org'));
 
 /* 줌 / 팬 이벤트 (최초 한 번만) */
-;(function initOcEvents() {
+if (ocWrapper) (function initOcEvents() {
   /* 마우스 휠 줌 */
   ocWrapper.addEventListener('wheel', e => {
     e.preventDefault();
