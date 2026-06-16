@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>업무 차트</title>
+    <link rel="stylesheet" href="/resources/css/custom.css">
+    <link href="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.css" type="text/css" rel="stylesheet" />
+    <script src="/resources/js/component/ui-include.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.js"></script>
+</head>
+<body>
+
+  <div class="operating-container">
+
+    <div data-include="/html/code/header.html"></div>
+
+    <div class="organization-container">
+
+      <!-- 사이드 네비게이션 -->
+      <nav class="side-nav" aria-label="업무 네비게이션">
+        <ul class="nav-tree" role="list">
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <a href="/resources/pages/operating.html" class="nav-node__row" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">업무 테이블</span>
+            </a>
+          </li>
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <a href="/resources/pages/operating-calendar.html" class="nav-node__row" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">업무 캘린더</span>
+            </a>
+          </li>
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <a href="/resources/pages/operating-gantt.html" class="nav-node__row is-selected" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">업무 차트</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- 간트 차트 영역 -->
+      <main class="main gantt-page">
+
+        <!-- 간트 툴바 -->
+        <div class="gantt-topbar">
+          <!-- 팀 선택 -->
+          <select class="krds-form-select gantt-select" id="team-select" title="팀 선택">
+            <option value="">전체 팀</option>
+          </select>
+          <!-- 팀원 선택 -->
+          <select class="krds-form-select gantt-select" id="member-select" title="팀원 선택">
+            <option value="">전체 팀원</option>
+          </select>
+          <!-- Legend -->
+          <div class="legend">
+            <span class="legend-item"><span class="legend-dot legend-dot--progress"></span> 진행중</span>
+            <span class="legend-item"><span class="legend-dot legend-dot--done"></span> 종결</span>
+            <span class="legend-item"><span class="legend-dot legend-dot--wait"></span> 대기</span>
+            <span class="legend-item"><span class="legend-dot overload"></span> 과부하 (3건+)</span>
+            <span class="legend-item"><span class="legend-dot warning"></span> 주의 (2건)</span>
+          </div>
+          <div class="tn-right">
+            <button type="button" class="krds-btn small secondary" id="btn-day"   onclick="setViewUnit('day')">일</button>
+            <button type="button" class="krds-btn small secondary active" id="btn-week"  onclick="setViewUnit('week')">주</button>
+            <button type="button" class="krds-btn small secondary" id="btn-month" onclick="setViewUnit('month')">월</button>
+          </div>
+        </div>
+
+        <!-- 간트 차트 -->
+        <div class="gantt-wrapper">
+          <div class="task-list">
+            <div class="tl-header">
+              <div class="tl-header-labels">
+                <span class="tl-label-task">업무 목록</span>
+                <span class="tl-label-count">건수</span>
+              </div>
+            </div>
+            <div class="tl-body" id="task-list-body"></div>
+          </div>
+
+          <div class="gantt-area">
+            <div class="gantt-header">
+              <div class="gantt-header-weeks" id="gantt-weeks"></div>
+              <div class="gantt-header-days" id="gantt-days"></div>
+            </div>
+            <div class="gantt-body">
+              <svg id="dep-svg" style="position:absolute;top:0;left:0;width:100%;pointer-events:none;z-index:20;overflow:visible"></svg>
+              <div class="gantt-rows" id="gantt-rows"></div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+
+    </div>
+  </div>
+
+<!-- 바 호버 팝업 (tooltip) -->
+<div class="gantt-popup" id="bar-popup">
+  <div class="popup-title" id="popup-title"></div>
+  <div class="popup-row"><span class="popup-label">담당자</span><span class="popup-value" id="popup-assignee"></span></div>
+  <div class="popup-row"><span class="popup-label">기간</span><span class="popup-value" id="popup-dates"></span></div>
+  <div class="popup-row"><span class="popup-label">진행률</span><span class="popup-value" id="popup-progress"></span></div>
+  <div class="popup-row" id="popup-load-row" style="display:none"><span class="popup-label">담당자 부하</span><span class="popup-value" id="popup-load"></span></div>
+</div>
+
+<!-- 업무 데이터를 ORG에서 읽어오기 위해 script.js를 먼저 로드 -->
+<script src="/resources/js/script.js"></script>
+<script>
+/* ── 설정 ── */
+const START_DATE = new Date(2026, 0, 1);   // 2026-01-01
+const DATA_DAYS  = 365;                    // 전체 데이터 범위 (2026년)
+const ROW_H      = 36;
+
+/* ── 날짜 ↔ 오프셋 ── */
+function dateToOffset(str) {
+  return Math.round((new Date(str) - START_DATE) / 86400000);
+}
+function dateFromOffset(off) {
+  const d = new Date(START_DATE);
+  d.setDate(d.getDate() + off);
+  return d;
+}
+function formatDate(d) { return (d.getMonth() + 1) + '/' + d.getDate(); }
+function isWeekend(off) { const day = dateFromOffset(off).getDay(); return day === 0 || day === 6; }
+function isToday(off)   { return dateFromOffset(off).toDateString() === new Date().toDateString(); }
+
+const todayOffset = Math.round((new Date() - START_DATE) / 86400000);
+
+/* ── 뷰 단위 상태 ── */
+let viewUnit = 'week'; // 'day' | 'week' | 'month'
+
+/* ── 뷰별 설정 ── */
+function buildGroupHdrs(cols, dtFn) {
+  const groups = [];
+  let cur = '', start = 0;
+  for (let i = 0; i < cols; i++) {
+    const dt  = dtFn(i);
+    const lbl = dt.getFullYear() + '년 ' + (dt.getMonth() + 1) + '월';
+    if (lbl !== cur) {
+      if (cur) groups.push({ label: cur, start, end: i - 1 });
+      cur = lbl; start = i;
+    }
+    if (i === cols - 1) groups.push({ label: cur, start, end: i });
+  }
+  return groups;
+}
+
+function getViewConfig() {
+  const dayStart = Math.max(0, todayOffset - 14);
+
+  switch (viewUnit) {
+    case 'day': return {
+      cols: 90,
+      colW: 32,
+      unitOf:   d => d - dayStart,
+      colClass: i => {
+        const off = dayStart + i;
+        return (isWeekend(off) ? ' weekend' : '') + (isToday(off) ? ' today-col' : '');
+      },
+      colTxt:   i => dateFromOffset(dayStart + i).getDate(),
+      todayCol: todayOffset - dayStart,
+      groupHdrs: buildGroupHdrs(90, i => dateFromOffset(dayStart + i))
+    };
+
+    case 'week': return {
+      cols: 26,
+      colW: 80,
+      unitOf:   d => Math.floor(d / 7),
+      colClass: i => (todayOffset >= i * 7 && todayOffset <= i * 7 + 6) ? ' today-col' : '',
+      colTxt:   i => { const d = dateFromOffset(i * 7); return (d.getMonth() + 1) + '/' + d.getDate(); },
+      todayCol: Math.floor(todayOffset / 7),
+      groupHdrs: buildGroupHdrs(26, i => dateFromOffset(i * 7))
+    };
+
+    case 'month': return {
+      cols: 12,
+      colW: 140,
+      unitOf:   d => { const dt = dateFromOffset(d); return (dt.getFullYear() - 2026) * 12 + dt.getMonth(); },
+      colClass: i => {
+        const now = new Date();
+        return (now.getFullYear() === 2026 && now.getMonth() === i) ? ' today-col' : '';
+      },
+      colTxt:   i => (i + 1) + '월',
+      todayCol: new Date().getFullYear() === 2026 ? new Date().getMonth() : -1,
+      groupHdrs: [{ label: '2026년', start: 0, end: 11 }]
+    };
+  }
+}
+
+/* ── 뷰 전환 ── */
+function setViewUnit(unit) {
+  viewUnit = unit;
+  ['day', 'week', 'month'].forEach(u => {
+    const btn = document.getElementById('btn-' + u);
+    if (btn) btn.classList.toggle('active', u === unit);
+  });
+  renderHeader();
+  renderAll();
+}
+
+/* ── 색상 팔레트 ── */
+const GROUP_COLORS = [
+  '#3b82f6','#10b981','#8b5cf6','#f59e0b','#ef4444',
+  '#06b6d4','#84cc16','#f97316','#ec4899','#6366f1','#14b8a6','#f43f5e'
+];
+const AVATAR_PALETTE = [
+  '#3b82f6','#10b981','#8b5cf6','#f59e0b','#ef4444',
+  '#06b6d4','#84cc16','#f97316','#ec4899','#6366f1'
+];
+
+const STATUS_BAR = { progress: 'bar-blue', done: 'bar-green', wait: 'bar-gray' };
+const STATUS_PCT = { progress: 50, done: 100, wait: 0 };
+
+/* ── ORG → AVATARS ── */
+const AVATARS = {};
+let _aci = 0;
+ORG.forEach(sil => getAllLeaves(sil).forEach(leaf =>
+  (leaf.tasks || []).forEach(t => {
+    if (!AVATARS[t.owner]) {
+      AVATARS[t.owner] = {
+        color: AVATAR_PALETTE[_aci++ % AVATAR_PALETTE.length],
+        abbr:  t.owner.slice(0, 1)
+      };
+    }
+  })
+));
+
+/* ── ORG → TASKS (2026년 전체 기준) ── */
+function buildAllTasks() {
+  const tasks = [];
+  let tid = 0;
+
+  ORG.forEach((sil, si) => {
+    const silId     = 'g' + si;
+    const silColor  = GROUP_COLORS[si % GROUP_COLORS.length];
+    const silLeaves = getAllLeaves(sil).filter(leaf =>
+      (leaf.tasks || []).some(t => dateToOffset(t.end) >= 0)
+    );
+    if (!silLeaves.length) return;
+
+    let silCount = 0;
+    const subBlocks = [];
+
+    silLeaves.forEach((leaf, li) => {
+      const subId    = silId + '-' + li;
+      const subColor = GROUP_COLORS[(si * 3 + li + 1) % GROUP_COLORS.length];
+      const leafTasks = (leaf.tasks || []).filter(t =>
+        dateToOffset(t.end) >= 0 && dateToOffset(t.start) < DATA_DAYS
+      );
+      if (!leafTasks.length) return;
+
+      const taskItems = leafTasks.map(t => {
+        tid++;
+        return {
+          id:       't' + tid,
+          type:     'task',
+          name:     t.title,
+          parent:   subId,
+          assignee: t.owner,
+          start:    Math.max(0, dateToOffset(t.start)),
+          end:      Math.min(DATA_DAYS - 1, Math.max(0, dateToOffset(t.end))),
+          color:    STATUS_BAR[t.status] || 'bar-blue',
+          progress: STATUS_PCT[t.status] || 0,
+          _silName: sil.name,
+        };
+      });
+
+      silCount += taskItems.length;
+      subBlocks.push({ subId, subColor, leaf, taskItems });
+    });
+
+    if (!silCount) return;
+
+    tasks.push({ id: silId, type: 'group', name: sil.name, count: silCount, color: silColor, open: true });
+    subBlocks.forEach(({ subId, subColor, leaf, taskItems }) => {
+      tasks.push({ id: subId, type: 'group', name: leaf.name, count: taskItems.length, color: subColor, parent: silId, open: true, _silName: sil.name });
+      taskItems.forEach(item => tasks.push(item));
+    });
+  });
+
+  return tasks;
+}
+
+const TASKS = buildAllTasks();
+
+/* ── 필터 상태 ── */
+let currentTeam   = null;
+let currentMember = null;
+
+/* ── 드롭다운 초기화 (KRDS form-select) ── */
+(function initDropdowns() {
+  const teamSel   = document.getElementById('team-select');
+  const memberSel = document.getElementById('member-select');
+
+  ORG.forEach(sil => {
+    if (!getAllLeaves(sil).some(l => (l.tasks || []).some(t => dateToOffset(t.end) >= 0))) return;
+    const opt = document.createElement('option');
+    opt.value       = sil.name;
+    opt.textContent = sil.name;
+    teamSel.appendChild(opt);
+  });
+
+  const ownersMap = ORG.flatMap(sil => getAllLeaves(sil).flatMap(leaf =>
+    (leaf.tasks || [])
+      .filter(t => dateToOffset(t.end) >= 0 && dateToOffset(t.start) < DATA_DAYS)
+      .map(t => ({ name: t.owner, sil: sil.name }))
+  )).reduce((map, { name, sil }) => {
+    if (!map.has(name)) map.set(name, sil);
+    return map;
+  }, new Map());
+
+  [...ownersMap.entries()].sort((a, b) => a[0].localeCompare(b[0], 'ko')).forEach(([name, silName]) => {
+    const opt = document.createElement('option');
+    opt.value       = name;
+    opt.textContent = name + ' (' + silName + ')';
+    memberSel.appendChild(opt);
+  });
+
+  teamSel.addEventListener('change',   () => { currentTeam   = teamSel.value   || null; renderAll(); });
+  memberSel.addEventListener('change', () => { currentMember = memberSel.value || null; renderAll(); });
+})();
+
+/* ── 과부하 계산 ── */
+function calcWorkload() {
+  const map = new Map();
+  TASKS.filter(t => t.type === 'task').forEach(t => {
+    if (!map.has(t.assignee)) map.set(t.assignee, new Map());
+    const dmap = map.get(t.assignee);
+    for (let d = t.start; d <= t.end; d++) dmap.set(d, (dmap.get(d) || 0) + 1);
+  });
+  return map;
+}
+function getMaxLoad(task, wlMap) {
+  const dmap = wlMap.get(task.assignee);
+  if (!dmap) return 0;
+  let max = 0;
+  for (let d = task.start; d <= task.end; d++) max = Math.max(max, dmap.get(d) || 0);
+  return max;
+}
+const WORKLOAD = calcWorkload();
+
+/* ── 표시 업무 목록 ── */
+function getVisibleTasks() {
+  const openGroups = new Set(TASKS.filter(t => t.type === 'group' && t.open).map(t => t.id));
+
+  let memberGroups = null;
+  if (currentMember) {
+    memberGroups = new Set();
+    TASKS.forEach(t => {
+      if (t.type === 'task' && t.assignee === currentMember) {
+        memberGroups.add(t.parent);
+        const sub = TASKS.find(g => g.id === t.parent);
+        if (sub && sub.parent) memberGroups.add(sub.parent);
+      }
+    });
+  }
+
+  return TASKS.filter(t => {
+    if (currentTeam) {
+      const silName = t._silName || (t.type === 'group' && !t.parent ? t.name : null);
+      if (silName && silName !== currentTeam) return false;
+      if (!silName && t.type !== 'group' && t._silName !== currentTeam) return false;
+    }
+    if (memberGroups) {
+      if (t.type === 'task' && t.assignee !== currentMember) return false;
+      if (t.type === 'group' && !memberGroups.has(t.id)) return false;
+    }
+    if (t.type === 'group' && !t.parent) return true;
+    if (t.type === 'group' && t.parent)  return openGroups.has(t.parent);
+    const par = TASKS.find(g => g.id === t.parent);
+    if (!par) return true;
+    if (!openGroups.has(t.parent)) return false;
+    if (par.parent) return openGroups.has(par.parent);
+    return true;
+  });
+}
+
+/* ── 헤더 렌더 (뷰 전환 시 재렌더) ── */
+function renderHeader() {
+  const weeksEl = document.getElementById('gantt-weeks');
+  const daysEl  = document.getElementById('gantt-days');
+  weeksEl.innerHTML = '';
+  daysEl.innerHTML  = '';
+
+  const vc = getViewConfig();
+
+  vc.groupHdrs.forEach(w => {
+    const el = document.createElement('div');
+    el.className   = 'gantt-week-label';
+    el.style.width = ((w.end - w.start + 1) * vc.colW) + 'px';
+    el.textContent = w.label;
+    weeksEl.appendChild(el);
+  });
+
+  for (let i = 0; i < vc.cols; i++) {
+    const el = document.createElement('div');
+    el.className   = 'gantt-day-cell' + vc.colClass(i);
+    el.style.width = vc.colW + 'px';
+    el.textContent = vc.colTxt(i);
+    daysEl.appendChild(el);
+  }
+}
+
+/* ── 업무 목록 (왼쪽 패널) 렌더 ── */
+function renderTaskList() {
+  const body = document.getElementById('task-list-body');
+  body.innerHTML = '';
+  getVisibleTasks().forEach(task => {
+    const isGroup    = task.type === 'group';
+    const isSubGroup = isGroup && !!task.parent;
+    const row = document.createElement('div');
+    row.className  = 'tl-row' + (isGroup ? ' group' : '');
+    row.dataset.id = task.id;
+
+    if (!isGroup) {
+      const maxLoad = getMaxLoad(task, WORKLOAD);
+      if (maxLoad >= 3) row.classList.add('overload-row');
+      else if (maxLoad >= 2) row.classList.add('warning-row');
+    }
+
+    const toggle = document.createElement('span');
+    toggle.className = 'tl-toggle' + (task.open ? ' open' : '');
+    toggle.innerHTML = isGroup ? '▶' : '';
+    row.appendChild(toggle);
+
+    if (task.parent) {
+      const indent = document.createElement('span');
+      indent.className = 'tl-indent';
+      indent.style.width = isSubGroup ? '8px' : '16px';
+      row.appendChild(indent);
+    }
+
+    if (!isGroup) {
+      const av = AVATARS[task.assignee];
+      if (av) {
+        const maxLoad = getMaxLoad(task, WORKLOAD);
+        const dot = document.createElement('span');
+        dot.className        = 'tl-avatar';
+        dot.style.background = maxLoad >= 3 ? '#ef4444' : maxLoad >= 2 ? '#f59e0b' : av.color;
+        dot.textContent      = av.abbr;
+        row.appendChild(dot);
+      }
+    } else {
+      const dot = document.createElement('span');
+      dot.className        = 'tl-dot';
+      dot.style.background = task.color || '#94a3b8';
+      row.appendChild(dot);
+    }
+
+    const name = document.createElement('span');
+    name.className   = 'tl-name';
+    name.textContent = task.name;
+    row.appendChild(name);
+
+    const count = document.createElement('span');
+    count.className   = 'tl-count';
+    count.textContent = task.count || '';
+    row.appendChild(count);
+
+    if (isGroup) {
+      row.addEventListener('click', () => {
+        const t = TASKS.find(x => x.id === task.id);
+        if (t) t.open = !t.open;
+        renderAll();
+      });
+    }
+    body.appendChild(row);
+  });
+}
+
+/* ── 그룹 범위 계산 ── */
+function getGroupSpan(groupId) {
+  const childIds = new Set();
+  function collect(pid) {
+    TASKS.forEach(t => {
+      if (t.parent === pid) {
+        if (t.type === 'group') { childIds.add(t.id); collect(t.id); }
+        else childIds.add(t.id);
+      }
+    });
+  }
+  collect(groupId);
+  const children = TASKS.filter(t => childIds.has(t.id) && t.type === 'task');
+  if (!children.length) return null;
+  return { start: Math.min(...children.map(t => t.start)), end: Math.max(...children.map(t => t.end)) };
+}
+
+/* ── 간트 행 렌더 (뷰 인식) ── */
+function renderGanttRows() {
+  const vc        = getViewConfig();
+  const container = document.getElementById('gantt-rows');
+  container.innerHTML = '';
+  container.style.width = (vc.cols * vc.colW) + 'px';
+
+  const todayCol = vc.todayCol;
+  if (todayCol >= 0 && todayCol < vc.cols) {
+    const line = document.createElement('div');
+    line.className = 'today-line';
+    line.style.left = (todayCol * vc.colW + vc.colW / 2) + 'px';
+    container.appendChild(line);
+  }
+
+  getVisibleTasks().forEach(task => {
+    const row = document.createElement('div');
+    row.className   = 'gantt-row' + (task.type === 'group' ? ' group-row' : '');
+    row.dataset.id  = task.id;
+    row.style.width = '100%';
+
+    for (let i = 0; i < vc.cols; i++) {
+      const col = document.createElement('div');
+      col.className   = 'gantt-col' + vc.colClass(i);
+      col.style.width = vc.colW + 'px';
+      row.appendChild(col);
+    }
+
+    if (task.type === 'group') {
+      const span = getGroupSpan(task.id);
+      if (span) {
+        const rawS = vc.unitOf(span.start);
+        const rawE = vc.unitOf(span.end);
+        if (rawE >= 0 && rawS < vc.cols) {
+          const sc    = Math.max(0, rawS);
+          const ec    = Math.min(vc.cols - 1, rawE);
+          const isTop = !task.parent;
+          const bw    = document.createElement('div');
+          bw.className    = 'gantt-bar-wrap';
+          bw.style.left   = (sc * vc.colW + 1) + 'px';
+          bw.style.width  = ((ec - sc + 1) * vc.colW - 2) + 'px';
+          bw.style.height = isTop ? '10px' : '8px';
+
+          const bar = document.createElement('div');
+          bar.style.cssText = [
+            'width:100%', 'height:100%',
+            'border-radius:' + (isTop ? '5px' : '4px'),
+            'background:' + (task.color || '#94a3b8'),
+            'opacity:' + (isTop ? '0.2' : '0.13'),
+            'position:relative'
+          ].join(';');
+
+          ['left', 'right'].forEach(side => {
+            const cap = document.createElement('div');
+            cap.style.cssText = [
+              'position:absolute', side + ':0', 'top:0',
+              'width:0', 'height:0',
+              'border-top:' + (isTop ? '10px' : '8px') + ' solid ' + (task.color || '#94a3b8'),
+              'border-' + (side === 'left' ? 'right' : 'left') + ':' + (isTop ? '10px' : '8px') + ' solid transparent',
+              'opacity:' + (isTop ? '0.6' : '0.45')
+            ].join(';');
+            bar.appendChild(cap);
+          });
+
+          bw.appendChild(bar);
+          row.appendChild(bw);
+        }
+      }
+    }
+
+    if (task.type === 'task') {
+      const rawS = vc.unitOf(task.start);
+      const rawE = vc.unitOf(task.end);
+      if (rawE >= 0 && rawS < vc.cols) {
+        const sc      = Math.max(0, rawS);
+        const ec      = Math.min(vc.cols - 1, rawE);
+        const maxLoad = getMaxLoad(task, WORKLOAD);
+
+        const bw = document.createElement('div');
+        bw.className   = 'gantt-bar-wrap';
+        bw.style.left  = (sc * vc.colW + 1) + 'px';
+        bw.style.width = ((ec - sc + 1) * vc.colW - 2) + 'px';
+
+        const bar = document.createElement('div');
+        bar.className   = 'gantt-bar ' + (task.color || 'bar-blue');
+        bar.style.width = '100%';
+        if (maxLoad >= 3) bar.classList.add('bar-overload');
+        else if (maxLoad >= 2) bar.classList.add('bar-warning');
+
+        const av = AVATARS[task.assignee];
+        if (av) {
+          const avEl = document.createElement('span');
+          avEl.className   = 'bar-avatar';
+          avEl.textContent = av.abbr;
+          bar.appendChild(avEl);
+        }
+
+        const nameEl = document.createElement('span');
+        nameEl.style.cssText = 'overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0';
+        nameEl.textContent   = task.name;
+        bar.appendChild(nameEl);
+
+        if (task.progress) {
+          const prog = document.createElement('span');
+          prog.className   = 'bar-progress';
+          prog.textContent = task.progress + '%';
+          bar.appendChild(prog);
+        }
+
+        bar.addEventListener('mouseenter', e => showPopup(e, task, maxLoad));
+        bar.addEventListener('mouseleave', hidePopup);
+        bar.addEventListener('mousemove',  movePopup);
+
+        bw.appendChild(bar);
+        row.appendChild(bw);
+      }
+    }
+
+    container.appendChild(row);
+  });
+}
+
+/* ── 팝업 (툴팁) ── */
+const popup = document.getElementById('bar-popup');
+
+function showPopup(e, task, maxLoad) {
+  document.getElementById('popup-title').textContent    = task.name;
+  document.getElementById('popup-assignee').textContent = task.assignee || '-';
+  document.getElementById('popup-dates').textContent    =
+    formatDate(dateFromOffset(task.start)) + ' ~ ' + formatDate(dateFromOffset(task.end));
+  document.getElementById('popup-progress').textContent = task.progress + '%';
+
+  const loadEl  = document.getElementById('popup-load');
+  const loadRow = document.getElementById('popup-load-row');
+  if (maxLoad > 1) {
+    loadEl.textContent = maxLoad >= 3 ? '⚠ 과부하 (동시 ' + maxLoad + '건)' : '주의 (동시 ' + maxLoad + '건)';
+    loadEl.className = 'popup-value ' + (maxLoad >= 3 ? 'popup-danger' : 'popup-warning');
+    loadRow.style.display = 'flex';
+  } else {
+    loadRow.style.display = 'none';
+  }
+  popup.classList.add('visible');
+  movePopup(e);
+}
+function hidePopup() { popup.classList.remove('visible'); }
+function movePopup(e) {
+  popup.style.left = (e.clientX + 14) + 'px';
+  popup.style.top  = (e.clientY - 20) + 'px';
+}
+
+
+/* ── 전체 렌더 ── */
+function renderAll() {
+  renderTaskList();
+  renderGanttRows();
+}
+
+/* ── 스크롤 동기화 (최초 1회) ── */
+(function initScroll() {
+  const taskBody  = document.getElementById('task-list-body');
+  const ganttBody = document.querySelector('.gantt-body');
+  const ganttHdr  = document.querySelector('.gantt-header');
+  ganttBody.addEventListener('scroll', () => {
+    taskBody.scrollTop   = ganttBody.scrollTop;
+    ganttHdr.scrollLeft  = ganttBody.scrollLeft;
+  });
+  taskBody.addEventListener('scroll', () => { ganttBody.scrollTop = taskBody.scrollTop; });
+})();
+
+renderHeader();
+renderAll();
+</script>
+</body>
+</html>
