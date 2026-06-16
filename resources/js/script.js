@@ -18,6 +18,9 @@ const ORG = [
         { title:"2025년 예산안 편성 및 배분 계획 수립", status:"progress", owner:"이서연", start:"2025-01-01", end:"2025-12-31" },
         { title:"재정성과 평가 체계 개선", status:"wait",     owner:"박지훈", start:"2025-03-01", end:"2025-09-30" },
         { title:"2024년 결산 검토 및 보고",              status:"done",     owner:"최수아", start:"2024-10-01", end:"2025-02-28" },
+        { title:"2026년도 예산안 사전 기획 및 지침 수립", status:"progress", owner:"정태양", start:"2025-11-01", end:"2026-05-07" },
+        { title:"2026년 상반기 재정집행 점검 및 분석",   status:"progress", owner:"한도윤", start:"2026-03-01", end:"2026-06-30" },
+        { title:"디지털 예산관리 시스템 구축 기본계획",  status:"progress", owner:"오시우", start:"2026-01-15", end:"2026-06-20" },
       ]},
       { name:"혁신행정담당관", members:[
         { name:"강현우", role:"과장",  position:"서기관",     email:"hyunwoo.kang@gov.kr",  phone:"02-1234-5701" },
@@ -30,6 +33,8 @@ const ORG = [
         { title:"정부혁신 실행계획 수립 및 추진", status:"progress", owner:"윤지아", start:"2025-02-01", end:"2025-11-30" },
         { title:"업무프로세스 재설계 추진",       status:"wait",     owner:"장민서", start:"2025-04-01", end:"2025-10-31" },
         { title:"민원서비스 만족도 조사",         status:"done",     owner:"조하은", start:"2024-09-01", end:"2025-01-31" },
+        { title:"스마트 행정 혁신방안 수립",      status:"progress", owner:"신예준", start:"2026-02-01", end:"2026-06-15" },
+        { title:"행정서비스 품질 개선 종합계획",  status:"wait",     owner:"류채원", start:"2026-04-01", end:"2026-06-30" },
       ]},
       { name:"정보화담당관", members:[
         { name:"이준혁", role:"과장",  position:"서기관",     email:"junhyuk.lee@gov.kr",   phone:"02-1234-5801" },
@@ -43,6 +48,8 @@ const ORG = [
         { title:"정보화 기본계획 수립",           status:"progress", owner:"김아린", start:"2025-01-15", end:"2025-06-30" },
         { title:"행정정보시스템 고도화 사업",     status:"progress", owner:"박서준", start:"2025-03-01", end:"2025-12-31" },
         { title:"개인정보 보호 실태점검",         status:"done",     owner:"최유나", start:"2024-11-01", end:"2025-02-28" },
+        { title:"AI 기반 민원처리 시스템 구축 계획", status:"progress", owner:"정우진", start:"2026-01-01", end:"2026-06-30" },
+        { title:"클라우드 전환 기본계획 수립",   status:"progress", owner:"한소율", start:"2026-03-01", end:"2026-06-25" },
       ]},
     ]},
     { name:"국제협력관", children:[
@@ -56,6 +63,8 @@ const ORG = [
         { title:"국제기구 연계 협력과제 발굴",   status:"progress", owner:"배하늘", start:"2025-02-01", end:"2025-10-31" },
         { title:"해외 정책 연수 프로그램 운영",  status:"wait",     owner:"심수현", start:"2025-05-01", end:"2025-08-31" },
         { title:"국제협력 성과보고서 작성",      status:"done",     owner:"고태민", start:"2024-12-01", end:"2025-03-31" },
+        { title:"하반기 국제회의 운영계획 수립", status:"wait",     owner:"문지수", start:"2026-04-01", end:"2026-06-10" },
+        { title:"ODA 협력사업 중간점검 및 평가", status:"progress", owner:"고태민", start:"2026-02-01", end:"2026-06-20" },
       ]},
       { name:"통상지원담당관", members:[
         { name:"권나래", role:"과장",  position:"서기관",     email:"narae.kwon@gov.kr",    phone:"02-1234-6001" },
@@ -65,6 +74,8 @@ const ORG = [
       ], tasks:[
         { title:"통상협력 지원체계 구축",        status:"progress", owner:"안재원", start:"2025-01-01", end:"2025-09-30" },
         { title:"수출기업 애로사항 해소 TF 운영",status:"wait",     owner:"남가은", start:"2025-04-01", end:"2025-12-31" },
+        { title:"2026년 통상환경 분석 보고서 작성", status:"progress", owner:"안재원", start:"2026-01-01", end:"2026-06-30" },
+        { title:"중소기업 수출역량 강화 프로그램 운영", status:"wait", owner:"서동현", start:"2026-03-01", end:"2026-06-15" },
       ]},
     ]},
   ]},
@@ -85,6 +96,8 @@ const ORG = [
         { title:"성과평가 제도 개선 TF 운영",   status:"progress", owner:"변준서", start:"2025-03-01", end:"2025-09-30" },
         { title:"2024년 인사통계 연보 작성",    status:"done",     owner:"석다은", start:"2024-11-01", end:"2025-02-28" },
         { title:"비공개 채용 절차 개선 연구",    status:"wait",     owner:"방태현", start:"2025-06-01", end:"2025-11-30" },
+        { title:"하반기 공개채용 계획 수립",    status:"progress", owner:"도지원", start:"2026-03-01", end:"2026-06-20" },
+        { title:"직급별 역량교육 체계 개편",    status:"wait",     owner:"표미래", start:"2026-04-01", end:"2026-06-30" },
       ]},
       { name:"재무과", members:[
         { name:"진수빈", role:"과장",  position:"서기관",     email:"subin.jin@gov.kr",     phone:"02-1234-6201" },
@@ -98,6 +111,8 @@ const ORG = [
         { title:"회계제도 개선 TF 운영",        status:"progress", owner:"마이준", start:"2025-02-01", end:"2025-08-31" },
         { title:"예산절감 추진계획 수립",        status:"wait",     owner:"선가람", start:"2025-04-01", end:"2025-10-31" },
         { title:"2024 회계연도 결산",           status:"done",     owner:"용태민", start:"2025-01-01", end:"2025-04-30" },
+        { title:"2025 회계연도 결산 최종 보고", status:"progress", owner:"봉지연", start:"2026-04-01", end:"2026-06-30" },
+        { title:"재무위험 관리체계 구축 기획",  status:"wait",     owner:"엄서아", start:"2026-02-01", end:"2026-06-15" },
       ]},
       { name:"총무과", members:[
         { name:"은도현", role:"과장",  position:"서기관",     email:"dohyun.eun@gov.kr",    phone:"02-1234-6301" },
@@ -110,6 +125,8 @@ const ORG = [
         { title:"청사 시설관리 현대화 계획",    status:"progress", owner:"가민주", start:"2025-01-01", end:"2025-12-31" },
         { title:"친환경 사무환경 조성 사업",    status:"wait",     owner:"나지훈", start:"2025-05-01", end:"2025-10-31" },
         { title:"물품 재고 실태조사",           status:"done",     owner:"다하은", start:"2025-01-15", end:"2025-03-31" },
+        { title:"청사 에너지 절감 대책 수립",   status:"progress", owner:"마지호", start:"2026-03-01", end:"2026-06-25" },
+        { title:"사무환경 표준화 매뉴얼 제작",  status:"wait",     owner:"라세은", start:"2026-04-01", end:"2026-06-10" },
       ]},
     ]},
     { name:"정보관리국", children:[
@@ -127,6 +144,8 @@ const ORG = [
         { title:"사이버보안 강화 대책 수립",    status:"progress", owner:"지민아", start:"2025-01-01", end:"2025-06-30" },
         { title:"전산장비 유지보수 계약",       status:"done",     owner:"차정우", start:"2024-12-01", end:"2025-01-31" },
         { title:"재해복구 시스템 점검",         status:"wait",     owner:"하율이", start:"2025-07-01", end:"2025-09-30" },
+        { title:"정보시스템 통합 보안점검",     status:"progress", owner:"서연이", start:"2026-02-01", end:"2026-06-30" },
+        { title:"망분리 고도화 사업 추진",      status:"progress", owner:"지아름", start:"2026-01-01", end:"2026-06-20" },
       ]},
       { name:"데이터관리과", members:[
         { name:"나민재", role:"과장",  position:"서기관",     email:"minjae.na@gov.kr",     phone:"02-1234-6501" },
@@ -139,6 +158,8 @@ const ORG = [
         { title:"공공데이터 개방 확대 계획",    status:"progress", owner:"황나래", start:"2025-01-01", end:"2025-12-31" },
         { title:"데이터 품질 관리 체계 구축",  status:"progress", owner:"임서준", start:"2025-03-01", end:"2025-09-30" },
         { title:"개인정보 비식별 처리 가이드라인 수립", status:"done", owner:"전유나", start:"2024-10-01", end:"2025-01-31" },
+        { title:"빅데이터 플랫폼 구축 1단계",  status:"progress", owner:"홍우진", start:"2026-02-01", end:"2026-06-30" },
+        { title:"공공데이터 품질 개선 중간점검", status:"progress", owner:"류소율", start:"2026-03-01", end:"2026-06-15" },
       ]},
     ]},
   ]},
@@ -154,6 +175,8 @@ const ORG = [
         { title:"2025년 정기감사 계획 수립",   status:"progress", owner:"신소희", start:"2025-01-01", end:"2025-06-30" },
         { title:"감사결과 이행 점검",          status:"progress", owner:"장준서", start:"2025-02-01", end:"2025-12-31" },
         { title:"2024년 감사 결과보고서 작성", status:"done",     owner:"조다은", start:"2024-11-01", end:"2025-03-31" },
+        { title:"상반기 기획감사 결과 보고",   status:"progress", owner:"강태현", start:"2026-04-01", end:"2026-06-30" },
+        { title:"내부감사 제도 개선 연구",     status:"wait",     owner:"장준서", start:"2026-02-01", end:"2026-06-20" },
       ]},
       { name:"청렴조사과", members:[
         { name:"윤지원", role:"과장",  position:"서기관",     email:"jiwon.yoon@gov.kr",    phone:"02-1234-6701" },
@@ -164,6 +187,8 @@ const ORG = [
         { title:"청렴도 향상 종합대책 수립",   status:"progress", owner:"오미래", start:"2025-01-01", end:"2025-12-31" },
         { title:"부패취약분야 집중 점검",      status:"wait",     owner:"문하준", start:"2025-05-01", end:"2025-08-31" },
         { title:"청렴 교육 프로그램 운영",     status:"done",     owner:"정세진", start:"2024-09-01", end:"2025-02-28" },
+        { title:"상반기 청렴도 자체평가",      status:"progress", owner:"오미래", start:"2026-04-01", end:"2026-06-30" },
+        { title:"부패신고 처리실태 집중 점검", status:"wait",     owner:"문하준", start:"2026-03-01", end:"2026-06-10" },
       ]},
     ]},
   ]},
@@ -633,15 +658,23 @@ if (operatingTaskList) {
 
   /* ---- 통합 필터 ---- */
   function applyFilters() {
-    const teamVal = document.getElementById('filterTeam')?.value || '';
-    const rawDate = document.getElementById('filterDate')?.value || '';
-    const dateVal = rawDate.replace(/\./g, '-');  // KRDS sets "YYYY.MM.DD" → compare as "YYYY-MM-DD"
+    const teamVal  = document.getElementById('filterTeam')?.value || '';
+    const rawStart = document.getElementById('filterDateStart')?.value || '';
+    const rawEnd   = document.getElementById('filterDateEnd')?.value || '';
+    const startVal = rawStart.replace(/\./g, '-');  // KRDS sets "YYYY.MM.DD" → compare as "YYYY-MM-DD"
+    const endVal   = rawEnd.replace(/\./g, '-');
 
     let tasks = allLeaves.flatMap(leaf =>
       (teamVal && leaf.name !== teamVal) ? [] : leaf.tasks
     );
     if (currentStatusFilter !== 'all') tasks = tasks.filter(t => t.status === currentStatusFilter);
-    if (dateVal) tasks = tasks.filter(t => t.start <= dateVal && t.end >= dateVal);
+    if (startVal || endVal) {
+      tasks = tasks.filter(t => {
+        const afterStart = !startVal || t.end >= startVal;
+        const beforeEnd  = !endVal   || t.start <= endVal;
+        return afterStart && beforeEnd;
+      });
+    }
 
     filteredTasks = tasks.sort((a, b) => a.start < b.start ? -1 : a.start > b.start ? 1 : 0);
     currentPage = 1;
@@ -660,11 +693,26 @@ if (operatingTaskList) {
     teamSelect.addEventListener('change', applyFilters);
   }
 
+  /* ---- 날짜 input 클릭 시 달력 열기 ---- */
+  const calTriggerBtn = document.querySelector('.calendar-conts .form-btn-datepicker');
+  ['filterDateStart', 'filterDateEnd'].forEach(id => {
+    document.getElementById(id)?.addEventListener('click', () => calTriggerBtn?.click());
+  });
+
   /* ---- KRDS 기간 선택: 확인 클릭 후 필터 적용 ---- */
   const calConfirmBtn = document.querySelector('.krds-calendar-area .calendar-btn-wrap .krds-btn.primary');
   if (calConfirmBtn) {
     calConfirmBtn.addEventListener('click', () => setTimeout(applyFilters, 0));
   }
+
+  /* ---- 날짜 초기화 ---- */
+  document.getElementById('calDateReset')?.addEventListener('click', () => {
+    const start = document.getElementById('filterDateStart');
+    const end   = document.getElementById('filterDateEnd');
+    if (start) start.value = '';
+    if (end)   end.value   = '';
+    applyFilters();
+  });
 
   /* ---- 탭 ---- */
   applyFilters();
@@ -979,6 +1027,171 @@ if (ocWrapper) (function initOcEvents() {
     fitOrgChart(cw, ch);
   });
 })();
+
+/* ---- 초기화: 업무 캘린더 페이지 ---- */
+const ocWeeksEl = document.querySelector('.oc-weeks');
+if (ocWeeksEl) {
+  const calLeaves = ORG.flatMap(sil => getAllLeaves(sil)).filter(l => l.tasks && l.tasks.length);
+  const calTasks  = calLeaves.flatMap(leaf => leaf.tasks.map(t => Object.assign({}, t, { dept: leaf.name })));
+
+  const CAL_CHIP = { progress: 'chip-blue', done: 'chip-green', wait: 'chip-orange' };
+  const DAY_KO   = ['일', '월', '화', '수', '목', '금', '토'];
+  const todayKey = (function() {
+    const n = new Date();
+    return n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0');
+  })();
+
+  let calDate = new Date();
+  let calView = 'month';
+
+  function toKey(d) {
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  function buildTaskMap() {
+    const map = {};
+    calTasks.forEach(t => { if (!map[t.end]) map[t.end] = []; map[t.end].push(t); });
+    return map;
+  }
+
+  function getWeekMonday(d) {
+    const c = new Date(d);
+    c.setDate(c.getDate() - (c.getDay() + 6) % 7);
+    return c;
+  }
+
+  function makeChip(t, extraClass) {
+    return `<div class="oc-chip ${CAL_CHIP[t.status] || 'chip-blue'}${extraClass ? ' ' + extraClass : ''}" title="${escapeHtml(t.dept + ' · ' + t.owner)}">` +
+      `<span class="chip-dot"></span><span class="chip-name">${escapeHtml(t.title)}</span></div>`;
+  }
+
+  /* ── Month ── */
+  function renderCalMonth() {
+    const y = calDate.getFullYear(), m = calDate.getMonth();
+    const first = new Date(y, m, 1);
+    const cells = [];
+    for (let i = (first.getDay() + 6) % 7; i > 0; i--)
+      cells.push({ d: new Date(y, m, 1 - i), other: true });
+    const days = new Date(y, m + 1, 0).getDate();
+    for (let i = 1; i <= days; i++)
+      cells.push({ d: new Date(y, m, i), other: false });
+    const tail = (7 - (cells.length % 7)) % 7;
+    for (let i = 1; i <= tail; i++)
+      cells.push({ d: new Date(y, m + 1, i), other: true });
+
+    const taskMap = buildTaskMap();
+    const MAX = 3;
+    let html = '';
+    for (let r = 0; r < cells.length; r += 7) {
+      html += '<div class="oc-week-row">';
+      for (let c = 0; c < 7; c++) {
+        const { d, other } = cells[r + c];
+        const key = toKey(d), isToday = key === todayKey;
+        const ts  = taskMap[key] || [];
+        const extra = Math.max(0, ts.length - MAX);
+        html += `<div class="oc-cell${other ? ' other-month' : ''}${isToday ? ' today' : ''}">` +
+          `<div class="oc-date-num${isToday ? ' today-circle' : ''}">${d.getDate()}</div>` +
+          (ts.length ? `<div class="oc-events">${ts.slice(0, MAX).map(t => makeChip(t)).join('')}${extra ? `<div class="oc-more">+${extra} 더보기</div>` : ''}</div>` : '') +
+          `</div>`;
+      }
+      html += '</div>';
+    }
+    ocWeeksEl.innerHTML = html;
+  }
+
+  /* ── Week ── */
+  function renderCalWeek() {
+    const mon = getWeekMonday(calDate);
+    const taskMap = buildTaskMap();
+    let hdr = '<div class="oc-week-col-headers">';
+    let cols = '<div class="oc-week-cols">';
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(mon); d.setDate(d.getDate() + i);
+      const key = toKey(d), isToday = key === todayKey;
+      const ts = taskMap[key] || [];
+      hdr += `<div class="oc-week-col-header${isToday ? ' today' : ''}">` +
+        `<span class="oc-wch-day">${DAY_KO[d.getDay()]}</span>` +
+        `<span class="oc-wch-date${isToday ? ' today-circle' : ''}">${d.getDate()}</span></div>`;
+      cols += `<div class="oc-week-col${isToday ? ' today' : ''}">${ts.map(t => makeChip(t, 'oc-chip--block')).join('')}</div>`;
+    }
+    hdr += '</div>'; cols += '</div>';
+    ocWeeksEl.innerHTML = '<div class="oc-view-week">' + hdr + cols + '</div>';
+  }
+
+  /* ── Day ── */
+  function renderCalDay() {
+    const ts = (buildTaskMap()[toKey(calDate)] || []);
+    let html = '<div class="oc-view-day">';
+    if (ts.length) {
+      html += ts.map(t =>
+        `<div class="oc-day-task ${CAL_CHIP[t.status] || 'chip-blue'}">` +
+          `<span class="chip-dot oc-day-dot"></span>` +
+          `<div class="oc-day-task__info">` +
+            `<span class="oc-day-task__title">${escapeHtml(t.title)}</span>` +
+            `<span class="oc-day-task__meta">${escapeHtml(t.dept)} · ${escapeHtml(t.owner)}</span>` +
+          `</div></div>`
+      ).join('');
+    } else {
+      html += '<div class="oc-day-empty">이 날 마감되는 업무가 없습니다.</div>';
+    }
+    ocWeeksEl.innerHTML = html + '</div>';
+  }
+
+  /* ── Label ── */
+  function updateLabel() {
+    const el = document.querySelector('.oc-month-label');
+    if (!el) return;
+    if (calView === 'month') {
+      el.textContent = calDate.getFullYear() + '년 ' + (calDate.getMonth() + 1) + '월';
+    } else if (calView === 'week') {
+      const mon = getWeekMonday(calDate);
+      const sun = new Date(mon); sun.setDate(sun.getDate() + 6);
+      const m1 = mon.getMonth() + 1, d1 = mon.getDate();
+      const m2 = sun.getMonth() + 1, d2 = sun.getDate();
+      el.textContent = calDate.getFullYear() + '년 ' +
+        (m1 === m2 ? `${m1}월 ${d1}–${d2}일` : `${m1}월 ${d1}일 – ${m2}월 ${d2}일`);
+    } else {
+      el.textContent = calDate.getFullYear() + '년 ' + (calDate.getMonth() + 1) + '월 ' +
+        calDate.getDate() + '일 (' + DAY_KO[calDate.getDay()] + ')';
+    }
+  }
+
+  /* ── Render dispatcher ── */
+  function render() {
+    updateLabel();
+    if (calView === 'week')      renderCalWeek();
+    else if (calView === 'day')  renderCalDay();
+    else                         renderCalMonth();
+  }
+
+  /* ── Navigation ── */
+  document.querySelectorAll('.oc-nav-btn').forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      const dir = i === 0 ? -1 : 1;
+      if (calView === 'month') {
+        calDate = new Date(calDate.getFullYear(), calDate.getMonth() + dir, 1);
+      } else if (calView === 'week') {
+        calDate = new Date(calDate); calDate.setDate(calDate.getDate() + dir * 7);
+      } else {
+        calDate = new Date(calDate); calDate.setDate(calDate.getDate() + dir);
+      }
+      render();
+    });
+  });
+
+  /* ── View selector ── */
+  document.querySelectorAll('.oc-view-selector button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.oc-view-selector button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const txt = btn.textContent.trim().toLowerCase();
+      calView = txt === 'day' ? 'day' : txt === 'week' ? 'week' : 'month';
+      render();
+    });
+  });
+
+  render();
+}
 
 /* ---- 탭 전환 ---- */
 document.querySelectorAll(".krds-tab-area.layer").forEach(tabArea => {

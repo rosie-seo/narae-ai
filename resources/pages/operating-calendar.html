@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>업무 캘린더</title>
+    <link rel="stylesheet" href="/resources/css/custom.css">
+    <link href="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.css" type="text/css" rel="stylesheet" />
+    <script src="/resources/js/component/ui-include.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.js"></script>
+</head>
+<body>
+
+  <div class="operating-container">
+
+    <div data-include="/html/code/header.html"></div>
+
+    <div class="organization-container">
+
+      <!-- 사이드 네비게이션 -->
+      <nav class="side-nav" aria-label="업무 네비게이션">
+        <ul class="nav-tree" role="list">
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <a href="/resources/pages/operating.html" class="nav-node__row" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">업무 테이블</span>
+            </a>
+          </li>
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <a href="/resources/pages/operating-calendar.html" class="nav-node__row is-selected" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">업무 캘린더</span>
+            </a>
+          </li>
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <a href="#" class="nav-node__row" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">업무 차트</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- 메인 콘텐츠 -->
+      <main class="main">
+        <h1 class="page-title">업무 캘린더</h1>
+
+        <!-- 툴바 -->
+        <div class="oc-toolbar">
+          <div class="oc-toolbar__nav">
+            <button class="oc-nav-btn" title="이전 달">&#8249;</button>
+            <button class="oc-nav-btn" title="다음 달">&#8250;</button>
+          </div>
+          <span class="oc-month-label">1월 2026</span>
+          <div class="oc-view-selector">
+            <button>Day</button>
+            <button>Week</button>
+            <button class="active">Month</button>
+          </div>
+        </div>
+
+        <!-- 달력 그리드 -->
+        <div class="oc-grid">
+
+          <!-- 요일 헤더 -->
+          <div class="oc-day-headers">
+            <div class="oc-day-header">월</div>
+            <div class="oc-day-header">화</div>
+            <div class="oc-day-header">수</div>
+            <div class="oc-day-header">목</div>
+            <div class="oc-day-header">금</div>
+            <div class="oc-day-header weekend">토</div>
+            <div class="oc-day-header weekend">일</div>
+          </div>
+
+          <div class="oc-weeks"></div>
+        </div>
+      </main>
+
+    </div>
+  </div>
+
+<script src="/resources/js/script.js"></script>
+</body>
+</html>

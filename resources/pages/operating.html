@@ -21,13 +21,13 @@
       <nav class="side-nav" aria-label="업무 네비게이션">
         <ul class="nav-tree" role="list">
           <li class="nav-node nav-node--leaf nav-node--depth0">
-            <a href="#" class="nav-node__row is-selected" style="--depth: 0">
+            <a href="/resources/pages/operating.html" class="nav-node__row is-selected" style="--depth: 0">
               <span class="nav-node__caret"></span>
               <span class="nav-node__label">업무 테이블</span>
             </a>
           </li>
           <li class="nav-node nav-node--leaf nav-node--depth0">
-            <a href="#" class="nav-node__row" style="--depth: 0">
+            <a href="/resources/pages/operating-calendar.html" class="nav-node__row" style="--depth: 0">
               <span class="nav-node__caret"></span>
               <span class="nav-node__label">업무 캘린더</span>
             </a>
@@ -58,17 +58,24 @@
               <option value="">팀 선택</option>
             </select>
 
-            <!-- 기간 선택 (KRDS calendar) -->
+            <!-- 기간 선택 (KRDS calendar range) -->
             <div class="form-conts calendar-conts">
               <div class="calendar-input">
-                <input type="number" class="krds-input datepicker cal" placeholder="기간 선택" id="filterDate">
-                <button type="button" class="krds-btn medium icon form-btn-datepicker">
+                <ul class="input-group range set">
+                  <li>
+                    <input type="number" class="krds-input datepicker" placeholder="시작날짜" title="시작날짜 입력" id="filterDateStart">
+                  </li>
+                  <li class="mark">-</li>
+                  <li>
+                    <input type="number" class="krds-input datepicker" placeholder="종료날짜" title="종료날짜 입력" id="filterDateEnd">
+                  </li>
+                </ul>
+                <button type="button" class="krds-btn medium icon form-btn-datepicker" aria-hidden="true" tabindex="-1" style="display:none;">
                   <span class="sr-only">달력 열기</span>
-                  <i class="svg-icon ico-calendar"></i>
                 </button>
               </div>
               <div class="krds-calendar-area">
-                <div class="calendar-wrap single" aria-label="달력">
+                <div class="calendar-wrap bottom" aria-label="달력">
                   <div class="calendar-head">
                     <button type="button" class="btn-cal-move prev"><span class="sr-only">이전 달</span></button>
                     <div class="calendar-switch-wrap">
@@ -193,6 +200,7 @@
                   </div>
                   <div class="calendar-footer">
                     <div class="calendar-btn-wrap">
+                      <button type="button" class="krds-btn small text" id="calDateReset">초기화</button>
                       <button type="button" class="krds-btn small text" id="get-today">오늘</button>
                       <button type="button" class="krds-btn small tertiary">취소</button>
                       <button type="button" class="krds-btn small primary">확인</button>
