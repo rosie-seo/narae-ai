@@ -1091,7 +1091,7 @@ if (ocWeeksEl) {
         const extra = Math.max(0, ts.length - MAX);
         html += `<div class="oc-cell${other ? ' other-month' : ''}${isToday ? ' today' : ''}">` +
           `<div class="oc-date-num${isToday ? ' today-circle' : ''}">${d.getDate()}</div>` +
-          (ts.length ? `<div class="oc-events">${ts.slice(0, MAX).map(t => makeChip(t)).join('')}${extra ? `<div class="oc-more">+${extra} 더보기</div>` : ''}</div>` : '') +
+          (ts.length ? `<div class="oc-events">${ts.slice(0, MAX).map(t => makeChip(t)).join('')}${extra ? `<button class="oc-more" data-key="${key}" type="button">+${extra} 더보기</button>` : ''}</div>` : '') +
           `</div>`;
       }
       html += '</div>';
@@ -1191,6 +1191,79 @@ if (ocWeeksEl) {
   });
 
   render();
+
+  /* ── 더보기 팝업 ── */
+  const DAY_KO_POPUP = ['일', '월', '화', '수', '목', '금', '토'];
+
+  const popupOverlay = document.createElement('div');
+  popupOverlay.id = 'oc-day-popup';
+  popupOverlay.className = 'oc-popup-overlay';
+  popupOverlay.hidden = true;
+  popupOverlay.setAttribute('role', 'dialog');
+  popupOverlay.setAttribute('aria-modal', 'true');
+  popupOverlay.setAttribute('aria-labelledby', 'oc-popup-title');
+  popupOverlay.innerHTML =
+    `<div class="oc-popup">
+      <div class="oc-popup__head">
+        <h2 class="oc-popup__title" id="oc-popup-title"></h2>
+        <button class="oc-popup__close" aria-label="닫기">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <ul class="oc-popup__body" id="oc-popup-body"></ul>
+    </div>`;
+  document.body.appendChild(popupOverlay);
+
+  function openDayPopup(key) {
+    const tasks = buildTaskMap()[key] || [];
+    const [y, m, d] = key.split('-').map(Number);
+    const dayName = DAY_KO_POPUP[new Date(y, m - 1, d).getDay()];
+
+    document.getElementById('oc-popup-title').innerHTML =
+      escapeHtml(m + '월 ' + d + '일 (' + dayName + ')') +
+      `<span class="oc-popup__count">총 ${tasks.length}건</span>`;
+
+    document.getElementById('oc-popup-body').innerHTML = tasks.map(t => {
+      const chipCls = CAL_CHIP[t.status] || 'chip-blue';
+      return `<li class="oc-popup-task">
+        <span class="oc-popup-task__dot ${chipCls}"></span>
+        <div class="oc-popup-task__info">
+          <div class="oc-popup-task__head">
+            <span class="${STATUS_CLASS[t.status]}">${STATUS_LABEL[t.status]}</span>
+            <span class="oc-popup-task__title">${escapeHtml(t.title)}</span>
+          </div>
+          <div class="oc-popup-task__meta">
+            <span class="oc-popup-task__dept">${escapeHtml(t.dept)}</span>
+            <span class="oc-popup-task__sep">·</span>
+            <span class="oc-popup-task__owner">${escapeHtml(t.owner)}</span>
+            <span class="oc-popup-task__sep">·</span>
+            <span class="oc-popup-task__date">${escapeHtml(t.start)} ~ ${escapeHtml(t.end)}</span>
+          </div>
+        </div>
+      </li>`;
+    }).join('');
+
+    popupOverlay.hidden = false;
+    document.body.style.overflow = 'hidden';
+    popupOverlay.querySelector('.oc-popup__close').focus();
+  }
+
+  function closeDayPopup() {
+    popupOverlay.hidden = true;
+    document.body.style.overflow = '';
+  }
+
+  popupOverlay.querySelector('.oc-popup__close').addEventListener('click', closeDayPopup);
+  popupOverlay.addEventListener('click', e => { if (e.target === popupOverlay) closeDayPopup(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !popupOverlay.hidden) closeDayPopup(); });
+
+  ocWeeksEl.addEventListener('click', e => {
+    const btn = e.target.closest('.oc-more');
+    if (!btn || !btn.dataset.key) return;
+    openDayPopup(btn.dataset.key);
+  });
 }
 
 /* ---- 탭 전환 ---- */
