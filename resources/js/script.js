@@ -356,23 +356,18 @@ function memberCardHTML(m) {
   </li>`;
 }
 
-const STATUS_LABEL = { wait:"계획서 업로드 대기", progress:"진행중", done:"종결" };
-const STATUS_CLASS = { wait:"krds-badge bg-gray", progress:"krds-badge bg-primary", done:"krds-badge bg-success" };
+const STATUS_LABEL = { wait:"대기", progress:"진행중", done:"종결" };
+const STATUS_CLASS = { wait:"krds-badge bg-light-gray", progress:"krds-badge bg-light-secondary", done:"krds-badge bg-light-success" };
 
 function taskCardHTML(t) {
   return `<li class="task-card">
-    <div class="task-card__body">
-      <div class="task-card__head">
-        <span class="${STATUS_CLASS[t.status]}">${STATUS_LABEL[t.status]}</span>
-        <span class="task-card__title">${escapeHtml(t.title)}</span>
-      </div>
-      <div class="task-card__meta">
-        <span class="task-card__avatar"></span>
-        <span class="task-card__owner">${escapeHtml(t.owner)}</span>
-        <span class="task-card__sep">|</span>
-        <span class="task-card__date">${escapeHtml(t.start)} ~ ${escapeHtml(t.end)}</span>
-      </div>
-    </div>
+    <span class="${STATUS_CLASS[t.status]}">${STATUS_LABEL[t.status]}</span>
+    <span class="task-card__title">${escapeHtml(t.title)}</span>
+    <span class="task-card__meta">
+      <span class="task-card__owner">${escapeHtml(t.owner)}</span>
+      <span class="task-card__sep">·</span>
+      <span class="task-card__date">${escapeHtml(t.start)} ~ ${escapeHtml(t.end)}</span>
+    </span>
     <span class="task-card__arrow">${arrowSVG}</span>
   </li>`;
 }
@@ -682,13 +677,21 @@ if (operatingTaskList) {
   }
 
   /* ---- 팀 선택 ---- */
-  const teamSelect = document.getElementById('filterTeam');
+  const teamSelect   = document.getElementById('filterTeam');
+  const teamDropdown = document.getElementById('filterTeamDd');
   if (teamSelect) {
     allLeaves.forEach(leaf => {
       const opt = document.createElement('option');
       opt.value = leaf.name;
       opt.textContent = leaf.name;
       teamSelect.appendChild(opt);
+      if (teamDropdown) {
+        const div = document.createElement('div');
+        div.className = 'dropdown-item';
+        div.textContent = leaf.name;
+        div.onclick = () => selectFilterTeam(div, leaf.name);
+        teamDropdown.appendChild(div);
+      }
     });
     teamSelect.addEventListener('change', applyFilters);
   }

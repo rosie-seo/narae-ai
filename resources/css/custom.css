@@ -426,62 +426,58 @@ mark.nav-mark{
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--krds-gap-4);
+  gap: var(--krds-gap-2);
 }
 
-/* ----- 과제 카드 ----- */
+/* ----- 과제 카드 (단일 행, 슬림) ----- */
 .task-card{
   display: flex;
   align-items: center;
-  gap: var(--krds-gap-6);
-  padding: var(--krds-padding-6) var(--krds-padding-7);
+  gap: var(--krds-gap-4);
+  padding: var(--krds-padding-4) var(--krds-padding-6);
   border: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-gray-light);
-  border-radius: var(--krds-radius-medium3);
+  border-radius: var(--krds-radius-medium2);
   background: var(--krds-light-color-surface-white);
   cursor: pointer;
-  transition: border-color var(--krds-transition-base), box-shadow var(--krds-transition-base);
+  transition: border-color var(--krds-transition-base), box-shadow var(--krds-transition-base), background var(--krds-transition-base);
 }
 .task-card:hover{
-  border-color: var(--krds-light-color-border-gray);
+  border-color: var(--krds-light-color-border-secondary-light);
+  background: var(--krds-light-color-action-secondary-hover);
   box-shadow: var(--krds-box-shadow-normal, 0 0.1rem 0.4rem rgba(20, 30, 50, .05));
 }
 
-.task-card__body{ flex: 1 1 auto; min-width: 0; }
-
-/* 상단: 뱃지 + 제목 */
-.task-card__head{
-  display: flex;
-  align-items: center;
-  gap: var(--krds-gap-3);
-}
 .task-card__title{
+  flex: 1 1 auto;
+  min-width: 0;
   font-size: var(--krds-pc-font-size-label-small);
-  font-weight: var(--krds-font-weight-bold);
-  color: var(--krds-light-color-text-basic);
+  font-weight: 500;
+  color: var(--krds-light-color-text-subtle);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* 하단: 담당자 + 기간 */
 .task-card__meta{
   display: flex;
   align-items: center;
-  gap: var(--krds-gap-3);
-  margin-top: var(--krds-gap-3);
+  gap: var(--krds-gap-2);
+  flex-shrink: 0;
   font-size: var(--krds-pc-font-size-label-xsmall);
   color: var(--krds-light-color-text-subtle);
-}
-.task-card__avatar{
-  flex: 0 0 auto;
-  width: var(--krds-size-height-5);
-  height: var(--krds-size-height-5);
-  border-radius: 50%;
-  background: var(--krds-light-color-surface-gray-subtle);
+  white-space: nowrap;
 }
 .task-card__owner{ color: var(--krds-light-color-text-basic); }
-.task-card__sep{ color: var(--krds-light-color-divider-gray-light); margin: 0 var(--krds-gap-2); }
-.task-card__date{ color: var(--krds-light-color-text-subtle); font-variant-numeric: tabular-nums; }
+.task-card__sep{ color: var(--krds-light-color-divider-gray-light); }
+.task-card__date{ font-variant-numeric: tabular-nums; }
+
+/* 과제 카드 내 뱃지 소형화 */
+.task-card .krds-badge {
+  font-size: var(--krds-pc-font-size-label-xsmall);
+  height: var(--krds-size-height-4);
+  padding: 0 var(--krds-padding-3);
+  flex-shrink: 0;
+}
 
 /* 우측 화살표 */
 .task-card__arrow{
@@ -489,6 +485,7 @@ mark.nav-mark{
   display: flex;
   align-items: center;
   color: var(--krds-light-color-text-disabled);
+  transition: color var(--krds-transition-base);
 }
 .task-card:hover .task-card__arrow{ color: var(--krds-light-color-action-secondary-active); }
 
@@ -921,14 +918,17 @@ mark.nav-mark{
 }
 
 .tab-bar .tab {
-  padding: var(--krds-padding-3) var(--krds-padding-5);
-  border: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-gray-light);
-  border-radius: var(--krds-radius-medium1);
-  background: var(--krds-light-color-surface-white);
-  color: var(--krds-light-color-text-subtle);
-  font-size: var(--krds-pc-font-size-label-xsmall);
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-family: inherit;
   cursor: pointer;
   transition: all var(--krds-transition-base);
+  white-space: nowrap;
 }
 
 .tab-bar .tab:hover {
@@ -938,9 +938,9 @@ mark.nav-mark{
 
 .tab-bar .tab.active {
   background: var(--krds-light-color-action-secondary-active);
-  color: var(--krds-light-color-text-basic-inverse);
+  color: #fff;
   border-color: var(--krds-light-color-action-secondary-active);
-  font-weight: var(--krds-font-weight-bold);
+  font-weight: 600;
 }
 
 /* ===== Filter Group ===== */
@@ -1065,20 +1065,29 @@ mark.nav-mark{
 /* ===== Filter 내 KRDS 달력 레이아웃 및 색상 조화 ===== */
 .filter-group .form-conts.calendar-conts {
   width: auto;
+  height: 30px;
   flex-shrink: 0;
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .filter-group .calendar-input {
   width: auto;
+  display: flex;
+  align-items: center;
 }
 
 .filter-group .calendar-input .krds-input {
-  width: 100px;
-  height: var(--krds-size-height-6);
-  font-size: var(--krds-pc-font-size-label-xsmall);
+  width: 90px;
+  height: 30px;
+  font-size: 12px;
+  color: var(--text-primary);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 5px;
   box-sizing: border-box;
-  padding-right: var(--krds-padding-5);
+  padding: 0 8px;
   cursor: pointer;
 }
 
@@ -2288,7 +2297,7 @@ body {
   display: flex;
   gap: 8px;
   width: 100%;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-muted);
   font-weight: 500;
 }
@@ -2324,7 +2333,7 @@ body {
 .tl-row.group {
   background: #f8fafc;
   font-weight: 600;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-primary);
 }
 
@@ -2336,7 +2345,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 9px;
+  font-size: 11px;
   color: var(--text-muted);
   flex-shrink: 0;
   margin-right: 4px;
@@ -2359,7 +2368,7 @@ body {
 
 .tl-name {
   flex: 1;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
@@ -2367,14 +2376,14 @@ body {
 }
 
 .tl-row.group .tl-name {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
 }
 
 .tl-count {
   width: 28px;
   text-align: center;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-muted);
   flex-shrink: 0;
 }
@@ -2383,7 +2392,7 @@ body {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -2419,7 +2428,7 @@ body {
 }
 
 .gantt-week-label {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-secondary);
   padding: 0 8px;
@@ -2438,7 +2447,7 @@ body {
 }
 
 .gantt-day-cell {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text-muted);
   border-right: 1px solid var(--border);
   height: 100%;
@@ -2526,7 +2535,7 @@ body {
   display: flex;
   align-items: center;
   padding: 0 7px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 500;
   color: #fff;
   white-space: nowrap;
@@ -2551,7 +2560,7 @@ body {
   height: 14px;
   border-radius: 50%;
   background: rgba(255,255,255,0.3);
-  font-size: 7px;
+  font-size: 9px;
   font-weight: 700;
   display: inline-flex;
   align-items: center;
@@ -2566,7 +2575,7 @@ body {
   right: 6px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 9px;
+  font-size: 11px;
   color: rgba(255,255,255,0.85);
   font-weight: 600;
 }
@@ -2764,12 +2773,9 @@ body {
    간트 차트 - KRDS 컴포넌트 적용
    =========================== */
 
-/* 툴바 KRDS 셀렉트 크기 */
-.gantt-topbar .krds-form-select {
+/* 단위 전환 버튼 (일/주/월) 높이 */
+.gantt-topbar .krds-btn {
   height: 30px !important;
-  width: auto !important;
-  min-width: 0 !important;
-  max-width: 120px !important;
   font-size: 12px !important;
   padding-top: 0 !important;
   padding-bottom: 0 !important;

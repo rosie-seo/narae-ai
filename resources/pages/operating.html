@@ -53,8 +53,15 @@
           <button class="tab" data-filter="wait">대기 중 업무</button>
 
           <div class="filter-group">
-            <!-- 팀 선택 -->
-            <select id="filterTeam" class="krds-form-select" title="팀 선택">
+            <!-- 팀 선택 (커스텀 드롭다운) -->
+            <div style="position:relative">
+              <button class="tn-select" id="filterTeamBtn" style="cursor:pointer;text-align:left;min-width:160px" onclick="toggleTeamDropdown(this)">팀 선택</button>
+              <div class="gantt-dropdown" id="filterTeamDd">
+                <div class="dropdown-item selected" onclick="selectFilterTeam(this, '')">전체</div>
+              </div>
+            </div>
+            <!-- script.js 호환용 숨김 select -->
+            <select id="filterTeam" title="팀 선택" style="display:none">
               <option value="">팀 선택</option>
             </select>
 
@@ -229,6 +236,30 @@
   </div>
 
 <script src="/resources/js/script.js"></script>
+<script>
+function toggleTeamDropdown(btn) {
+  const dd = document.getElementById('filterTeamDd');
+  dd.classList.toggle('visible');
+  if (dd.classList.contains('visible')) {
+    const r = btn.getBoundingClientRect();
+    dd.style.left = r.left + 'px';
+    dd.style.top  = (r.bottom + 4) + 'px';
+  }
+}
+function selectFilterTeam(el, value) {
+  document.querySelectorAll('#filterTeamDd .dropdown-item').forEach(i => i.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('filterTeamBtn').textContent = value || '팀 선택';
+  document.getElementById('filterTeamDd').classList.remove('visible');
+  const sel = document.getElementById('filterTeam');
+  sel.value = value;
+  sel.dispatchEvent(new Event('change'));
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('#filterTeamDd') && e.target.id !== 'filterTeamBtn')
+    document.getElementById('filterTeamDd')?.classList.remove('visible');
+});
+</script>
 
 </body>
 </html>

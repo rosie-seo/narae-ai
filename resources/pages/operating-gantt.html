@@ -46,14 +46,20 @@
 
         <!-- 간트 툴바 -->
         <div class="gantt-topbar">
-          <!-- 팀 선택 -->
-          <select class="krds-form-select gantt-select" id="team-select" title="팀 선택">
-            <option value="">전체 팀</option>
-          </select>
-          <!-- 팀원 선택 -->
-          <select class="krds-form-select gantt-select" id="member-select" title="팀원 선택">
-            <option value="">전체 팀원</option>
-          </select>
+          <div style="position:relative">
+            <button class="tn-select" id="team-btn" style="cursor:pointer;text-align:left;min-width:160px" onclick="toggleDropdown('team-dd', this)">팀을 선택해주세요.</button>
+            <div class="gantt-dropdown" id="team-dd">
+              <div class="dropdown-item selected" onclick="selectTeam(this, null)">전체 팀</div>
+              <!-- populated by JS -->
+            </div>
+          </div>
+          <div style="position:relative">
+            <button class="tn-select" id="member-btn" style="cursor:pointer;text-align:left;min-width:160px" onclick="toggleDropdown('member-dd', this)">팀원을 선택해주세요.</button>
+            <div class="gantt-dropdown" id="member-dd">
+              <div class="dropdown-item selected" onclick="selectMember(this, null)">전체 팀원</div>
+              <!-- populated by JS -->
+            </div>
+          </div>
           <!-- Legend -->
           <div class="legend">
             <span class="legend-item"><span class="legend-dot legend-dot--progress"></span> 진행중</span>
@@ -291,17 +297,18 @@ const TASKS = buildAllTasks();
 let currentTeam   = null;
 let currentMember = null;
 
-/* ── 드롭다운 초기화 (KRDS form-select) ── */
+/* ── 드롭다운 초기화 ── */
 (function initDropdowns() {
-  const teamSel   = document.getElementById('team-select');
-  const memberSel = document.getElementById('member-select');
+  const teamDd   = document.getElementById('team-dd');
+  const memberDd = document.getElementById('member-dd');
 
   ORG.forEach(sil => {
     if (!getAllLeaves(sil).some(l => (l.tasks || []).some(t => dateToOffset(t.end) >= 0))) return;
-    const opt = document.createElement('option');
-    opt.value       = sil.name;
-    opt.textContent = sil.name;
-    teamSel.appendChild(opt);
+    const div = document.createElement('div');
+    div.className = 'dropdown-item';
+    div.textContent = sil.name;
+    div.onclick = () => selectTeam(div, sil.name);
+    teamDd.appendChild(div);
   });
 
   const ownersMap = ORG.flatMap(sil => getAllLeaves(sil).flatMap(leaf =>
@@ -312,16 +319,15 @@ let currentMember = null;
     if (!map.has(name)) map.set(name, sil);
     return map;
   }, new Map());
+  const owners = [...ownersMap.entries()].sort((a, b) => a[0].localeCompare(b[0], 'ko'));
 
-  [...ownersMap.entries()].sort((a, b) => a[0].localeCompare(b[0], 'ko')).forEach(([name, silName]) => {
-    const opt = document.createElement('option');
-    opt.value       = name;
-    opt.textContent = name + ' (' + silName + ')';
-    memberSel.appendChild(opt);
+  owners.forEach(([name, silName]) => {
+    const div = document.createElement('div');
+    div.className = 'dropdown-item';
+    div.innerHTML = `<span class="avatar-sm" style="background:${AVATARS[name]?.color || '#94a3b8'}">${AVATARS[name]?.abbr || name.slice(0,1)}</span>${name} <small style="color:#9ca3af;font-size:10px">${silName}</small>`;
+    div.onclick = () => selectMember(div, name);
+    memberDd.appendChild(div);
   });
-
-  teamSel.addEventListener('change',   () => { currentTeam   = teamSel.value   || null; renderAll(); });
-  memberSel.addEventListener('change', () => { currentMember = memberSel.value || null; renderAll(); });
 })();
 
 /* ── 과부하 계산 ── */
@@ -639,6 +645,40 @@ function movePopup(e) {
   popup.style.top  = (e.clientY - 20) + 'px';
 }
 
+/* ── 드롭다운 토글 ── */
+function toggleDropdown(id, btn) {
+  const dd = document.getElementById(id);
+  document.querySelectorAll('.gantt-dropdown').forEach(d => { if (d.id !== id) d.classList.remove('visible'); });
+  dd.classList.toggle('visible');
+  if (dd.classList.contains('visible')) {
+    const r = btn.getBoundingClientRect();
+    dd.style.left = r.left + 'px';
+    dd.style.top  = (r.bottom + 4) + 'px';
+  }
+}
+
+function selectTeam(el, name) {
+  document.querySelectorAll('#team-dd .dropdown-item').forEach(i => i.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('team-btn').textContent = name || '전체 팀';
+  document.getElementById('team-dd').classList.remove('visible');
+  currentTeam = name;
+  renderAll();
+}
+
+function selectMember(el, name) {
+  document.querySelectorAll('#member-dd .dropdown-item').forEach(i => i.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('member-btn').textContent = name || '전체 팀원';
+  document.getElementById('member-dd').classList.remove('visible');
+  currentMember = name;
+  renderAll();
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.gantt-dropdown') && !e.target.closest('[onclick*="toggleDropdown"]'))
+    document.querySelectorAll('.gantt-dropdown').forEach(d => d.classList.remove('visible'));
+});
 
 /* ── 전체 렌더 ── */
 function renderAll() {
