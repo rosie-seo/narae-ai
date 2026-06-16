@@ -359,6 +359,63 @@ function memberCardHTML(m) {
 const STATUS_LABEL = { wait:"대기", progress:"진행중", done:"종결" };
 const STATUS_CLASS = { wait:"krds-badge bg-light-gray", progress:"krds-badge bg-light-secondary", done:"krds-badge bg-light-success" };
 
+/* ── 세부 과업 생성 (결정론적 의사난수) ─────────────────────────── */
+function getSubtasks(task) {
+  // 타이틀 기반 시드 – 같은 업무는 항상 같은 세부과업
+  let h = 0;
+  for (let i = 0; i < task.title.length; i++)
+    h = (Math.imul(31, h) + task.title.charCodeAt(i)) | 0;
+  const r = () => {
+    h = (Math.imul(h ^ (h >>> 16), 0x45d9f3b)) | 0;
+    return (h >>> 0) / 0x100000000;
+  };
+
+  const TYPES = ['내부 업무', '외부 업무', '협업 업무', '지원 업무'];
+  const RISKS = ['선행업무 미완료', '일정지연', '병목', '리소스 부족', '검토 지연'];
+  const PRIOS = ['high', 'mid', 'low'];
+
+  // 업무 진행 단계 세트 – 5종 중 시드로 선택
+  const PHASE_SETS = [
+    ['현황 조사 및 기초분석', '추진 계획 수립', '관련 부서 협의', '초안 작성 및 검토', '최종 보고 및 결재'],
+    ['수요 조사', '예산 검토', '추진 일정 확정', '실행 및 모니터링', '성과 분석 및 보고'],
+    ['법령·규정 검토', '기획안 작성', '내부 검토', '의견 수렴 및 수정', '완료 보고'],
+    ['사전 준비 및 자료수집', '방안 도출', '부서 간 조율', '실행 계획 확정', '결과 보고'],
+    ['목표 설정', '세부 추진과제 도출', '담당자 배정', '진행상황 점검', '완료 및 평가'],
+  ];
+
+  const phaseSet = PHASE_SETS[Math.floor(r() * PHASE_SETS.length)];
+  const count    = 3 + Math.floor(r() * 2);  // 3~4개
+  const phases   = phaseSet.slice(0, count);
+
+  const startMs   = new Date(task.start).getTime();
+  const endMs     = new Date(task.end).getTime();
+  const span      = (endMs - startMs) / count;
+  const doneFrac  = task.status === 'done' ? 1 : task.status === 'progress' ? 0.25 + r() * 0.4 : 0;
+  const doneCount = Math.round(count * doneFrac);
+
+  return phases.map((phase, i) => {
+    const subEnd = new Date(startMs + span * (i + 1)).toISOString().slice(0, 10);
+    const isDone = i < doneCount;
+    const isCurr = !isDone && i === doneCount;
+
+    let stage, approval;
+    if (isDone)      { stage = '완료'; approval = '결재완료'; }
+    else if (isCurr) { stage = '검토'; approval = '상신완료'; }
+    else             { stage = '접수';  approval = '미상신'; }
+
+    return {
+      name:     phase,
+      type:     TYPES[Math.floor(r() * TYPES.length)],
+      assignee: task.owner,
+      deadline: subEnd,
+      stage,
+      approval,
+      priority: PRIOS[Math.floor(r() * PRIOS.length)],
+      risks:    isDone ? [] : [RISKS[Math.floor(r() * RISKS.length)]],
+    };
+  });
+}
+
 function taskCardHTML(t) {
   return `<li class="task-card">
     <span class="${STATUS_CLASS[t.status]}">${STATUS_LABEL[t.status]}</span>
@@ -427,12 +484,24 @@ function renderLeafMembers(node) {
 }
 
 /* 과 단위 연계과제 */
+function attachTaskNav(containerEl, flatTasks) {
+  containerEl.querySelectorAll('.task-card').forEach((card, i) => {
+    const t = flatTasks[i];
+    if (!t) return;
+    card.addEventListener('click', () => {
+      sessionStorage.setItem('krds_selected_task', JSON.stringify(t));
+      window.location.href = '/resources/pages/operating-detail.html';
+    });
+  });
+}
+
 function renderLeafTasks(node) {
   const taskList = document.getElementById("taskList");
   if (!taskList) return;
   taskList.classList.remove("task-list--grouped");
   if (node.tasks && node.tasks.length) {
     taskList.innerHTML = node.tasks.map(taskCardHTML).join("");
+    attachTaskNav(taskList, node.tasks);
   } else {
     taskList.innerHTML = `<li class="task-empty">등록된 연계과제가 없습니다.</li>`;
   }
@@ -524,6 +593,9 @@ function renderParentTasks(node) {
       </ul>
     </li>
   `).join('');
+
+  const flatTasks = grouped.flatMap(leaf => leaf.tasks);
+  attachTaskNav(taskList, flatTasks);
 }
 
 /* ---- 검색 ---- */
@@ -629,6 +701,15 @@ if (operatingTaskList) {
     operatingTaskList.innerHTML = slice.length
       ? slice.map(taskCardHTML).join('')
       : '<li class="task-empty">해당하는 업무가 없습니다.</li>';
+
+    if (slice.length) {
+      operatingTaskList.querySelectorAll('.task-card').forEach((card, i) => {
+        card.addEventListener('click', () => {
+          sessionStorage.setItem('krds_selected_task', JSON.stringify(slice[i]));
+          window.location.href = '/resources/pages/operating-detail.html';
+        });
+      });
+    }
 
     if (prevNav) prevNav.classList.toggle('disabled', currentPage === 1);
     if (nextNav) nextNav.classList.toggle('disabled', currentPage >= totalPages);

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>업무 상세 · 프로세싱 뷰</title>
+    <link rel="stylesheet" href="/resources/css/custom.css">
+    <link href="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.css" type="text/css" rel="stylesheet" />
+    <script src="/resources/js/component/ui-include.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.js"></script>
+</head>
+<body>
+
+  <div class="operating-container">
+
+    <div data-include="/html/code/header.html"></div>
+
+    <div class="organization-container">
+
+      <!-- 사이드 네비게이션 -->
+      <nav class="side-nav" aria-label="업무 상세 네비게이션">
+        <ul class="nav-tree" role="list">
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <a href="/resources/pages/operating-detail.html" class="nav-node__row" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">과업 리스트 뷰</span>
+            </a>
+          </li>
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <span class="nav-node__row is-selected" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">프로세싱 뷰</span>
+            </span>
+          </li>
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <span class="nav-node__row" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">규정</span>
+            </span>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- 메인 콘텐츠 -->
+      <main class="main" style="padding:0; overflow:auto;">
+
+        <!-- 과제 정보 헤더 -->
+        <header class="gnb-sub">
+          <div class="task-id">
+            <span class="badge-status" id="detail-badge">종결</span>
+            <div class="task-titles">
+              <strong class="task-name" id="detail-task-name">과제 이름 들어가는 곳</strong>
+              <span class="task-meta" id="detail-task-meta">담당자명 / 담당 부서 / 참여 인원 7명</span>
+            </div>
+            <span class="chevron" aria-hidden="true">&rsaquo;</span>
+          </div>
+          <button type="button" class="btn-log" onclick="history.back()">
+            <span class="ico" aria-hidden="true">&#8592;</span> 목록으로
+          </button>
+        </header>
+
+        <!-- 흐름도 (JS가 동적 렌더링) -->
+        <div class="flow-wrap">
+          <div id="flow-canvas" class="flow-canvas"></div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="/resources/js/script.js"></script>
+  <script>
+  (function () {
+    const raw = sessionStorage.getItem('krds_selected_task');
+    const canvas = document.getElementById('flow-canvas');
+
+    if (!raw) {
+      canvas.innerHTML = '<p style="padding:40px;color:#94a3b8">업무 정보가 없습니다.</p>';
+      return;
+    }
+
+    const task = JSON.parse(raw);
+    const STATUS_LABEL = { wait: '대기', progress: '진행중', done: '종결' };
+
+    /* ── 헤더 채우기 ── */
+    const badge = document.getElementById('detail-badge');
+    badge.textContent = STATUS_LABEL[task.status] || task.status;
+    badge.className   = 'badge-status badge-status--' + (task.status || 'wait');
+    document.getElementById('detail-task-name').textContent = task.title;
+    document.title = task.title + ' · 프로세싱 뷰';
+
+    let teamName = '';
+    for (const sil of ORG) {
+      for (const leaf of getAllLeaves(sil)) {
+        if ((leaf.tasks || []).some(t => t.title === task.title && t.owner === task.owner)) {
+          teamName = leaf.name; break;
+        }
+      }
+      if (teamName) break;
+    }
+    document.getElementById('detail-task-meta').textContent =
+      task.owner + (teamName ? ' / ' + teamName : '') + ' / ' + task.start + ' ~ ' + task.end;
+
+    /* ── 세부과업 → 노드 렌더링 ── */
+    const subtasks = getSubtasks(task);
+
+    // 노드 크기 / 간격
+    const NODE_W = 168, NODE_H = 138, GAP_X = 56, PAD = 24;
+    const totalW  = subtasks.length * (NODE_W + GAP_X) + PAD * 2;
+    const centerY = 80;
+
+    // 스테이지별 CSS 클래스
+    const STAGE_CLS = { '완료': 'node--green', '검토': 'node--amber', '접수': '', '추천': 'node--select' };
+    // 스테이지별 아이콘 SVG
+    const STAGE_ICON = {
+      '완료': `<svg viewBox="0 0 18 18"><circle cx="9" cy="9" r="9" fill="#1f9d57"/><path d="M5 9.2l2.6 2.6L13 6.4" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+      '검토': `<svg viewBox="0 0 18 18"><path d="M9 1.6l7.8 14.2H1.2z" fill="#e0a400"/><rect x="8.2" y="6.6" width="1.6" height="5" rx="0.8" fill="#fff"/><circle cx="9" cy="13.4" r="1" fill="#fff"/></svg>`,
+      '접수': ``,
+      '추천': ``,
+    };
+
+    // 노드 HTML 생성
+    const nodeItems = subtasks.map((st, i) => {
+      const left = PAD + i * (NODE_W + GAP_X);
+      const cls  = STAGE_CLS[st.stage] || '';
+      const icon = STAGE_ICON[st.stage] || '';
+      return `<article class="node ${cls}" style="left:${left}px; top:${centerY}px; width:${NODE_W}px;">
+        <div class="node-head">
+          <h3 class="node-title" style="font-size:12px;line-height:1.3">${escapeHtml(st.name)}</h3>
+          <span class="node-status">${icon}</span>
+        </div>
+        <dl class="node-body">
+          <div class="row"><dt>담당자</dt><dd>${escapeHtml(st.assignee)}</dd></div>
+          <div class="row"><dt>단계</dt><dd>${escapeHtml(st.stage)}</dd></div>
+          <div class="row"><dt>결재</dt><dd>${escapeHtml(st.approval)}</dd></div>
+          <div class="row"><dt>기한</dt><dd>${escapeHtml(st.deadline)}</dd></div>
+        </dl>
+      </article>`;
+    });
+
+    // SVG 연결선 생성 (노드 중앙 → 다음 노드 중앙, 수평)
+    const PORT = 3;
+    const lineY = centerY + NODE_H / 2;
+    let svgPaths = '';
+    let svgPorts = '';
+    for (let i = 0; i < subtasks.length - 1; i++) {
+      const x1 = PAD + i * (NODE_W + GAP_X) + NODE_W;
+      const x2 = PAD + (i + 1) * (NODE_W + GAP_X);
+      svgPaths += `<path class="line" d="M${x1},${lineY} H${x2}" />`;
+      svgPorts += `<rect class="port" x="${x1 - PORT}" y="${lineY - PORT}" width="${PORT*2}" height="${PORT*2}" rx="1" />`;
+      svgPorts += `<rect class="port" x="${x2 - PORT}" y="${lineY - PORT}" width="${PORT*2}" height="${PORT*2}" rx="1" />`;
+    }
+
+    const svgH = centerY + NODE_H + PAD;
+    const svg  = `<svg class="flow-lines" viewBox="0 0 ${totalW} ${svgH}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="width:${totalW}px;height:${svgH}px">${svgPaths}${svgPorts}</svg>`;
+
+    canvas.style.width  = totalW + 'px';
+    canvas.style.height = (centerY + NODE_H + PAD) + 'px';
+    canvas.innerHTML    = svg + nodeItems.join('');
+  })();
+  </script>
+
+</body>
+</html>

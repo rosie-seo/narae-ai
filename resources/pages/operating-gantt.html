@@ -67,6 +67,7 @@
             <span class="legend-item"><span class="legend-dot legend-dot--wait"></span> 대기</span>
             <span class="legend-item"><span class="legend-dot overload"></span> 과부하 (3건+)</span>
             <span class="legend-item"><span class="legend-dot warning"></span> 주의 (2건)</span>
+            <span class="legend-item"><span class="legend-link-line"></span> 연계관계</span>
           </div>
           <div class="tn-right">
             <button type="button" class="krds-btn small secondary" id="btn-day"   onclick="setViewUnit('day')">일</button>
@@ -292,6 +293,17 @@ function buildAllTasks() {
 }
 
 const TASKS = buildAllTasks();
+
+/* ── 협업/연계 관계 링크 정의 ── */
+const COLLAB_LINKS = [
+  { from: "디지털 예산관리 시스템 구축 기본계획",    to: "AI 기반 민원처리 시스템 구축 계획",       color: '#6366f1', label: '디지털 협업' },
+  { from: "클라우드 전환 기본계획 수립",              to: "망분리 고도화 사업 추진",                 color: '#6366f1', label: '인프라 연계' },
+  { from: "행정정보시스템 고도화 사업",               to: "정보시스템 통합 보안점검",                color: '#f97316', label: '시스템→보안' },
+  { from: "국제기구 연계 협력과제 발굴",              to: "2026년 통상환경 분석 보고서 작성",        color: '#f97316', label: '국제→통상' },
+  { from: "2026년도 예산안 사전 기획 및 지침 수립",  to: "2025 회계연도 결산 최종 보고",           color: '#14b8a6', label: '예산→결산' },
+  { from: "스마트 행정 혁신방안 수립",                to: "디지털 예산관리 시스템 구축 기본계획",    color: '#14b8a6', label: '혁신→디지털' },
+  { from: "하반기 공개채용 계획 수립",                to: "직급별 역량교육 체계 개편",               color: '#8b5cf6', label: '채용→교육' },
+];
 
 /* ── 필터 상태 ── */
 let currentTeam   = null;
@@ -680,10 +692,112 @@ document.addEventListener('click', e => {
     document.querySelectorAll('.gantt-dropdown').forEach(d => d.classList.remove('visible'));
 });
 
+/* ── 협업 연계 곡선 (SVG) ── */
+function renderLinks() {
+  const svg = document.getElementById('dep-svg');
+  svg.innerHTML = '';
+
+  const visible = getVisibleTasks();
+  const vc = getViewConfig();
+  const totalW = vc.cols * vc.colW;
+  const totalH = visible.length * ROW_H;
+  svg.style.width  = totalW + 'px';
+  svg.style.height = totalH + 'px';
+
+  // task id → row index (task rows only)
+  const rowIdx = new Map();
+  visible.forEach((t, i) => { if (t.type === 'task') rowIdx.set(t.id, i); });
+
+  // task name → task object
+  const byName = new Map();
+  TASKS.forEach(t => { if (t.type === 'task') byName.set(t.name, t); });
+
+  const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+
+  COLLAB_LINKS.forEach(({ from, to, color, label }, li) => {
+    const ft = byName.get(from);
+    const tt = byName.get(to);
+    if (!ft || !tt) return;
+
+    const fi = rowIdx.get(ft.id);
+    const ti = rowIdx.get(tt.id);
+    if (fi === undefined || ti === undefined) return;
+
+    // 뷰 범위 체크 – 둘 다 보여야 선을 그림
+    const fRawS = vc.unitOf(ft.start);
+    const fRawE = vc.unitOf(ft.end);
+    const tRawS = vc.unitOf(tt.start);
+    const tRawE = vc.unitOf(tt.end);
+    if (fRawE < 0 || fRawS >= vc.cols) return;
+    if (tRawE < 0 || tRawS >= vc.cols) return;
+
+    const fEc = Math.min(vc.cols - 1, fRawE);
+    const tSc = Math.max(0, tRawS);
+
+    const x1 = (fEc + 1) * vc.colW - 3;
+    const x2 = tSc * vc.colW + 3;
+    const y1 = fi * ROW_H + ROW_H / 2;
+    const y2 = ti * ROW_H + ROW_H / 2;
+
+    // 큐빅 베지어 제어점
+    const dx = x2 - x1;
+    const cp = Math.max(50, Math.abs(dx) * 0.45);
+    const cx1 = x1 + cp;
+    const cx2 = x2 - cp;
+
+    // 화살표 마커
+    const mid = 'mk' + li;
+    const mkr = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+    mkr.setAttribute('id', mid);
+    mkr.setAttribute('markerWidth', '8');
+    mkr.setAttribute('markerHeight', '8');
+    mkr.setAttribute('refX', '7');
+    mkr.setAttribute('refY', '4');
+    mkr.setAttribute('orient', 'auto');
+    const tri = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    tri.setAttribute('points', '0 0, 7 4, 0 8');
+    tri.setAttribute('fill', color);
+    tri.setAttribute('opacity', '0.75');
+    mkr.appendChild(tri);
+    defs.appendChild(mkr);
+
+    // 곡선 경로
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', `M ${x1},${y1} C ${cx1},${y1} ${cx2},${y2} ${x2},${y2}`);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', color);
+    path.setAttribute('stroke-width', '1.5');
+    path.setAttribute('stroke-dasharray', '5 3');
+    path.setAttribute('opacity', '0.65');
+    path.setAttribute('marker-end', `url(#${mid})`);
+
+    // 라벨 (중간 지점)
+    if (label) {
+      const mx = (x1 + x2) / 2;
+      const my = (y1 + y2) / 2 - 6;
+      const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      txt.setAttribute('x', mx);
+      txt.setAttribute('y', my);
+      txt.setAttribute('text-anchor', 'middle');
+      txt.setAttribute('font-size', '9');
+      txt.setAttribute('fill', color);
+      txt.setAttribute('opacity', '0.75');
+      txt.setAttribute('font-family', 'inherit');
+      txt.textContent = label;
+      svg.appendChild(txt);
+    }
+
+    svg.appendChild(path);
+  });
+
+  svg.insertBefore(defs, svg.firstChild);
+}
+
 /* ── 전체 렌더 ── */
 function renderAll() {
   renderTaskList();
   renderGanttRows();
+  renderLinks();
 }
 
 /* ── 스크롤 동기화 (최초 1회) ── */
