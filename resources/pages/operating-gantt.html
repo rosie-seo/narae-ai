@@ -273,6 +273,7 @@ function buildAllTasks() {
           color:    STATUS_BAR[t.status] || 'bar-blue',
           progress: STATUS_PCT[t.status] || 0,
           _silName: sil.name,
+          _orgTask: t,
         };
       });
 
@@ -619,6 +620,13 @@ function renderGanttRows() {
         bar.addEventListener('mouseenter', e => showPopup(e, task, maxLoad));
         bar.addEventListener('mouseleave', hidePopup);
         bar.addEventListener('mousemove',  movePopup);
+        if (task._orgTask) {
+          bar.style.cursor = 'pointer';
+          bar.addEventListener('click', () => {
+            sessionStorage.setItem('krds_selected_task', JSON.stringify(task._orgTask));
+            window.location.href = '/resources/pages/operating-detail.html';
+          });
+        }
 
         bw.appendChild(bar);
         row.appendChild(bw);

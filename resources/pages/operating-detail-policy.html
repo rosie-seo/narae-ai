@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>관련 규정 — Narae AI</title>
+  <link rel="stylesheet" href="/resources/css/custom.css"/>
+  <link href="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.css" type="text/css" rel="stylesheet"/>
+  <script src="/resources/js/component/ui-include.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.js"></script>
+</head>
+<body>
+
+  <div class="operating-container">
+
+    <div data-include="/html/code/header.html"></div>
+
+    <div class="organization-container">
+
+      <!-- 사이드 네비게이션 -->
+      <nav class="side-nav" aria-label="업무 상세 네비게이션">
+        <ul class="nav-tree" role="list">
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <a href="/resources/pages/operating-detail.html" class="nav-node__row" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">과업 리스트 뷰</span>
+            </a>
+          </li>
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <a href="/resources/pages/operating-detail-node.html" class="nav-node__row" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">프로세싱 뷰</span>
+            </a>
+          </li>
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <span class="nav-node__row is-selected" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">규정</span>
+            </span>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- 메인 콘텐츠 -->
+      <main class="main" style="padding:0; overflow:auto;">
+
+        <!-- 과제 정보 헤더 -->
+        <header class="gnb-sub">
+          <div class="task-id">
+            <span class="badge-status" id="detail-badge">종결</span>
+            <div class="task-titles">
+              <strong class="task-name" id="detail-task-name">과제 이름 들어가는 곳</strong>
+              <span class="task-meta" id="detail-task-meta">담당자명 / 담당 부서</span>
+            </div>
+            <span class="chevron" aria-hidden="true">&rsaquo;</span>
+          </div>
+          <button type="button" class="btn-log" onclick="history.back()">
+            <span class="ico" aria-hidden="true">&#8592;</span> 목록으로
+          </button>
+        </header>
+
+        <!-- 규정 콘텐츠 -->
+        <div style="padding: 24px;">
+
+          <!-- SECTION HEADER -->
+          <div class="reg-header">
+            <div class="reg-title-group">
+              <span class="reg-title">관련 규정</span>
+              <span class="reg-count">3개</span>
+              <span class="reg-total">/ 10개</span>
+            </div>
+            <a href="#" class="reg-file-btn">
+              파일 업로드
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <path d="M5 3l4 3.5L5 10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+          </div>
+
+          <!-- SUB META -->
+          <div class="reg-meta">
+            업무 단계 · <span>1단계</span>
+          </div>
+
+          <!-- FILE LIST -->
+          <div class="file-list" id="file-list">
+
+            <div class="file-row">
+              <span class="file-name">
+                전입재등록신고서 (주민등록법 시행령 : 별지서식 15, 15호의2호) [hwp, 17KB]
+              </span>
+              <div class="file-actions">
+                <a href="#" class="file-action-btn" onclick="return false">
+                  다운로드
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M6 1v7M3 5.5l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M1.5 10h9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                  </svg>
+                </a>
+                <a href="#" class="file-action-btn preview" onclick="return false">
+                  바로보기
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M5 3H2.5A1.5 1.5 0 001 4.5v5A1.5 1.5 0 002.5 11h5A1.5 1.5 0 009 9.5V7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                    <path d="M7 1h4v4M11 1L5.5 6.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
+
+            <div class="file-row">
+              <span class="file-name">
+                주민등록법 시행규칙 [pdf, 248KB]
+              </span>
+              <div class="file-actions">
+                <a href="#" class="file-action-btn" onclick="return false">
+                  다운로드
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M6 1v7M3 5.5l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M1.5 10h9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                  </svg>
+                </a>
+                <a href="#" class="file-action-btn preview" onclick="return false">
+                  바로보기
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M5 3H2.5A1.5 1.5 0 001 4.5v5A1.5 1.5 0 002.5 11h5A1.5 1.5 0 009 9.5V7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                    <path d="M7 1h4v4M11 1L5.5 6.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
+
+            <div class="file-row">
+              <span class="file-name">
+                개인정보 보호법 시행령 [pdf, 132KB]
+              </span>
+              <div class="file-actions">
+                <a href="#" class="file-action-btn" onclick="return false">
+                  다운로드
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M6 1v7M3 5.5l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M1.5 10h9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                  </svg>
+                </a>
+                <a href="#" class="file-action-btn preview" onclick="return false">
+                  바로보기
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M5 3H2.5A1.5 1.5 0 001 4.5v5A1.5 1.5 0 002.5 11h5A1.5 1.5 0 009 9.5V7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                    <path d="M7 1h4v4M11 1L5.5 6.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
+
+          </div><!-- /file-list -->
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="/resources/js/script.js"></script>
+  <script>
+  (function () {
+    const raw = sessionStorage.getItem('krds_selected_task');
+    if (!raw) return;
+
+    const task = JSON.parse(raw);
+    const STATUS_LABEL = { wait: '대기', progress: '진행중', done: '종결' };
+
+    const badge = document.getElementById('detail-badge');
+    badge.textContent = STATUS_LABEL[task.status] || task.status;
+    badge.className   = 'badge-status badge-status--' + (task.status || 'wait');
+    document.getElementById('detail-task-name').textContent = task.title;
+    document.title = task.title + ' · 관련 규정';
+
+    let teamName = '';
+    for (const sil of ORG) {
+      for (const leaf of getAllLeaves(sil)) {
+        if ((leaf.tasks || []).some(t => t.title === task.title && t.owner === task.owner)) {
+          teamName = leaf.name; break;
+        }
+      }
+      if (teamName) break;
+    }
+    document.getElementById('detail-task-meta').textContent =
+      task.owner + (teamName ? ' / ' + teamName : '') + ' / ' + task.start + ' ~ ' + task.end;
+  })();
+  </script>
+
+</body>
+</html>

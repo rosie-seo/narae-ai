@@ -15,12 +15,16 @@ const ORG = [
         { name:"오시우", role:"담당자", position:"행정서기",   email:"siwoo.oh@gov.kr",      phone:"02-1234-5607" },
         { name:"임나은", role:"담당자", position:"행정주사보", email:"naeun.lim@gov.kr",     phone:"02-1234-5608" },
       ], tasks:[
-        { title:"2025년 예산안 편성 및 배분 계획 수립", status:"progress", owner:"이서연", start:"2025-01-01", end:"2025-12-31" },
-        { title:"재정성과 평가 체계 개선", status:"wait",     owner:"박지훈", start:"2025-03-01", end:"2025-09-30" },
-        { title:"2024년 결산 검토 및 보고",              status:"done",     owner:"최수아", start:"2024-10-01", end:"2025-02-28" },
+        { title:"2025년 예산안 편성 및 배분 계획 수립",   status:"progress", owner:"이서연", start:"2025-01-01", end:"2025-12-31" },
+        { title:"재정성과 평가 체계 개선",                status:"wait",     owner:"박지훈", start:"2025-03-01", end:"2025-09-30" },
+        { title:"2024년 결산 검토 및 보고",               status:"done",     owner:"최수아", start:"2024-10-01", end:"2025-02-28" },
         { title:"2026년도 예산안 사전 기획 및 지침 수립", status:"progress", owner:"정태양", start:"2025-11-01", end:"2026-05-07" },
-        { title:"2026년 상반기 재정집행 점검 및 분석",   status:"progress", owner:"한도윤", start:"2026-03-01", end:"2026-06-30" },
-        { title:"디지털 예산관리 시스템 구축 기본계획",  status:"progress", owner:"오시우", start:"2026-01-15", end:"2026-06-20" },
+        { title:"2026년 상반기 재정집행 점검 및 분석",    status:"progress", owner:"한도윤", start:"2026-03-01", end:"2026-06-30" },
+        { title:"디지털 예산관리 시스템 구축 기본계획",   status:"progress", owner:"오시우", start:"2026-01-15", end:"2026-06-20" },
+        { title:"2025년 국가재정운용계획 의견 제출",      status:"done",     owner:"박지훈", start:"2025-02-01", end:"2025-04-30" },
+        { title:"재정집행 모니터링 체계 개편",            status:"progress", owner:"임나은", start:"2025-06-01", end:"2025-11-30" },
+        { title:"특별교부세 배분 및 정산 관리",           status:"done",     owner:"최수아", start:"2025-01-10", end:"2025-03-31" },
+        { title:"예산편성 기준 매뉴얼 개정",              status:"wait",     owner:"이서연", start:"2026-02-01", end:"2026-05-31" },
       ]},
       { name:"혁신행정담당관", members:[
         { name:"강현우", role:"과장",  position:"서기관",     email:"hyunwoo.kang@gov.kr",  phone:"02-1234-5701" },
@@ -30,11 +34,15 @@ const ORG = [
         { name:"신예준", role:"담당자", position:"행정주사보", email:"yejun.shin@gov.kr",    phone:"02-1234-5705" },
         { name:"류채원", role:"담당자", position:"행정서기",   email:"chaewon.ryu@gov.kr",   phone:"02-1234-5706" },
       ], tasks:[
-        { title:"정부혁신 실행계획 수립 및 추진", status:"progress", owner:"윤지아", start:"2025-02-01", end:"2025-11-30" },
-        { title:"업무프로세스 재설계 추진",       status:"wait",     owner:"장민서", start:"2025-04-01", end:"2025-10-31" },
-        { title:"민원서비스 만족도 조사",         status:"done",     owner:"조하은", start:"2024-09-01", end:"2025-01-31" },
-        { title:"스마트 행정 혁신방안 수립",      status:"progress", owner:"신예준", start:"2026-02-01", end:"2026-06-15" },
-        { title:"행정서비스 품질 개선 종합계획",  status:"wait",     owner:"류채원", start:"2026-04-01", end:"2026-06-30" },
+        { title:"정부혁신 실행계획 수립 및 추진",      status:"progress", owner:"윤지아", start:"2025-02-01", end:"2025-11-30" },
+        { title:"업무프로세스 재설계 추진",            status:"wait",     owner:"장민서", start:"2025-04-01", end:"2025-10-31" },
+        { title:"민원서비스 만족도 조사",              status:"done",     owner:"조하은", start:"2024-09-01", end:"2025-01-31" },
+        { title:"스마트 행정 혁신방안 수립",           status:"progress", owner:"신예준", start:"2026-02-01", end:"2026-06-15" },
+        { title:"행정서비스 품질 개선 종합계획",       status:"wait",     owner:"류채원", start:"2026-04-01", end:"2026-06-30" },
+        { title:"규제혁신 추진과제 발굴 및 이행점검",  status:"progress", owner:"윤지아", start:"2025-05-01", end:"2025-12-31" },
+        { title:"행정절차 간소화 방안 연구",           status:"done",     owner:"조하은", start:"2025-01-01", end:"2025-05-31" },
+        { title:"공공서비스 디자인 개선 시범사업",     status:"wait",     owner:"장민서", start:"2025-09-01", end:"2026-02-28" },
+        { title:"정부혁신 우수사례 경진대회 운영",     status:"progress", owner:"류채원", start:"2026-03-01", end:"2026-06-20" },
       ]},
       { name:"정보화담당관", members:[
         { name:"이준혁", role:"과장",  position:"서기관",     email:"junhyuk.lee@gov.kr",   phone:"02-1234-5801" },
@@ -45,11 +53,16 @@ const ORG = [
         { name:"한소율", role:"담당자", position:"행정주사보", email:"soyul.han@gov.kr",     phone:"02-1234-5806" },
         { name:"오지민", role:"담당자", position:"행정서기",   email:"jimin.oh@gov.kr",      phone:"02-1234-5807" },
       ], tasks:[
-        { title:"정보화 기본계획 수립",           status:"progress", owner:"김아린", start:"2025-01-15", end:"2025-06-30" },
-        { title:"행정정보시스템 고도화 사업",     status:"progress", owner:"박서준", start:"2025-03-01", end:"2025-12-31" },
-        { title:"개인정보 보호 실태점검",         status:"done",     owner:"최유나", start:"2024-11-01", end:"2025-02-28" },
-        { title:"AI 기반 민원처리 시스템 구축 계획", status:"progress", owner:"정우진", start:"2026-01-01", end:"2026-06-30" },
-        { title:"클라우드 전환 기본계획 수립",   status:"progress", owner:"한소율", start:"2026-03-01", end:"2026-06-25" },
+        { title:"정보화 기본계획 수립",                    status:"progress", owner:"김아린", start:"2025-01-15", end:"2025-06-30" },
+        { title:"행정정보시스템 고도화 사업",              status:"progress", owner:"박서준", start:"2025-03-01", end:"2025-12-31" },
+        { title:"개인정보 보호 실태점검",                  status:"done",     owner:"최유나", start:"2024-11-01", end:"2025-02-28" },
+        { title:"AI 기반 민원처리 시스템 구축 계획",       status:"progress", owner:"정우진", start:"2026-01-01", end:"2026-06-30" },
+        { title:"클라우드 전환 기본계획 수립",             status:"progress", owner:"한소율", start:"2026-03-01", end:"2026-06-25" },
+        { title:"정보화사업 예산 심의 및 조정",            status:"done",     owner:"김아린", start:"2025-02-01", end:"2025-04-30" },
+        { title:"전자정부 표준프레임워크 전환 지원",        status:"wait",     owner:"박서준", start:"2025-08-01", end:"2025-12-31" },
+        { title:"공공 SW 사업 품질관리 가이드라인 수립",   status:"progress", owner:"오지민", start:"2025-06-01", end:"2025-10-31" },
+        { title:"행정망 장애 대응 훈련 실시",              status:"done",     owner:"최유나", start:"2025-03-10", end:"2025-03-31" },
+        { title:"정보자원 통합관리 체계 개선",             status:"wait",     owner:"정우진", start:"2026-04-01", end:"2026-06-30" },
       ]},
     ]},
     { name:"국제협력관", children:[
@@ -60,11 +73,15 @@ const ORG = [
         { name:"고태민", role:"담당자", position:"행정주사보", email:"taemin.ko@gov.kr",     phone:"02-1234-5904" },
         { name:"문지수", role:"담당자", position:"행정서기",   email:"jisu.moon@gov.kr",     phone:"02-1234-5905" },
       ], tasks:[
-        { title:"국제기구 연계 협력과제 발굴",   status:"progress", owner:"배하늘", start:"2025-02-01", end:"2025-10-31" },
-        { title:"해외 정책 연수 프로그램 운영",  status:"wait",     owner:"심수현", start:"2025-05-01", end:"2025-08-31" },
-        { title:"국제협력 성과보고서 작성",      status:"done",     owner:"고태민", start:"2024-12-01", end:"2025-03-31" },
-        { title:"하반기 국제회의 운영계획 수립", status:"wait",     owner:"문지수", start:"2026-04-01", end:"2026-06-10" },
-        { title:"ODA 협력사업 중간점검 및 평가", status:"progress", owner:"고태민", start:"2026-02-01", end:"2026-06-20" },
+        { title:"국제기구 연계 협력과제 발굴",     status:"progress", owner:"배하늘", start:"2025-02-01", end:"2025-10-31" },
+        { title:"해외 정책 연수 프로그램 운영",    status:"wait",     owner:"심수현", start:"2025-05-01", end:"2025-08-31" },
+        { title:"국제협력 성과보고서 작성",        status:"done",     owner:"고태민", start:"2024-12-01", end:"2025-03-31" },
+        { title:"하반기 국제회의 운영계획 수립",   status:"wait",     owner:"문지수", start:"2026-04-01", end:"2026-06-10" },
+        { title:"ODA 협력사업 중간점검 및 평가",   status:"progress", owner:"고태민", start:"2026-02-01", end:"2026-06-20" },
+        { title:"OECD 회의 참가 계획 및 결과 보고",status:"done",     owner:"배하늘", start:"2025-04-01", end:"2025-06-30" },
+        { title:"다자협력체 가입 검토 및 추진",    status:"wait",     owner:"심수현", start:"2025-09-01", end:"2026-02-28" },
+        { title:"해외 우수정책 벤치마킹 보고서",   status:"progress", owner:"문지수", start:"2025-07-01", end:"2025-12-31" },
+        { title:"국제협약 이행상황 연차 점검",     status:"done",     owner:"고태민", start:"2025-01-01", end:"2025-03-31" },
       ]},
       { name:"통상지원담당관", members:[
         { name:"권나래", role:"과장",  position:"서기관",     email:"narae.kwon@gov.kr",    phone:"02-1234-6001" },
@@ -72,10 +89,14 @@ const ORG = [
         { name:"남가은", role:"담당자", position:"행정서기",   email:"gaeun.nam@gov.kr",     phone:"02-1234-6003" },
         { name:"서동현", role:"담당자", position:"행정주사보", email:"donghyun.seo@gov.kr",  phone:"02-1234-6004" },
       ], tasks:[
-        { title:"통상협력 지원체계 구축",        status:"progress", owner:"안재원", start:"2025-01-01", end:"2025-09-30" },
-        { title:"수출기업 애로사항 해소 TF 운영",status:"wait",     owner:"남가은", start:"2025-04-01", end:"2025-12-31" },
-        { title:"2026년 통상환경 분석 보고서 작성", status:"progress", owner:"안재원", start:"2026-01-01", end:"2026-06-30" },
-        { title:"중소기업 수출역량 강화 프로그램 운영", status:"wait", owner:"서동현", start:"2026-03-01", end:"2026-06-15" },
+        { title:"통상협력 지원체계 구축",                  status:"progress", owner:"안재원", start:"2025-01-01", end:"2025-09-30" },
+        { title:"수출기업 애로사항 해소 TF 운영",          status:"wait",     owner:"남가은", start:"2025-04-01", end:"2025-12-31" },
+        { title:"2026년 통상환경 분석 보고서 작성",        status:"progress", owner:"안재원", start:"2026-01-01", end:"2026-06-30" },
+        { title:"중소기업 수출역량 강화 프로그램 운영",    status:"wait",     owner:"서동현", start:"2026-03-01", end:"2026-06-15" },
+        { title:"수출규제 대응 모니터링 체계 강화",        status:"progress", owner:"남가은", start:"2025-05-01", end:"2025-10-31" },
+        { title:"통상분쟁 대응 TF 운영",                   status:"done",     owner:"안재원", start:"2024-11-01", end:"2025-02-28" },
+        { title:"FTA 활용 지원 프로그램 기획",             status:"wait",     owner:"서동현", start:"2025-08-01", end:"2026-01-31" },
+        { title:"글로벌 공급망 리스크 분석 보고서",        status:"progress", owner:"남가은", start:"2026-02-01", end:"2026-06-20" },
       ]},
     ]},
   ]},
@@ -92,12 +113,16 @@ const ORG = [
         { name:"구하준", role:"담당자", position:"행정주사보", email:"hajun.goo@gov.kr",     phone:"02-1234-6108" },
         { name:"허세진", role:"담당자", position:"행정서기",   email:"sejin.heo@gov.kr",     phone:"02-1234-6109" },
       ], tasks:[
-        { title:"인사혁신 중장기 계획 수립",     status:"progress", owner:"천소희", start:"2025-01-01", end:"2025-12-31" },
-        { title:"성과평가 제도 개선 TF 운영",   status:"progress", owner:"변준서", start:"2025-03-01", end:"2025-09-30" },
-        { title:"2024년 인사통계 연보 작성",    status:"done",     owner:"석다은", start:"2024-11-01", end:"2025-02-28" },
-        { title:"비공개 채용 절차 개선 연구",    status:"wait",     owner:"방태현", start:"2025-06-01", end:"2025-11-30" },
-        { title:"하반기 공개채용 계획 수립",    status:"progress", owner:"도지원", start:"2026-03-01", end:"2026-06-20" },
-        { title:"직급별 역량교육 체계 개편",    status:"wait",     owner:"표미래", start:"2026-04-01", end:"2026-06-30" },
+        { title:"인사혁신 중장기 계획 수립",          status:"progress", owner:"천소희", start:"2025-01-01", end:"2025-12-31" },
+        { title:"성과평가 제도 개선 TF 운영",         status:"progress", owner:"변준서", start:"2025-03-01", end:"2025-09-30" },
+        { title:"2024년 인사통계 연보 작성",          status:"done",     owner:"석다은", start:"2024-11-01", end:"2025-02-28" },
+        { title:"비공개 채용 절차 개선 연구",          status:"wait",     owner:"방태현", start:"2025-06-01", end:"2025-11-30" },
+        { title:"하반기 공개채용 계획 수립",          status:"progress", owner:"도지원", start:"2026-03-01", end:"2026-06-20" },
+        { title:"직급별 역량교육 체계 개편",          status:"wait",     owner:"표미래", start:"2026-04-01", end:"2026-06-30" },
+        { title:"복무관리 실태점검 및 개선 방안 수립", status:"done",     owner:"구하준", start:"2025-02-01", end:"2025-04-30" },
+        { title:"공무원 전문역량 인증제 도입 연구",   status:"wait",     owner:"허세진", start:"2025-07-01", end:"2025-12-31" },
+        { title:"인사교류 활성화 방안 수립",          status:"progress", owner:"천소희", start:"2025-09-01", end:"2026-02-28" },
+        { title:"2025년 승진심사 기준 및 계획 수립",  status:"done",     owner:"변준서", start:"2025-01-01", end:"2025-03-31" },
       ]},
       { name:"재무과", members:[
         { name:"진수빈", role:"과장",  position:"서기관",     email:"subin.jin@gov.kr",     phone:"02-1234-6201" },
@@ -108,11 +133,15 @@ const ORG = [
         { name:"태준호", role:"담당자", position:"행정서기",   email:"junho.tae@gov.kr",     phone:"02-1234-6206" },
         { name:"봉지연", role:"담당자", position:"세무주사보", email:"jiyeon.bong@gov.kr",   phone:"02-1234-6207" },
       ], tasks:[
-        { title:"회계제도 개선 TF 운영",        status:"progress", owner:"마이준", start:"2025-02-01", end:"2025-08-31" },
-        { title:"예산절감 추진계획 수립",        status:"wait",     owner:"선가람", start:"2025-04-01", end:"2025-10-31" },
-        { title:"2024 회계연도 결산",           status:"done",     owner:"용태민", start:"2025-01-01", end:"2025-04-30" },
-        { title:"2025 회계연도 결산 최종 보고", status:"progress", owner:"봉지연", start:"2026-04-01", end:"2026-06-30" },
-        { title:"재무위험 관리체계 구축 기획",  status:"wait",     owner:"엄서아", start:"2026-02-01", end:"2026-06-15" },
+        { title:"회계제도 개선 TF 운영",              status:"progress", owner:"마이준", start:"2025-02-01", end:"2025-08-31" },
+        { title:"예산절감 추진계획 수립",              status:"wait",     owner:"선가람", start:"2025-04-01", end:"2025-10-31" },
+        { title:"2024 회계연도 결산",                 status:"done",     owner:"용태민", start:"2025-01-01", end:"2025-04-30" },
+        { title:"2025 회계연도 결산 최종 보고",       status:"progress", owner:"봉지연", start:"2026-04-01", end:"2026-06-30" },
+        { title:"재무위험 관리체계 구축 기획",        status:"wait",     owner:"엄서아", start:"2026-02-01", end:"2026-06-15" },
+        { title:"세입징수 관리 강화 방안 수립",       status:"done",     owner:"마이준", start:"2025-01-01", end:"2025-03-31" },
+        { title:"계약제도 운영 실태 점검",            status:"progress", owner:"태준호", start:"2025-05-01", end:"2025-09-30" },
+        { title:"회계검사 사전점검 실시",             status:"done",     owner:"용태민", start:"2025-03-01", end:"2025-05-31" },
+        { title:"부처 합동 재무위험 세미나 개최",     status:"wait",     owner:"선가람", start:"2025-10-01", end:"2025-11-30" },
       ]},
       { name:"총무과", members:[
         { name:"은도현", role:"과장",  position:"서기관",     email:"dohyun.eun@gov.kr",    phone:"02-1234-6301" },
@@ -122,11 +151,15 @@ const ORG = [
         { name:"라세은", role:"담당자", position:"행정서기",   email:"seun.ra@gov.kr",       phone:"02-1234-6305" },
         { name:"마지호", role:"담당자", position:"행정주사",   email:"jiho.ma@gov.kr",       phone:"02-1234-6306" },
       ], tasks:[
-        { title:"청사 시설관리 현대화 계획",    status:"progress", owner:"가민주", start:"2025-01-01", end:"2025-12-31" },
-        { title:"친환경 사무환경 조성 사업",    status:"wait",     owner:"나지훈", start:"2025-05-01", end:"2025-10-31" },
-        { title:"물품 재고 실태조사",           status:"done",     owner:"다하은", start:"2025-01-15", end:"2025-03-31" },
-        { title:"청사 에너지 절감 대책 수립",   status:"progress", owner:"마지호", start:"2026-03-01", end:"2026-06-25" },
-        { title:"사무환경 표준화 매뉴얼 제작",  status:"wait",     owner:"라세은", start:"2026-04-01", end:"2026-06-10" },
+        { title:"청사 시설관리 현대화 계획",       status:"progress", owner:"가민주", start:"2025-01-01", end:"2025-12-31" },
+        { title:"친환경 사무환경 조성 사업",       status:"wait",     owner:"나지훈", start:"2025-05-01", end:"2025-10-31" },
+        { title:"물품 재고 실태조사",              status:"done",     owner:"다하은", start:"2025-01-15", end:"2025-03-31" },
+        { title:"청사 에너지 절감 대책 수립",      status:"progress", owner:"마지호", start:"2026-03-01", end:"2026-06-25" },
+        { title:"사무환경 표준화 매뉴얼 제작",     status:"wait",     owner:"라세은", start:"2026-04-01", end:"2026-06-10" },
+        { title:"공용차량 운영 효율화 방안 수립",  status:"done",     owner:"나지훈", start:"2025-02-01", end:"2025-04-30" },
+        { title:"보안점검 및 문서관리 강화 계획",  status:"progress", owner:"다하은", start:"2025-06-01", end:"2025-11-30" },
+        { title:"청사 이전 기획 및 사전 준비",    status:"wait",     owner:"가민주", start:"2025-09-01", end:"2026-03-31" },
+        { title:"비품·물품 구매 계획 및 조달 관리",status:"done",     owner:"마지호", start:"2025-01-01", end:"2025-02-28" },
       ]},
     ]},
     { name:"정보관리국", children:[
@@ -140,12 +173,16 @@ const ORG = [
         { name:"지아름", role:"담당자", position:"전산서기",   email:"areum.ji@gov.kr",      phone:"02-1234-6407" },
         { name:"류성민", role:"담당자", position:"전산주사보", email:"sungmin.ryu@gov.kr",   phone:"02-1234-6408" },
       ], tasks:[
-        { title:"노후 서버 교체 사업",          status:"progress", owner:"채태양", start:"2025-02-01", end:"2025-11-30" },
-        { title:"사이버보안 강화 대책 수립",    status:"progress", owner:"지민아", start:"2025-01-01", end:"2025-06-30" },
-        { title:"전산장비 유지보수 계약",       status:"done",     owner:"차정우", start:"2024-12-01", end:"2025-01-31" },
-        { title:"재해복구 시스템 점검",         status:"wait",     owner:"하율이", start:"2025-07-01", end:"2025-09-30" },
-        { title:"정보시스템 통합 보안점검",     status:"progress", owner:"서연이", start:"2026-02-01", end:"2026-06-30" },
-        { title:"망분리 고도화 사업 추진",      status:"progress", owner:"지아름", start:"2026-01-01", end:"2026-06-20" },
+        { title:"노후 서버 교체 사업",              status:"progress", owner:"채태양", start:"2025-02-01", end:"2025-11-30" },
+        { title:"사이버보안 강화 대책 수립",        status:"progress", owner:"지민아", start:"2025-01-01", end:"2025-06-30" },
+        { title:"전산장비 유지보수 계약",           status:"done",     owner:"차정우", start:"2024-12-01", end:"2025-01-31" },
+        { title:"재해복구 시스템 점검",             status:"wait",     owner:"하율이", start:"2025-07-01", end:"2025-09-30" },
+        { title:"정보시스템 통합 보안점검",         status:"progress", owner:"서연이", start:"2026-02-01", end:"2026-06-30" },
+        { title:"망분리 고도화 사업 추진",          status:"progress", owner:"지아름", start:"2026-01-01", end:"2026-06-20" },
+        { title:"IT 서비스 데스크 운영 개선 방안",  status:"done",     owner:"류성민", start:"2025-03-01", end:"2025-06-30" },
+        { title:"전산실 환경안전 점검 및 조치",     status:"done",     owner:"하율이", start:"2025-01-10", end:"2025-02-28" },
+        { title:"소프트웨어 라이선스 관리 체계 강화",status:"wait",    owner:"채태양", start:"2025-08-01", end:"2025-12-31" },
+        { title:"업무용 PC 보안설정 일제 점검",     status:"progress", owner:"지민아", start:"2025-10-01", end:"2025-11-30" },
       ]},
       { name:"데이터관리과", members:[
         { name:"나민재", role:"과장",  position:"서기관",     email:"minjae.na@gov.kr",     phone:"02-1234-6501" },
@@ -155,11 +192,15 @@ const ORG = [
         { name:"홍우진", role:"담당자", position:"전산주사보", email:"woojin.hong@gov.kr",   phone:"02-1234-6505" },
         { name:"류소율", role:"담당자", position:"행정서기",   email:"soyul.ryu@gov.kr",     phone:"02-1234-6506" },
       ], tasks:[
-        { title:"공공데이터 개방 확대 계획",    status:"progress", owner:"황나래", start:"2025-01-01", end:"2025-12-31" },
-        { title:"데이터 품질 관리 체계 구축",  status:"progress", owner:"임서준", start:"2025-03-01", end:"2025-09-30" },
-        { title:"개인정보 비식별 처리 가이드라인 수립", status:"done", owner:"전유나", start:"2024-10-01", end:"2025-01-31" },
-        { title:"빅데이터 플랫폼 구축 1단계",  status:"progress", owner:"홍우진", start:"2026-02-01", end:"2026-06-30" },
-        { title:"공공데이터 품질 개선 중간점검", status:"progress", owner:"류소율", start:"2026-03-01", end:"2026-06-15" },
+        { title:"공공데이터 개방 확대 계획",                   status:"progress", owner:"황나래", start:"2025-01-01", end:"2025-12-31" },
+        { title:"데이터 품질 관리 체계 구축",                  status:"progress", owner:"임서준", start:"2025-03-01", end:"2025-09-30" },
+        { title:"개인정보 비식별 처리 가이드라인 수립",         status:"done",     owner:"전유나", start:"2024-10-01", end:"2025-01-31" },
+        { title:"빅데이터 플랫폼 구축 1단계",                  status:"progress", owner:"홍우진", start:"2026-02-01", end:"2026-06-30" },
+        { title:"공공데이터 품질 개선 중간점검",               status:"progress", owner:"류소율", start:"2026-03-01", end:"2026-06-15" },
+        { title:"행정데이터 분류체계 표준화 작업",             status:"done",     owner:"임서준", start:"2025-01-01", end:"2025-04-30" },
+        { title:"정보공개 청구 처리 현황 분석 및 보고",        status:"progress", owner:"전유나", start:"2025-05-01", end:"2025-10-31" },
+        { title:"데이터 거버넌스 위원회 운영 및 안건 관리",    status:"wait",     owner:"황나래", start:"2025-07-01", end:"2025-12-31" },
+        { title:"공공데이터 활용 우수사례 경진대회 운영",      status:"wait",     owner:"류소율", start:"2025-09-01", end:"2025-11-30" },
       ]},
     ]},
   ]},
@@ -172,11 +213,15 @@ const ORG = [
         { name:"조다은", role:"담당자", position:"행정서기",   email:"daeun.jo@gov.kr",      phone:"02-1234-6604" },
         { name:"강태현", role:"담당자", position:"감사주사보", email:"taehyun.kang@gov.kr",  phone:"02-1234-6605" },
       ], tasks:[
-        { title:"2025년 정기감사 계획 수립",   status:"progress", owner:"신소희", start:"2025-01-01", end:"2025-06-30" },
-        { title:"감사결과 이행 점검",          status:"progress", owner:"장준서", start:"2025-02-01", end:"2025-12-31" },
-        { title:"2024년 감사 결과보고서 작성", status:"done",     owner:"조다은", start:"2024-11-01", end:"2025-03-31" },
-        { title:"상반기 기획감사 결과 보고",   status:"progress", owner:"강태현", start:"2026-04-01", end:"2026-06-30" },
-        { title:"내부감사 제도 개선 연구",     status:"wait",     owner:"장준서", start:"2026-02-01", end:"2026-06-20" },
+        { title:"2025년 정기감사 계획 수립",           status:"progress", owner:"신소희", start:"2025-01-01", end:"2025-06-30" },
+        { title:"감사결과 이행 점검",                  status:"progress", owner:"장준서", start:"2025-02-01", end:"2025-12-31" },
+        { title:"2024년 감사 결과보고서 작성",         status:"done",     owner:"조다은", start:"2024-11-01", end:"2025-03-31" },
+        { title:"상반기 기획감사 결과 보고",           status:"progress", owner:"강태현", start:"2026-04-01", end:"2026-06-30" },
+        { title:"내부감사 제도 개선 연구",             status:"wait",     owner:"장준서", start:"2026-02-01", end:"2026-06-20" },
+        { title:"기관 합동감사 계획 수립 및 사전 조율",status:"done",     owner:"신소희", start:"2025-03-01", end:"2025-05-31" },
+        { title:"감사 지적사항 개선 이행점검 강화",    status:"progress", owner:"조다은", start:"2025-06-01", end:"2025-12-31" },
+        { title:"수시감사 추진 방안 수립",             status:"wait",     owner:"강태현", start:"2025-09-01", end:"2025-12-31" },
+        { title:"외부감사 결과 이행 관리 체계 개선",   status:"wait",     owner:"장준서", start:"2025-10-01", end:"2026-02-28" },
       ]},
       { name:"청렴조사과", members:[
         { name:"윤지원", role:"과장",  position:"서기관",     email:"jiwon.yoon@gov.kr",    phone:"02-1234-6701" },
@@ -184,11 +229,146 @@ const ORG = [
         { name:"문하준", role:"담당자", position:"감사서기",   email:"hajun.moon@gov.kr",    phone:"02-1234-6703" },
         { name:"정세진", role:"담당자", position:"행정주사보", email:"sejin.jung@gov.kr",    phone:"02-1234-6704" },
       ], tasks:[
-        { title:"청렴도 향상 종합대책 수립",   status:"progress", owner:"오미래", start:"2025-01-01", end:"2025-12-31" },
-        { title:"부패취약분야 집중 점검",      status:"wait",     owner:"문하준", start:"2025-05-01", end:"2025-08-31" },
-        { title:"청렴 교육 프로그램 운영",     status:"done",     owner:"정세진", start:"2024-09-01", end:"2025-02-28" },
-        { title:"상반기 청렴도 자체평가",      status:"progress", owner:"오미래", start:"2026-04-01", end:"2026-06-30" },
-        { title:"부패신고 처리실태 집중 점검", status:"wait",     owner:"문하준", start:"2026-03-01", end:"2026-06-10" },
+        { title:"청렴도 향상 종합대책 수립",           status:"progress", owner:"오미래", start:"2025-01-01", end:"2025-12-31" },
+        { title:"부패취약분야 집중 점검",              status:"wait",     owner:"문하준", start:"2025-05-01", end:"2025-08-31" },
+        { title:"청렴 교육 프로그램 운영",             status:"done",     owner:"정세진", start:"2024-09-01", end:"2025-02-28" },
+        { title:"상반기 청렴도 자체평가",              status:"progress", owner:"오미래", start:"2026-04-01", end:"2026-06-30" },
+        { title:"부패신고 처리실태 집중 점검",         status:"wait",     owner:"문하준", start:"2026-03-01", end:"2026-06-10" },
+        { title:"공익신고자 보호 강화 방안 수립",      status:"done",     owner:"정세진", start:"2025-01-01", end:"2025-03-31" },
+        { title:"청렴 서약 및 공직윤리 강령 제·개정",  status:"progress", owner:"오미래", start:"2025-07-01", end:"2025-12-31" },
+        { title:"직원 청렴 실천 교육 계획 수립",       status:"done",     owner:"문하준", start:"2025-02-01", end:"2025-04-30" },
+        { title:"부패방지 자체 평가 점검 및 환류",     status:"wait",     owner:"정세진", start:"2025-09-01", end:"2025-11-30" },
+      ]},
+    ]},
+  ]},
+  { name:"정책홍보실", children:[
+    { name:"홍보전략관", children:[
+      { name:"언론홍보과", members:[
+        { name:"박정우", role:"과장",  position:"서기관",     email:"jungwoo.park@gov.kr",  phone:"02-1234-7101" },
+        { name:"유서아", role:"담당자", position:"홍보주사",   email:"seoa.yu@gov.kr",       phone:"02-1234-7102" },
+        { name:"이수민", role:"담당자", position:"행정주사",   email:"sumin.lee@gov.kr",     phone:"02-1234-7103" },
+        { name:"한여울", role:"담당자", position:"홍보서기",   email:"yorul.han@gov.kr",     phone:"02-1234-7104" },
+        { name:"전다은", role:"담당자", position:"행정주사보", email:"daeun.jeon@gov.kr",    phone:"02-1234-7105" },
+        { name:"오규민", role:"담당자", position:"행정서기",   email:"gyumin.oh@gov.kr",     phone:"02-1234-7106" },
+      ], tasks:[
+        { title:"2025년 홍보 종합계획 수립",             status:"done",     owner:"유서아", start:"2024-12-01", end:"2025-01-31" },
+        { title:"정례 브리핑 운영 및 관리 체계 개선",   status:"progress", owner:"이수민", start:"2025-02-01", end:"2025-12-31" },
+        { title:"미디어 모니터링 체계 구축",             status:"done",     owner:"한여울", start:"2025-01-01", end:"2025-04-30" },
+        { title:"보도자료 품질 관리 가이드라인 제정",    status:"progress", owner:"전다은", start:"2025-05-01", end:"2025-09-30" },
+        { title:"언론 인터뷰 지원 및 일정 조정",         status:"wait",     owner:"오규민", start:"2025-07-01", end:"2025-12-31" },
+        { title:"주요 정책 홍보 캠페인 기획 및 실행",    status:"progress", owner:"유서아", start:"2025-06-01", end:"2025-11-30" },
+        { title:"2026년 언론홍보 연간 계획 수립",        status:"wait",     owner:"이수민", start:"2025-10-01", end:"2025-12-31" },
+        { title:"기자단 간담회 운영 계획 수립",          status:"done",     owner:"한여울", start:"2025-03-01", end:"2025-06-30" },
+        { title:"정책 설명자료 표준화 가이드 수립",      status:"wait",     owner:"전다은", start:"2026-01-01", end:"2026-03-31" },
+        { title:"TV·라디오 홍보 매체 활용 계획",         status:"progress", owner:"오규민", start:"2026-02-01", end:"2026-06-30" },
+      ]},
+      { name:"뉴미디어담당관", members:[
+        { name:"최민재", role:"과장",  position:"서기관",     email:"minjae.choi@gov.kr",   phone:"02-1234-7201" },
+        { name:"김소현", role:"담당자", position:"홍보주사",   email:"sohyun.kim@gov.kr",    phone:"02-1234-7202" },
+        { name:"장태준", role:"담당자", position:"전산주사",   email:"taejun.jang@gov.kr",   phone:"02-1234-7203" },
+        { name:"임지아", role:"담당자", position:"홍보서기",   email:"jia.lim@gov.kr",       phone:"02-1234-7204" },
+        { name:"류하늘", role:"담당자", position:"행정주사보", email:"haneul.ryu@gov.kr",    phone:"02-1234-7205" },
+      ], tasks:[
+        { title:"공식 SNS 채널 운영 전략 수립",          status:"progress", owner:"김소현", start:"2025-01-01", end:"2025-06-30" },
+        { title:"정책 홍보 영상 제작 기획",              status:"progress", owner:"장태준", start:"2025-03-01", end:"2025-08-31" },
+        { title:"유튜브 채널 개선 및 구독자 확대 방안", status:"done",     owner:"임지아", start:"2024-10-01", end:"2025-02-28" },
+        { title:"인터넷 여론 분석 시스템 구축",          status:"wait",     owner:"류하늘", start:"2025-07-01", end:"2025-12-31" },
+        { title:"디지털 홍보 성과 측정 체계 개선",       status:"progress", owner:"김소현", start:"2025-06-01", end:"2025-10-31" },
+        { title:"뉴미디어 홍보 우수사례 발굴 및 공유",   status:"done",     owner:"장태준", start:"2025-02-01", end:"2025-05-31" },
+        { title:"2026년 온라인 홍보 전략 수립",          status:"wait",     owner:"임지아", start:"2025-09-01", end:"2025-12-31" },
+        { title:"AI 기반 콘텐츠 생성 도구 도입 검토",    status:"wait",     owner:"류하늘", start:"2026-01-01", end:"2026-04-30" },
+      ]},
+    ]},
+    { name:"대국민소통관", children:[
+      { name:"민원지원과", members:[
+        { name:"이준태", role:"과장",  position:"서기관",     email:"juntae.lee@gov.kr",    phone:"02-1234-7301" },
+        { name:"서가은", role:"담당자", position:"행정주사",   email:"gaeun.seo@gov.kr",     phone:"02-1234-7302" },
+        { name:"안하준", role:"담당자", position:"행정주사",   email:"hajun.an@gov.kr",      phone:"02-1234-7303" },
+        { name:"문미래", role:"담당자", position:"행정서기",   email:"mirae.moon@gov.kr",    phone:"02-1234-7304" },
+        { name:"정세율", role:"담당자", position:"행정주사보", email:"seyul.jung@gov.kr",    phone:"02-1234-7305" },
+        { name:"박민서", role:"담당자", position:"행정서기",   email:"minseo.park@gov.kr",   phone:"02-1234-7306" },
+      ], tasks:[
+        { title:"민원처리 현황 분석 및 개선 방안 도출",  status:"progress", owner:"서가은", start:"2025-01-01", end:"2025-06-30" },
+        { title:"고충민원 해소 TF 운영",                 status:"wait",     owner:"안하준", start:"2025-04-01", end:"2025-10-31" },
+        { title:"민원 만족도 조사 및 결과 분석",         status:"done",     owner:"문미래", start:"2024-11-01", end:"2025-02-28" },
+        { title:"복합민원 처리 절차 간소화 방안",        status:"progress", owner:"정세율", start:"2025-05-01", end:"2025-11-30" },
+        { title:"전화민원 응대 교육 실시",               status:"done",     owner:"박민서", start:"2025-02-10", end:"2025-03-31" },
+        { title:"온라인 민원 창구 개편 기획",            status:"progress", owner:"서가은", start:"2025-07-01", end:"2025-12-31" },
+        { title:"민원 처리 연간 성과 보고",              status:"wait",     owner:"안하준", start:"2026-01-01", end:"2026-03-31" },
+        { title:"취약계층 민원지원 서비스 강화 방안",    status:"wait",     owner:"정세율", start:"2026-03-01", end:"2026-06-30" },
+      ]},
+      { name:"소통협력과", members:[
+        { name:"강지원", role:"과장",  position:"서기관",     email:"jiwon.kang@gov.kr",    phone:"02-1234-7401" },
+        { name:"황민서", role:"담당자", position:"행정주사",   email:"minseo.hwang@gov.kr",  phone:"02-1234-7402" },
+        { name:"염수희", role:"담당자", position:"행정주사",   email:"suhee.yum@gov.kr",     phone:"02-1234-7403" },
+        { name:"설준혁", role:"담당자", position:"행정서기",   email:"junhyuk.seol@gov.kr",  phone:"02-1234-7404" },
+        { name:"모하은", role:"담당자", position:"행정주사보", email:"haeun.mo@gov.kr",      phone:"02-1234-7405" },
+      ], tasks:[
+        { title:"부처 합동 소통 행사 기획 및 운영",      status:"progress", owner:"황민서", start:"2025-02-01", end:"2025-06-30" },
+        { title:"정책 공청회 운영 지원 매뉴얼 제작",     status:"done",     owner:"염수희", start:"2024-12-01", end:"2025-02-28" },
+        { title:"시민 참여 정책 개발 프로그램 운영",     status:"progress", owner:"설준혁", start:"2025-04-01", end:"2025-10-31" },
+        { title:"소통 채널 통합 관리 방안 수립",         status:"wait",     owner:"모하은", start:"2025-07-01", end:"2025-12-31" },
+        { title:"부처 내 의견수렴 절차 개선 방안",       status:"done",     owner:"황민서", start:"2025-01-01", end:"2025-04-30" },
+        { title:"대국민 소통 성과 보고서 작성",          status:"progress", owner:"염수희", start:"2026-01-01", end:"2026-03-31" },
+        { title:"지역사회 협력 네트워크 구축 기획",      status:"wait",     owner:"설준혁", start:"2026-02-01", end:"2026-06-30" },
+      ]},
+    ]},
+  ]},
+  { name:"연구기획실", children:[
+    { name:"정책연구관", children:[
+      { name:"정책분석과", members:[
+        { name:"조재현", role:"과장",  position:"서기관",     email:"jaehyun.jo@gov.kr",    phone:"02-1234-7501" },
+        { name:"권민아", role:"담당자", position:"행정주사",   email:"mina.kwon@gov.kr",     phone:"02-1234-7502" },
+        { name:"도준서", role:"담당자", position:"행정주사",   email:"junseo.do@gov.kr",     phone:"02-1234-7503" },
+        { name:"배지호", role:"담당자", position:"행정서기",   email:"jiho.bae@gov.kr",      phone:"02-1234-7504" },
+        { name:"임태양", role:"담당자", position:"행정주사보", email:"taeyang.lim@gov.kr",   phone:"02-1234-7505" },
+        { name:"전하은", role:"담당자", position:"행정서기",   email:"haeun.jeon@gov.kr",    phone:"02-1234-7506" },
+      ], tasks:[
+        { title:"정책효과 분석 모델 개발",                status:"progress", owner:"권민아", start:"2025-01-01", end:"2025-09-30" },
+        { title:"국내외 정책 동향 비교 분석 보고서",      status:"progress", owner:"도준서", start:"2025-02-01", end:"2025-07-31" },
+        { title:"현안 정책 쟁점 연구 보고서 작성",        status:"done",     owner:"배지호", start:"2024-10-01", end:"2025-02-28" },
+        { title:"정책 성과지표 개발 및 검증",             status:"progress", owner:"임태양", start:"2025-05-01", end:"2025-11-30" },
+        { title:"빅데이터 기반 정책 수요 분석",           status:"wait",     owner:"전하은", start:"2025-08-01", end:"2026-01-31" },
+        { title:"민간 연구기관 협업 과제 기획",           status:"done",     owner:"권민아", start:"2025-01-01", end:"2025-04-30" },
+        { title:"부처 간 정책 연계 방안 연구",            status:"progress", owner:"도준서", start:"2025-09-01", end:"2026-02-28" },
+        { title:"중장기 정책 로드맵 수립 지원",           status:"wait",     owner:"임태양", start:"2026-01-01", end:"2026-06-30" },
+        { title:"정책연구 연차보고서 발간",               status:"done",     owner:"배지호", start:"2025-01-01", end:"2025-03-31" },
+      ]},
+      { name:"입법연구과", members:[
+        { name:"윤민재", role:"과장",  position:"서기관",     email:"minjae.yoon@gov.kr",   phone:"02-1234-7601" },
+        { name:"심서아", role:"담당자", position:"법무주사",   email:"seoa.shim@gov.kr",     phone:"02-1234-7602" },
+        { name:"노준혁", role:"담당자", position:"행정주사",   email:"junhyuk.no@gov.kr",    phone:"02-1234-7603" },
+        { name:"성소율", role:"담당자", position:"법무서기",   email:"soyul.sung@gov.kr",    phone:"02-1234-7604" },
+        { name:"차하은", role:"담당자", position:"행정주사보", email:"haeun.cha@gov.kr",     phone:"02-1234-7605" },
+      ], tasks:[
+        { title:"법령 정비 수요 조사 및 분석",            status:"progress", owner:"심서아", start:"2025-01-01", end:"2025-06-30" },
+        { title:"주요 개정 법안 영향 분석 보고서",        status:"progress", owner:"노준혁", start:"2025-03-01", end:"2025-09-30" },
+        { title:"법령 해석 사례집 발간",                  status:"done",     owner:"성소율", start:"2024-09-01", end:"2025-01-31" },
+        { title:"입법예고 의견 수렴 및 정리",             status:"wait",     owner:"차하은", start:"2025-06-01", end:"2025-11-30" },
+        { title:"규제 영향 분석 체계 개선",               status:"progress", owner:"심서아", start:"2025-07-01", end:"2025-12-31" },
+        { title:"행정규칙 정비 계획 수립",                status:"done",     owner:"노준혁", start:"2025-01-15", end:"2025-04-30" },
+        { title:"법령 DB 현행화 및 관리 체계 강화",       status:"wait",     owner:"성소율", start:"2025-09-01", end:"2026-02-28" },
+        { title:"2026년 주요 입법 과제 발굴",             status:"wait",     owner:"차하은", start:"2025-10-01", end:"2025-12-31" },
+      ]},
+    ]},
+    { name:"미래전략관", children:[
+      { name:"미래전략과", members:[
+        { name:"장민호", role:"과장",  position:"서기관",     email:"minho.jang@gov.kr",    phone:"02-1234-7701" },
+        { name:"구소희", role:"담당자", position:"행정주사",   email:"sohee.ku@gov.kr",      phone:"02-1234-7702" },
+        { name:"남준서", role:"담당자", position:"행정주사",   email:"junseo.nam@gov.kr",    phone:"02-1234-7703" },
+        { name:"주다은", role:"담당자", position:"행정서기",   email:"daeun.joo@gov.kr",     phone:"02-1234-7704" },
+        { name:"허태현", role:"담당자", position:"행정주사보", email:"taehyun.heo@gov.kr",   phone:"02-1234-7705" },
+        { name:"위서연", role:"담당자", position:"행정서기",   email:"seoyeon.wi@gov.kr",    phone:"02-1234-7706" },
+      ], tasks:[
+        { title:"행정환경 변화 대응 미래 전략 수립",      status:"progress", owner:"구소희", start:"2025-01-01", end:"2025-12-31" },
+        { title:"디지털 전환 중장기 로드맵 작성",         status:"progress", owner:"남준서", start:"2025-03-01", end:"2025-10-31" },
+        { title:"부처 미래 인력 수급 예측 연구",          status:"done",     owner:"주다은", start:"2024-11-01", end:"2025-03-31" },
+        { title:"기후변화 대응 행정 혁신 방안 연구",      status:"wait",     owner:"허태현", start:"2025-06-01", end:"2025-12-31" },
+        { title:"위기관리 시나리오 분석 및 대응 전략",    status:"progress", owner:"구소희", start:"2025-05-01", end:"2025-11-30" },
+        { title:"신기술 도입 타당성 조사 및 검토",        status:"wait",     owner:"남준서", start:"2025-08-01", end:"2026-01-31" },
+        { title:"지속가능발전 목표(SDGs) 이행점검",       status:"done",     owner:"주다은", start:"2025-01-01", end:"2025-05-31" },
+        { title:"미래전략 연간 보고서 작성 및 발간",      status:"progress", owner:"위서연", start:"2025-10-01", end:"2025-12-31" },
+        { title:"2030 행정혁신 비전 수립 기획",           status:"wait",     owner:"허태현", start:"2026-01-01", end:"2026-06-30" },
       ]},
     ]},
   ]},
@@ -335,6 +515,13 @@ function escapeHtml(s) {
   return s.replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 }
 
+/* 이름 해시 → av-0 ~ av-4 (KRDS 팔레트) */
+function ownerColorClass(name) {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (Math.imul(31, h) + name.charCodeAt(i)) | 0;
+  return 'av-' + (Math.abs(h) % 4);
+}
+
 /* ---- 콘텐츠 렌더 ---- */
 function getBreadcrumbPath(node) {
   const path = [];
@@ -345,7 +532,7 @@ function getBreadcrumbPath(node) {
 
 function memberCardHTML(m) {
   return `<li class="member-card">
-    <span class="member-card__avatar"></span>
+    <span class="member-card__avatar ${ownerColorClass(m.name)}">${escapeHtml(m.name.slice(0, 1))}</span>
     <div class="member-card__info">
       <p class="member-card__name">${escapeHtml(m.name)}</p>
       <p class="member-card__position">${escapeHtml(m.position)}</p>
@@ -370,21 +557,24 @@ function getSubtasks(task) {
     return (h >>> 0) / 0x100000000;
   };
 
-  const TYPES = ['내부 업무', '외부 업무', '협업 업무', '지원 업무'];
-  const RISKS = ['선행업무 미완료', '일정지연', '병목', '리소스 부족', '검토 지연'];
+  const TYPES = ['내부 업무', '외부 업무', '협업 업무', '지원 업무', '검토 업무', '조정 업무'];
+  const RISKS = ['선행업무 미완료', '일정지연', '병목', '리소스 부족', '검토 지연', '이해관계자 미합의', '예산 부족', '법령 미정비'];
   const PRIOS = ['high', 'mid', 'low'];
 
-  // 업무 진행 단계 세트 – 5종 중 시드로 선택
+  // 업무 진행 단계 세트 – 각 8단계
   const PHASE_SETS = [
-    ['현황 조사 및 기초분석', '추진 계획 수립', '관련 부서 협의', '초안 작성 및 검토', '최종 보고 및 결재'],
-    ['수요 조사', '예산 검토', '추진 일정 확정', '실행 및 모니터링', '성과 분석 및 보고'],
-    ['법령·규정 검토', '기획안 작성', '내부 검토', '의견 수렴 및 수정', '완료 보고'],
-    ['사전 준비 및 자료수집', '방안 도출', '부서 간 조율', '실행 계획 확정', '결과 보고'],
-    ['목표 설정', '세부 추진과제 도출', '담당자 배정', '진행상황 점검', '완료 및 평가'],
+    ['현황 조사 및 기초분석', '과제 범위 확정', '추진 계획 수립', '관련 부서 협의', '초안 작성', '초안 검토 및 수정', '최종안 확정', '최종 보고 및 결재'],
+    ['수요 조사', '예산 검토 및 확보', '추진 일정 확정', '담당자 배정', '실행', '중간 점검', '성과 분석', '보고 및 환류'],
+    ['법령·규정 검토', '문제 현황 파악', '기획안 작성', '내부 검토', '의견 수렴', '수정 및 보완', '부서장 결재', '완료 보고'],
+    ['사전 준비 및 자료수집', '분석 및 방안 도출', '부서 간 조율', '계획 확정', '1차 실행', '중간 모니터링', '2차 실행 및 보완', '결과 보고'],
+    ['목표 설정', '세부 추진과제 도출', '담당자 배정', '착수 보고', '1단계 진행', '중간 평가', '2단계 진행', '완료 및 성과 평가'],
+    ['현안 파악 및 이슈 정리', '대응 방향 수립', '내부 검토 회의', '외부 기관 협의', '방안 확정', '시범 적용', '결과 분석', '제도화 및 보고'],
+    ['기초 자료 수집', '현황 분석', '개선 방향 도출', '관계 부서 의견 청취', '개선안 작성', '검토 및 수정', '승인 및 확정', '이행 및 사후관리'],
+    ['착수 준비', '요구사항 분석', '계획 수립', '1차 추진', '점검 및 조정', '2차 추진', '검수 및 확인', '완료 보고 및 결재'],
   ];
 
   const phaseSet = PHASE_SETS[Math.floor(r() * PHASE_SETS.length)];
-  const count    = 3 + Math.floor(r() * 2);  // 3~4개
+  const count    = 5 + Math.floor(r() * 4);  // 5~8개
   const phases   = phaseSet.slice(0, count);
 
   const startMs   = new Date(task.start).getTime();
@@ -1145,7 +1335,8 @@ if (ocWeeksEl) {
   }
 
   function makeChip(t, extraClass) {
-    return `<div class="oc-chip ${CAL_CHIP[t.status] || 'chip-blue'}${extraClass ? ' ' + extraClass : ''}" title="${escapeHtml(t.dept + ' · ' + t.owner)}">` +
+    const idx = calTasks.indexOf(t);
+    return `<div class="oc-chip ${CAL_CHIP[t.status] || 'chip-blue'}${extraClass ? ' ' + extraClass : ''}" data-task-i="${idx}" title="${escapeHtml(t.dept + ' · ' + t.owner)}">` +
       `<span class="chip-dot"></span><span class="chip-name">${escapeHtml(t.title)}</span></div>`;
   }
 
@@ -1311,7 +1502,8 @@ if (ocWeeksEl) {
 
     document.getElementById('oc-popup-body').innerHTML = tasks.map(t => {
       const chipCls = CAL_CHIP[t.status] || 'chip-blue';
-      return `<li class="oc-popup-task">
+      const idx = calTasks.indexOf(t);
+      return `<li class="oc-popup-task" data-task-i="${idx}" style="cursor:pointer">
         <span class="oc-popup-task__dot ${chipCls}"></span>
         <div class="oc-popup-task__info">
           <div class="oc-popup-task__head">
@@ -1339,14 +1531,24 @@ if (ocWeeksEl) {
     document.body.style.overflow = '';
   }
 
+  function goToDetail(t) {
+    sessionStorage.setItem('krds_selected_task', JSON.stringify(t));
+    window.location.href = '/resources/pages/operating-detail.html';
+  }
+
   popupOverlay.querySelector('.oc-popup__close').addEventListener('click', closeDayPopup);
-  popupOverlay.addEventListener('click', e => { if (e.target === popupOverlay) closeDayPopup(); });
+  popupOverlay.addEventListener('click', e => {
+    if (e.target === popupOverlay) { closeDayPopup(); return; }
+    const li = e.target.closest('.oc-popup-task[data-task-i]');
+    if (li) { closeDayPopup(); goToDetail(calTasks[+li.dataset.taskI]); }
+  });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !popupOverlay.hidden) closeDayPopup(); });
 
   ocWeeksEl.addEventListener('click', e => {
+    const chip = e.target.closest('.oc-chip[data-task-i]');
+    if (chip) { goToDetail(calTasks[+chip.dataset.taskI]); return; }
     const btn = e.target.closest('.oc-more');
-    if (!btn || !btn.dataset.key) return;
-    openDayPopup(btn.dataset.key);
+    if (btn?.dataset.key) openDayPopup(btn.dataset.key);
   });
 }
 
@@ -1369,3 +1571,23 @@ document.querySelectorAll(".krds-tab-area.layer").forEach(tabArea => {
     });
   });
 });
+
+/* ===== GNB 현재 페이지 active ===== */
+function setGnbActive() {
+  const path = window.location.pathname;
+  document.querySelectorAll('.gnb-menu a.gnb-main-trigger').forEach(function (a) {
+    const href = a.getAttribute('href') || '';
+    const match =
+      (href.includes('organization') && path.includes('organization')) ||
+      (href.includes('operating')    && path.includes('operating'));
+    if (match) {
+      a.classList.add('active');
+      a.setAttribute('aria-current', 'page');
+    } else {
+      a.classList.remove('active');
+      a.removeAttribute('aria-current');
+    }
+  });
+}
+setGnbActive();
+document.addEventListener('ui-include:done', setGnbActive);

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>규정</title>
+    <link rel="stylesheet" href="/resources/css/custom.css">
+    <link href="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.css" type="text/css" rel="stylesheet" />
+    <script src="/resources/js/component/ui-include.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.js"></script>
+</head>
+<body>
+
+<div class="operating-container">
+
+  <div data-include="/html/code/header.html"></div>
+
+  <main class="main" style="overflow:auto;">
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <div class="page-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <path d="M11 2C9.9 2 9 2.9 9 4v5H6.5c-.4 0-.7.5-.4.8l4.5 4.5c.2.2.6.2.8 0l4.5-4.5c.3-.3.1-.8-.4-.8H13V4c0-1.1-.9-2-2-2z" fill="#256ef4"/>
+          <path d="M4 16v2a2 2 0 002 2h10a2 2 0 002-2v-2" stroke="#256ef4" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="page-title-group">
+        <div class="page-title">조직도 규정 업로드</div>
+        <div class="page-desc">직제 규정, 운영 규정, 업무 분장 등 조직도 관련 규정 문서를 등록합니다</div>
+      </div>
+    </div>
+
+    <!-- CATEGORY TABS -->
+    <div class="category-label">업로드 문서 분류</div>
+    <div class="category-tabs" id="cat-tabs">
+      <button class="cat-tab active" data-cat="직제규정">직제규정</button>
+      <button class="cat-tab" data-cat="운영규정">운영규정</button>
+      <button class="cat-tab" data-cat="업무분장">업무분장</button>
+      <button class="cat-tab" data-cat="인사규정">인사규정</button>
+      <button class="cat-tab" data-cat="기타">기타</button>
+    </div>
+
+    <!-- DROPZONE -->
+    <div class="dropzone" id="dropzone">
+      <input type="file" id="file-input" multiple accept=".pdf,.hwp,.docx,.xlsx"/>
+      <div class="dropzone-icon">
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+          <path d="M13 3v13M8 9l5-6 5 6" stroke="#256ef4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M4 19v2a2 2 0 002 2h14a2 2 0 002-2v-2" stroke="#256ef4" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="dropzone-title">파일을 드래그하거나 클릭하여 업로드</div>
+      <div class="dropzone-sub">PDF, HWP, DOCX, XLSX 파일 지원 · 파일당 최대 50MB</div>
+      <div class="dropzone-badge" id="cat-badge">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M6 1l1.1 3.3H11L8.2 6.3l1.1 3.3L6 7.5 2.7 9.6l1.1-3.3L1 4.3h3.9L6 1z" fill="#256ef4"/>
+        </svg>
+        직제규정로 분류됩니다
+      </div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar" id="filter-bar">
+      <button class="filter-btn active" data-filter="전체">전체 (3)</button>
+      <button class="filter-btn" data-filter="직제규정">직제규정 (1)</button>
+      <button class="filter-btn" data-filter="운영규정">운영규정 (1)</button>
+      <button class="filter-btn" data-filter="업무분장">업무분장 (1)</button>
+      <button class="filter-btn" data-filter="인사규정">인사규정 (0)</button>
+      <button class="filter-btn" data-filter="기타">기타 (0)</button>
+    </div>
+
+    <!-- FILE LIST -->
+    <div class="file-list" id="file-list">
+
+      <div class="file-row" data-cat="직제규정">
+        <span class="file-name">직제규정_2024.pdf [PDF · 1.8MB · 2024.12.01 업로드]</span>
+        <div class="file-actions">
+          <a href="#" class="file-action-btn" onclick="return false">
+            다운로드
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M6 1v7M3 5.5l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M1.5 10h9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+          </a>
+          <a href="#" class="file-action-btn preview" onclick="return false">
+            바로보기
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M5 3H2.5A1.5 1.5 0 001 4.5v5A1.5 1.5 0 002.5 11h5A1.5 1.5 0 009 9.5V7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+              <path d="M7 1h4v4M11 1L5.5 6.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <div class="file-row" data-cat="운영규정">
+        <span class="file-name">조직도_운영규정_v2.pdf [PDF · 980KB · 2024.10.05 업로드]</span>
+        <div class="file-actions">
+          <a href="#" class="file-action-btn" onclick="return false">
+            다운로드
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M6 1v7M3 5.5l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M1.5 10h9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+          </a>
+          <a href="#" class="file-action-btn preview" onclick="return false">
+            바로보기
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M5 3H2.5A1.5 1.5 0 001 4.5v5A1.5 1.5 0 002.5 11h5A1.5 1.5 0 009 9.5V7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+              <path d="M7 1h4v4M11 1L5.5 6.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <div class="file-row" data-cat="업무분장">
+        <span class="file-name">업무분장표_2025.hwp [HWP · 245KB · 2025.03.12 업로드]</span>
+        <div class="file-actions">
+          <a href="#" class="file-action-btn" onclick="return false">
+            다운로드
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M6 1v7M3 5.5l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M1.5 10h9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+          </a>
+          <a href="#" class="file-action-btn preview" onclick="return false">
+            바로보기
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M5 3H2.5A1.5 1.5 0 001 4.5v5A1.5 1.5 0 002.5 11h5A1.5 1.5 0 009 9.5V7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+              <path d="M7 1h4v4M11 1L5.5 6.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+    </div><!-- /file-list -->
+
+  </main>
+</div>
+
+<script>
+/* ── GNB ACTIVE ── */
+document.addEventListener('ui-include:done', () => {
+  document.querySelectorAll('.gnb-menu .gnb-main-trigger').forEach(el => {
+    if (el.href && el.href.includes('policy.html')) {
+      el.classList.add('active');
+    }
+  });
+});
+
+/* ── CATEGORY TABS ── */
+const activeCat = { value: '직제규정' };
+
+document.getElementById('cat-tabs').addEventListener('click', e => {
+  const btn = e.target.closest('.cat-tab');
+  if (!btn) return;
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  activeCat.value = btn.dataset.cat;
+  document.getElementById('cat-badge').lastChild.textContent = activeCat.value + '로 분류됩니다';
+});
+
+/* ── FILTER BAR ── */
+document.getElementById('filter-bar').addEventListener('click', e => {
+  const btn = e.target.closest('.filter-btn');
+  if (!btn) return;
+  document.querySelectorAll('.filter-btn').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  const f = btn.dataset.filter;
+  document.querySelectorAll('#file-list .file-row').forEach(row => {
+    row.style.display = (f === '전체' || row.dataset.cat === f) ? 'flex' : 'none';
+  });
+});
+
+/* ── DROPZONE DRAG ── */
+const dz = document.getElementById('dropzone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+dz.addEventListener('drop', e => {
+  e.preventDefault();
+  dz.classList.remove('dragover');
+  handleFiles(e.dataTransfer.files);
+});
+dz.addEventListener('click', () => document.getElementById('file-input').click());
+document.getElementById('file-input').addEventListener('change', e => handleFiles(e.target.files));
+
+/* ── FILE HANDLE ── */
+function handleFiles(files) {
+  Array.from(files).forEach(file => {
+    const ext = file.name.split('.').pop().toLowerCase();
+    const sizeKB = (file.size / 1024).toFixed(0);
+    const sizeStr = sizeKB > 1024 ? (sizeKB / 1024).toFixed(1) + 'MB' : sizeKB + 'KB';
+    const today = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' })
+      .replace(/\. /g, '.').replace(/\.$/, '');
+    const cat = activeCat.value;
+
+    const row = document.createElement('div');
+    row.className = 'file-row';
+    row.dataset.cat = cat;
+    row.innerHTML = `
+      <span class="file-name">${file.name} [${ext.toUpperCase()} · ${sizeStr} · ${today} 업로드]</span>
+      <div class="file-actions">
+        <a href="#" class="file-action-btn" onclick="return false">
+          다운로드
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M6 1v7M3 5.5l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M1.5 10h9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+        </a>
+        <a href="#" class="file-action-btn preview" onclick="return false">
+          바로보기
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M5 3H2.5A1.5 1.5 0 001 4.5v5A1.5 1.5 0 002.5 11h5A1.5 1.5 0 009 9.5V7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            <path d="M7 1h4v4M11 1L5.5 6.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </div>`;
+
+    document.getElementById('file-list').prepend(row);
+    updateFilterCounts();
+  });
+}
+
+/* ── UPDATE FILTER COUNTS ── */
+function updateFilterCounts() {
+  const rows = Array.from(document.querySelectorAll('#file-list .file-row'));
+  const counts = { '전체': rows.length };
+  rows.forEach(r => {
+    const c = r.dataset.cat;
+    counts[c] = (counts[c] || 0) + 1;
+  });
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    const f = btn.dataset.filter;
+    const n = f === '전체' ? rows.length : (counts[f] || 0);
+    btn.textContent = f === '전체' ? `전체 (${n})` : `${f} (${n})`;
+  });
+}
+</script>
+
+</body>
+</html>

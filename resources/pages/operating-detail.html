@@ -11,6 +11,11 @@
 </head>
 <body>
 
+  <!-- 드로어 (왼쪽 슬라이드 패널) -->
+  <div class="drawer-backdrop" id="drawer-backdrop">
+    <iframe class="drawer-iframe" id="drawer-frame" src=""></iframe>
+  </div>
+
   <div class="operating-container">
 
     <div data-include="/html/code/header.html"></div>
@@ -33,10 +38,10 @@
             </a>
           </li>
           <li class="nav-node nav-node--leaf nav-node--depth0">
-            <span class="nav-node__row" style="--depth: 0">
+            <a href="/resources/pages/operating-detail-policy.html" class="nav-node__row" style="--depth: 0">
               <span class="nav-node__caret"></span>
               <span class="nav-node__label">규정</span>
-            </span>
+            </a>
           </li>
         </ul>
       </nav>
@@ -63,111 +68,25 @@
         <div class="layout" style="grid-template-columns: minmax(0,1fr);">
           <main id="detail-content" class="content">
 
-            <!-- placeholder – 삭제 방지용 더미 -->
-            <section class="board" data-open="true" style="display:none">
+            <!-- placeholder – task 미선택 시 표시 -->
+            <section class="board" data-open="true">
               <div class="board-head">
                 <button type="button" class="board-toggle" aria-expanded="true">
-                  <span class="caret" aria-hidden="true">&#9662;</span> 접수 <span class="count">(7건)</span>
+                  <span class="caret" aria-hidden="true">&#9662;</span> 완료 <span class="count">(4건)</span>
                 </button>
               </div>
               <table class="task-table">
-                <thead>
-                  <tr>
-                    <th scope="col">업무명</th>
-                    <th scope="col">업무유형</th>
-                    <th scope="col">담당자</th>
-                    <th scope="col">마감일</th>
-                    <th scope="col">현재 단계</th>
-                    <th scope="col">결재 상태</th>
-                    <th scope="col">우선순위</th>
-                    <th scope="col">AI 리스크</th>
-                  </tr>
-                </thead>
+                <thead><tr>
+                  <th scope="col">업무명</th><th scope="col">업무유형</th>
+                  <th scope="col">담당자</th><th scope="col">마감일</th>
+                  <th scope="col">현재 단계</th><th scope="col">결재 상태</th>
+                  <th scope="col">우선순위</th><th scope="col">AI 리스크</th>
+                </tr></thead>
                 <tbody>
-                  <tr>
-                    <td class="col-name">업무명이 들어가는 곳입니다.</td>
-                    <td>외부 업무</td>
-                    <td><span class="col-assignee"><span class="avatar"></span>닉네임</span></td>
-                    <td>2024-04-23</td>
-                    <td>2024-04-23</td>
-                    <td>미상신</td>
-                    <td><span class="pri pri-high">상</span></td>
-                    <td class="col-risk">
-                      <span class="tag-risk">선행업무 미완료</span><span class="tag-risk">일정지연</span><span class="tag-risk">병목</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="col-name">업무명이 들어가는 곳입니다.</td>
-                    <td>외부 업무</td>
-                    <td><span class="col-assignee"><span class="avatar"></span>닉네임</span></td>
-                    <td>2024-04-23</td>
-                    <td>2024-04-23</td>
-                    <td>미상신</td>
-                    <td><span class="pri pri-mid">중</span></td>
-                    <td class="col-risk">
-                      <span class="tag-risk">선행업무 미완료</span><span class="tag-risk">일정지연</span><span class="tag-risk">병목</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="col-name">업무명이 들어가는 곳입니다.</td>
-                    <td>외부 업무</td>
-                    <td><span class="col-assignee need"><span class="dot"></span>지정 필요</span></td>
-                    <td>2024-04-23</td>
-                    <td>2024-04-23</td>
-                    <td>미상신</td>
-                    <td><span class="pri pri-low">하</span></td>
-                    <td class="col-risk">
-                      <span class="tag-risk">선행업무 미완료</span><span class="tag-risk">일정지연</span><span class="tag-risk">병목</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="col-name">업무명이 들어가는 곳입니다.</td>
-                    <td>외부 업무</td>
-                    <td><span class="col-assignee need"><span class="dot"></span>지정 필요</span></td>
-                    <td>2024-04-23</td>
-                    <td>2024-04-23</td>
-                    <td>미상신</td>
-                    <td><span class="pri pri-high">상</span></td>
-                    <td class="col-risk">
-                      <span class="tag-risk">선행업무 미완료</span><span class="tag-risk">일정지연</span><span class="tag-risk">병목</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="col-name">업무명이 들어가는 곳입니다.</td>
-                    <td>외부 업무</td>
-                    <td><span class="col-assignee"><span class="avatar"></span>닉네임</span></td>
-                    <td>2024-04-23</td>
-                    <td>2024-04-23</td>
-                    <td>미상신</td>
-                    <td><span class="pri pri-high">상</span></td>
-                    <td class="col-risk">
-                      <span class="tag-risk">선행업무 미완료</span><span class="tag-risk">일정지연</span><span class="tag-risk">병목</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="col-name">업무명이 들어가는 곳입니다.</td>
-                    <td>외부 업무</td>
-                    <td><span class="col-assignee"><span class="avatar"></span>닉네임</span></td>
-                    <td>2024-04-23</td>
-                    <td>2024-04-23</td>
-                    <td>미상신</td>
-                    <td><span class="pri pri-high">상</span></td>
-                    <td class="col-risk">
-                      <span class="tag-risk">선행업무 미완료</span><span class="tag-risk">일정지연</span><span class="tag-risk">병목</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="col-name">업무명이 들어가는 곳입니다.</td>
-                    <td>외부 업무</td>
-                    <td><span class="col-assignee"><span class="avatar"></span>닉네임</span></td>
-                    <td>2024-04-23</td>
-                    <td>2024-04-23</td>
-                    <td>미상신</td>
-                    <td><span class="pri pri-mid">중</span></td>
-                    <td class="col-risk">
-                      <span class="tag-risk">선행업무 미완료</span><span class="tag-risk">일정지연</span><span class="tag-risk">병목</span>
-                    </td>
-                  </tr>
+                  <tr><td class="col-name">현황 조사 및 기초분석</td><td>내부 업무</td><td><span class="col-assignee"><span class="avatar av-1">이</span>이서연</span></td><td>2025-03-15</td><td>완료</td><td>결재완료</td><td><span class="pri pri-high">상</span></td><td class="col-risk"><span style="color:#94a3b8;font-size:11px">없음</span></td></tr>
+                  <tr><td class="col-name">과제 범위 확정</td><td>협업 업무</td><td><span class="col-assignee"><span class="avatar av-1">이</span>이서연</span></td><td>2025-04-10</td><td>완료</td><td>결재완료</td><td><span class="pri pri-mid">중</span></td><td class="col-risk"><span style="color:#94a3b8;font-size:11px">없음</span></td></tr>
+                  <tr><td class="col-name">추진 계획 수립</td><td>내부 업무</td><td><span class="col-assignee"><span class="avatar av-1">이</span>이서연</span></td><td>2025-05-20</td><td>완료</td><td>결재완료</td><td><span class="pri pri-high">상</span></td><td class="col-risk"><span style="color:#94a3b8;font-size:11px">없음</span></td></tr>
+                  <tr><td class="col-name">관련 부서 협의</td><td>협업 업무</td><td><span class="col-assignee"><span class="avatar av-1">이</span>이서연</span></td><td>2025-07-01</td><td>완료</td><td>결재완료</td><td><span class="pri pri-low">하</span></td><td class="col-risk"><span style="color:#94a3b8;font-size:11px">없음</span></td></tr>
                 </tbody>
               </table>
             </section>
@@ -176,128 +95,40 @@
             <section class="board" data-open="true">
               <div class="board-head">
                 <button type="button" class="board-toggle" aria-expanded="true">
-                  <span class="caret" aria-hidden="true">&#9662;</span> 검토 <span class="count">(7건)</span>
+                  <span class="caret" aria-hidden="true">&#9662;</span> 검토 <span class="count">(2건)</span>
                 </button>
               </div>
               <table class="task-table">
-                <thead>
-                  <tr>
-                    <th scope="col">업무명</th>
-                    <th scope="col">업무유형</th>
-                    <th scope="col">담당자</th>
-                    <th scope="col">마감일</th>
-                    <th scope="col">현재 단계</th>
-                    <th scope="col">결재 상태</th>
-                    <th scope="col">우선순위</th>
-                    <th scope="col">AI 리스크</th>
-                  </tr>
-                </thead>
+                <thead><tr>
+                  <th scope="col">업무명</th><th scope="col">업무유형</th>
+                  <th scope="col">담당자</th><th scope="col">마감일</th>
+                  <th scope="col">현재 단계</th><th scope="col">결재 상태</th>
+                  <th scope="col">우선순위</th><th scope="col">AI 리스크</th>
+                </tr></thead>
                 <tbody>
-                  <tr>
-                    <td class="col-name">업무명이 들어가는 곳입니다.</td>
-                    <td>외부 업무</td>
-                    <td><span class="col-assignee"><span class="avatar"></span>닉네임</span></td>
-                    <td>2024-04-23</td><td>2024-04-23</td><td>미상신</td>
-                    <td><span class="pri pri-high">상</span></td>
-                    <td class="col-risk"><span class="tag-risk">선행업무 미완료</span><span class="tag-risk">일정지연</span><span class="tag-risk">병목</span></td>
-                  </tr>
-                  <tr>
-                    <td class="col-name">업무명이 들어가는 곳입니다.</td>
-                    <td>외부 업무</td>
-                    <td><span class="col-assignee"><span class="avatar"></span>닉네임</span></td>
-                    <td>2024-04-23</td><td>2024-04-23</td><td>미상신</td>
-                    <td><span class="pri pri-mid">중</span></td>
-                    <td class="col-risk"><span class="tag-risk">선행업무 미완료</span><span class="tag-risk">일정지연</span><span class="tag-risk">병목</span></td>
-                  </tr>
-                  <tr>
-                    <td class="col-name">업무명이 들어가는 곳입니다.</td>
-                    <td>외부 업무</td>
-                    <td><span class="col-assignee"><span class="avatar"></span>닉네임</span></td>
-                    <td>2024-04-23</td><td>2024-04-23</td><td>미상신</td>
-                    <td><span class="pri pri-low">하</span></td>
-                    <td class="col-risk"><span class="tag-risk">선행업무 미완료</span><span class="tag-risk">일정지연</span><span class="tag-risk">병목</span></td>
-                  </tr>
-                  <tr>
-                    <td class="col-name">업무명이 들어가는 곳입니다.</td>
-                    <td>외부 업무</td>
-                    <td><span class="col-assignee"><span class="avatar"></span>닉네임</span></td>
-                    <td>2024-04-23</td><td>2024-04-23</td><td>미상신</td>
-                    <td><span class="pri pri-high">상</span></td>
-                    <td class="col-risk"><span class="tag-risk">선행업무 미완료</span><span class="tag-risk">일정지연</span><span class="tag-risk">병목</span></td>
-                  </tr>
-                  <tr>
-                    <td class="col-name">업무명이 들어가는 곳입니다.</td>
-                    <td>외부 업무</td>
-                    <td><span class="col-assignee"><span class="avatar"></span>닉네임</span></td>
-                    <td>2024-04-23</td><td>2024-04-23</td><td>미상신</td>
-                    <td><span class="pri pri-high">상</span></td>
-                    <td class="col-risk"><span class="tag-risk">선행업무 미완료</span><span class="tag-risk">일정지연</span><span class="tag-risk">병목</span></td>
-                  </tr>
-                  <tr>
-                    <td class="col-name">업무명이 들어가는 곳입니다.</td>
-                    <td>외부 업무</td>
-                    <td><span class="col-assignee"><span class="avatar"></span>닉네임</span></td>
-                    <td>2024-04-23</td><td>2024-04-23</td><td>미상신</td>
-                    <td><span class="pri pri-high">상</span></td>
-                    <td class="col-risk"><span class="tag-risk">선행업무 미완료</span><span class="tag-risk">일정지연</span><span class="tag-risk">병목</span></td>
-                  </tr>
-                  <tr>
-                    <td class="col-name">업무명이 들어가는 곳입니다.</td>
-                    <td>외부 업무</td>
-                    <td><span class="col-assignee"><span class="avatar"></span>닉네임</span></td>
-                    <td>2024-04-23</td><td>2024-04-23</td><td>미상신</td>
-                    <td><span class="pri pri-high">상</span></td>
-                    <td class="col-risk"><span class="tag-risk">선행업무 미완료</span><span class="tag-risk">일정지연</span><span class="tag-risk">병목</span></td>
-                  </tr>
+                  <tr><td class="col-name">초안 작성</td><td>내부 업무</td><td><span class="col-assignee"><span class="avatar av-1">이</span>이서연</span></td><td>2025-09-30</td><td>검토</td><td>상신완료</td><td><span class="pri pri-high">상</span></td><td class="col-risk"><span class="tag-risk">검토 지연</span></td></tr>
+                  <tr><td class="col-name">초안 검토 및 수정</td><td>검토 업무</td><td><span class="col-assignee"><span class="avatar av-1">이</span>이서연</span></td><td>2025-10-31</td><td>검토</td><td>상신완료</td><td><span class="pri pri-mid">중</span></td><td class="col-risk"><span class="tag-risk">이해관계자 미합의</span></td></tr>
                 </tbody>
               </table>
             </section>
 
-            <!-- 추천 -->
+            <!-- 접수 -->
             <section class="board" data-open="true">
               <div class="board-head">
                 <button type="button" class="board-toggle" aria-expanded="true">
-                  <span class="caret" aria-hidden="true">&#9662;</span> 추천 <span class="count">(3건)</span>
+                  <span class="caret" aria-hidden="true">&#9662;</span> 접수 <span class="count">(2건)</span>
                 </button>
               </div>
               <table class="task-table">
-                <thead>
-                  <tr>
-                    <th scope="col">업무명</th>
-                    <th scope="col">업무유형</th>
-                    <th scope="col">담당자</th>
-                    <th scope="col">마감일</th>
-                    <th scope="col">현재 단계</th>
-                    <th scope="col">결재 상태</th>
-                    <th scope="col">우선순위</th>
-                    <th scope="col">AI 리스크</th>
-                  </tr>
-                </thead>
+                <thead><tr>
+                  <th scope="col">업무명</th><th scope="col">업무유형</th>
+                  <th scope="col">담당자</th><th scope="col">마감일</th>
+                  <th scope="col">현재 단계</th><th scope="col">결재 상태</th>
+                  <th scope="col">우선순위</th><th scope="col">AI 리스크</th>
+                </tr></thead>
                 <tbody>
-                  <tr>
-                    <td class="col-name">업무명이 들어가는 곳입니다.</td>
-                    <td>외부 업무</td>
-                    <td><span class="col-assignee"><span class="avatar"></span>닉네임</span></td>
-                    <td>2024-04-23</td><td>2024-04-23</td><td>미상신</td>
-                    <td><span class="pri pri-high">상</span></td>
-                    <td class="col-risk"><span class="tag-risk">선행업무 미완료</span><span class="tag-risk">일정지연</span><span class="tag-risk">병목</span></td>
-                  </tr>
-                  <tr>
-                    <td class="col-name">업무명이 들어가는 곳입니다.</td>
-                    <td>외부 업무</td>
-                    <td><span class="col-assignee"><span class="avatar"></span>닉네임</span></td>
-                    <td>2024-04-23</td><td>2024-04-23</td><td>미상신</td>
-                    <td><span class="pri pri-mid">중</span></td>
-                    <td class="col-risk"><span class="tag-risk">선행업무 미완료</span><span class="tag-risk">일정지연</span><span class="tag-risk">병목</span></td>
-                  </tr>
-                  <tr>
-                    <td class="col-name">업무명이 들어가는 곳입니다.</td>
-                    <td>외부 업무</td>
-                    <td><span class="col-assignee"><span class="avatar"></span>닉네임</span></td>
-                    <td>2024-04-23</td><td>2024-04-23</td><td>미상신</td>
-                    <td><span class="pri pri-low">하</span></td>
-                    <td class="col-risk"><span class="tag-risk">선행업무 미완료</span><span class="tag-risk">일정지연</span><span class="tag-risk">병목</span></td>
-                  </tr>
+                  <tr><td class="col-name">최종안 확정</td><td>조정 업무</td><td><span class="col-assignee need"><span class="dot"></span>지정 필요</span></td><td>2025-11-30</td><td>접수</td><td>미상신</td><td><span class="pri pri-high">상</span></td><td class="col-risk"><span class="tag-risk">일정지연</span><span class="tag-risk">리소스 부족</span></td></tr>
+                  <tr><td class="col-name">최종 보고 및 결재</td><td>내부 업무</td><td><span class="col-assignee need"><span class="dot"></span>지정 필요</span></td><td>2025-12-31</td><td>접수</td><td>미상신</td><td><span class="pri pri-mid">중</span></td><td class="col-risk"><span class="tag-risk">선행업무 미완료</span></td></tr>
                 </tbody>
               </table>
             </section>
@@ -312,6 +143,25 @@
 
   <script src="/resources/js/script.js"></script>
   <script>
+  /* ── 드로어 열기/닫기 (iframe 기반 왼쪽 슬라이드) ── */
+  (function () {
+    const back  = document.getElementById('drawer-backdrop');
+    const frame = document.getElementById('drawer-frame');
+
+    window.openDrawer = function () {
+      frame.src = '/resources/pages/operating-detail-page.html';
+      back.classList.add('drawer-open');
+    };
+
+    window.closeDrawer = function () {
+      back.classList.remove('drawer-open');
+    };
+
+    back.addEventListener('click', e => {
+      if (e.target === back) closeDrawer();
+    });
+  })();
+
   (function () {
     const raw = sessionStorage.getItem('krds_selected_task');
     const content = document.getElementById('detail-content');
@@ -354,13 +204,14 @@
     const PRI_CLS   = { high: 'pri-high', mid: 'pri-mid', low: 'pri-low' };
 
     function rowHTML(st) {
+      const idx  = subtasks.indexOf(st);
       const risks = st.risks.length
         ? st.risks.map(r => `<span class="tag-risk">${escapeHtml(r)}</span>`).join('')
-        : '<span style="color:#94a3b8;font-size:11px">없음</span>';
-      return `<tr>
+        : `<span style="color:var(--krds-light-color-text-subtle);font-size:11px">없음</span>`;
+      return `<tr data-st-idx="${idx}" style="cursor:pointer">
         <td class="col-name">${escapeHtml(st.name)}</td>
         <td>${escapeHtml(st.type)}</td>
-        <td><span class="col-assignee"><span class="avatar">${escapeHtml(st.assignee.slice(0,1))}</span>${escapeHtml(st.assignee)}</span></td>
+        <td><span class="col-assignee"><span class="avatar ${ownerColorClass(st.assignee)}">${escapeHtml(st.assignee.slice(0,1))}</span>${escapeHtml(st.assignee)}</span></td>
         <td>${escapeHtml(st.deadline)}</td>
         <td>${escapeHtml(st.stage)}</td>
         <td>${escapeHtml(st.approval)}</td>
@@ -401,6 +252,17 @@
         board.setAttribute('data-open', open ? 'false' : 'true');
         btn.setAttribute('aria-expanded', open ? 'false' : 'true');
       });
+    });
+
+    /* ── 행 클릭 → 드로어 열기 ── */
+    content.addEventListener('click', e => {
+      const tr = e.target.closest('tr[data-st-idx]');
+      if (!tr) return;
+      const st = subtasks[+tr.dataset.stIdx];
+      if (st) {
+        sessionStorage.setItem('krds_selected_subtask', JSON.stringify(st));
+        openDrawer();
+      }
     });
   })();
   </script>

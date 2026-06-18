@@ -11,6 +11,11 @@
 </head>
 <body>
 
+  <!-- 드로어 (왼쪽 슬라이드 패널) -->
+  <div class="drawer-backdrop" id="drawer-backdrop">
+    <iframe class="drawer-iframe" id="drawer-frame" src=""></iframe>
+  </div>
+
   <div class="operating-container">
 
     <div data-include="/html/code/header.html"></div>
@@ -33,10 +38,10 @@
             </span>
           </li>
           <li class="nav-node nav-node--leaf nav-node--depth0">
-            <span class="nav-node__row" style="--depth: 0">
+            <a href="/resources/pages/operating-detail-policy.html" class="nav-node__row" style="--depth: 0">
               <span class="nav-node__caret"></span>
               <span class="nav-node__label">규정</span>
-            </span>
+            </a>
           </li>
         </ul>
       </nav>
@@ -70,6 +75,25 @@
 
   <script src="/resources/js/script.js"></script>
   <script>
+  /* ── 드로어 열기/닫기 (iframe 기반 왼쪽 슬라이드) ── */
+  (function () {
+    const back  = document.getElementById('drawer-backdrop');
+    const frame = document.getElementById('drawer-frame');
+
+    window.openDrawer = function () {
+      frame.src = '/resources/pages/operating-detail-page.html';
+      back.classList.add('drawer-open');
+    };
+
+    window.closeDrawer = function () {
+      back.classList.remove('drawer-open');
+    };
+
+    back.addEventListener('click', e => {
+      if (e.target === back) closeDrawer();
+    });
+  })();
+
   (function () {
     const raw = sessionStorage.getItem('krds_selected_task');
     const canvas = document.getElementById('flow-canvas');
@@ -138,25 +162,36 @@
       </article>`;
     });
 
-    // SVG 연결선 생성 (노드 중앙 → 다음 노드 중앙, 수평)
-    const PORT = 3;
+    // SVG 연결선 생성 — 조직도뷰 라인 스타일 통일
+    const ARROW = 10;
     const lineY = centerY + NODE_H / 2;
     let svgPaths = '';
-    let svgPorts = '';
+    const svgDefs = `<defs>
+      <marker id="flow-arrow" markerWidth="${ARROW}" markerHeight="8" refX="${ARROW - 1}" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+        <polygon class="flow-arrow-head" points="0 0, ${ARROW} 4, 0 8" />
+      </marker>
+    </defs>`;
     for (let i = 0; i < subtasks.length - 1; i++) {
       const x1 = PAD + i * (NODE_W + GAP_X) + NODE_W;
       const x2 = PAD + (i + 1) * (NODE_W + GAP_X);
-      svgPaths += `<path class="line" d="M${x1},${lineY} H${x2}" />`;
-      svgPorts += `<rect class="port" x="${x1 - PORT}" y="${lineY - PORT}" width="${PORT*2}" height="${PORT*2}" rx="1" />`;
-      svgPorts += `<rect class="port" x="${x2 - PORT}" y="${lineY - PORT}" width="${PORT*2}" height="${PORT*2}" rx="1" />`;
+      svgPaths += `<path class="line" d="M${x1},${lineY} H${x2 - ARROW}" marker-end="url(#flow-arrow)" />`;
     }
 
     const svgH = centerY + NODE_H + PAD;
-    const svg  = `<svg class="flow-lines" viewBox="0 0 ${totalW} ${svgH}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="width:${totalW}px;height:${svgH}px">${svgPaths}${svgPorts}</svg>`;
+    const svg  = `<svg class="flow-lines" viewBox="0 0 ${totalW} ${svgH}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="width:${totalW}px;height:${svgH}px">${svgDefs}${svgPaths}</svg>`;
 
     canvas.style.width  = totalW + 'px';
     canvas.style.height = (centerY + NODE_H + PAD) + 'px';
     canvas.innerHTML    = svg + nodeItems.join('');
+
+    /* ── 노드 클릭 → 드로어 열기 ── */
+    canvas.querySelectorAll('.node').forEach((el, i) => {
+      el.style.cursor = 'pointer';
+      el.addEventListener('click', () => {
+        sessionStorage.setItem('krds_selected_subtask', JSON.stringify(subtasks[i]));
+        openDrawer();
+      });
+    });
   })();
   </script>
 
