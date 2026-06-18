@@ -52,7 +52,7 @@
         <!-- 과제 정보 헤더 -->
         <header class="gnb-sub">
           <div class="task-id">
-            <span class="badge-status" id="detail-badge">종결</span>
+            <span class="krds-badge bg-light-gray" id="detail-badge">종결</span>
             <div class="task-titles">
               <strong class="task-name" id="detail-task-name">과제 이름 들어가는 곳</strong>
               <span class="task-meta" id="detail-task-meta">담당자명 / 담당 부서 / 참여 인원 7명</span>
@@ -104,12 +104,11 @@
     }
 
     const task = JSON.parse(raw);
-    const STATUS_LABEL = { wait: '대기', progress: '진행중', done: '종결' };
 
     /* ── 헤더 채우기 ── */
     const badge = document.getElementById('detail-badge');
     badge.textContent = STATUS_LABEL[task.status] || task.status;
-    badge.className   = 'badge-status badge-status--' + (task.status || 'wait');
+    badge.className   = STATUS_CLASS[task.status] || 'krds-badge bg-light-gray';
     document.getElementById('detail-task-name').textContent = task.title;
     document.title = task.title + ' · 프로세싱 뷰';
 
