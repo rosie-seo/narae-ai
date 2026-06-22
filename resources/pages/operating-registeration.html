@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>업무 등록</title>
+  <link rel="stylesheet" href="/resources/css/custom.css"/>
+  <link href="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.css" type="text/css" rel="stylesheet"/>
+  <script src="/resources/js/component/ui-include.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.js"></script>
+  <style>
+    /* ── 등록 폼 레이아웃 ── */
+    .reg-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: var(--krds-gap-5);
+    }
+
+    /* ── 페이지 헤더 ── */
+    .reg-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--krds-gap-4);
+      flex-wrap: wrap;
+    }
+    .reg-topbar__left {
+      display: flex;
+      align-items: baseline;
+      gap: var(--krds-gap-3);
+    }
+    .reg-topbar__title {
+      font-size: var(--krds-pc-font-size-heading-small);
+      font-weight: var(--krds-font-weight-bold);
+      color: var(--krds-light-color-text-basic);
+      margin: 0;
+    }
+    .reg-topbar__id {
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      color: var(--krds-light-color-text-subtle);
+    }
+    .reg-topbar__actions {
+      display: flex;
+      align-items: center;
+      gap: var(--krds-gap-3);
+    }
+
+    /* ── 버튼 ── */
+    .btn-ghost {
+      height: var(--krds-size-height-6);
+      padding: 0 var(--krds-padding-5);
+      border: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-gray);
+      border-radius: var(--krds-radius-medium2);
+      background: var(--krds-light-color-surface-white);
+      color: var(--krds-light-color-text-basic);
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      font-family: inherit;
+      cursor: pointer;
+      transition: background var(--krds-transition-base), border-color var(--krds-transition-base);
+    }
+    .btn-ghost:hover {
+      background: var(--krds-light-color-action-secondary-hover);
+      border-color: var(--krds-light-color-action-secondary-active);
+    }
+    .btn-solid {
+      height: var(--krds-size-height-6);
+      padding: 0 var(--krds-padding-6);
+      border: none;
+      border-radius: var(--krds-radius-medium2);
+      background: var(--krds-light-color-action-secondary-active);
+      color: var(--krds-light-color-text-basic-inverse);
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      font-weight: var(--krds-font-weight-bold);
+      font-family: inherit;
+      cursor: pointer;
+      transition: background var(--krds-transition-base);
+    }
+    .btn-solid:hover { background: var(--krds-light-color-action-secondary-pressed); }
+
+    /* ── 섹션 카드 ── */
+    .reg-section {
+      border: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-gray-light);
+      border-radius: var(--krds-radius-medium3);
+      background: var(--krds-light-color-surface-white);
+      overflow: hidden;
+    }
+    .reg-section__head {
+      display: flex;
+      align-items: center;
+      gap: var(--krds-gap-3);
+      padding: var(--krds-padding-5) var(--krds-padding-7);
+      border-bottom: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-divider-gray-light);
+      background: var(--krds-light-color-background-gray-subtler);
+    }
+    .reg-section__num {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: var(--krds-light-color-action-secondary-active);
+      color: var(--krds-light-color-text-basic-inverse);
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      font-weight: var(--krds-font-weight-bold);
+      flex-shrink: 0;
+    }
+    .reg-section__title {
+      font-size: var(--krds-pc-font-size-label-small);
+      font-weight: var(--krds-font-weight-bold);
+      color: var(--krds-light-color-text-basic);
+    }
+    .reg-section__desc {
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      color: var(--krds-light-color-text-subtle);
+    }
+    .reg-section__body {
+      padding: var(--krds-padding-7);
+      display: flex;
+      flex-direction: column;
+      gap: var(--krds-gap-5);
+    }
+
+    /* ── 폼 행 ── */
+    .form-row { display: flex; flex-direction: column; gap: var(--krds-gap-2); }
+    .form-cols {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(22rem, 1fr));
+      gap: var(--krds-gap-5);
+    }
+    .form-field { display: flex; flex-direction: column; gap: var(--krds-gap-2); }
+    .form-label {
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      font-weight: var(--krds-font-weight-bold);
+      color: var(--krds-light-color-text-basic);
+    }
+    .req-mark { color: var(--krds-light-color-element-danger); margin-left: 2px; }
+
+    /* ── 공통 입력 ── */
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      height: var(--krds-size-height-6);
+      padding: 0 var(--krds-padding-5);
+      border: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-gray);
+      border-radius: var(--krds-radius-medium2);
+      background: var(--krds-light-color-surface-white);
+      color: var(--krds-light-color-text-basic);
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      font-family: inherit;
+      box-sizing: border-box;
+      transition: border-color var(--krds-transition-base), box-shadow var(--krds-transition-base);
+      outline: none;
+    }
+    .form-input:focus,
+    .form-select:focus { border-color: var(--krds-light-color-action-secondary-active); box-shadow: var(--krds-box-shadow-outline); }
+    .form-input[readonly],
+    .form-input:disabled { background: var(--krds-light-color-background-gray-subtler); color: var(--krds-light-color-text-subtle); cursor: default; }
+    .form-textarea {
+      height: auto;
+      min-height: 8rem;
+      padding: var(--krds-padding-4) var(--krds-padding-5);
+      resize: vertical;
+      line-height: var(--krds-line-height-normal, 1.5);
+    }
+    .form-textarea:focus { border-color: var(--krds-light-color-action-secondary-active); box-shadow: var(--krds-box-shadow-outline); }
+
+    /* ── 담당자 칩 그룹 ── */
+    .chip-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--krds-gap-2);
+      padding: var(--krds-padding-3) var(--krds-padding-4);
+      border: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-gray);
+      border-radius: var(--krds-radius-medium2);
+      background: var(--krds-light-color-surface-white);
+      min-height: var(--krds-size-height-6);
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--krds-gap-1);
+      padding: var(--krds-padding-1) var(--krds-padding-3);
+      border-radius: var(--krds-radius-max);
+      background: var(--krds-light-color-element-secondary-lighter);
+      color: var(--krds-light-color-action-secondary-active);
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      font-weight: 500;
+    }
+    .chip-close {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      color: var(--krds-light-color-text-subtle);
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+    .chip-search {
+      flex: 1;
+      min-width: 8rem;
+      border: none;
+      outline: none;
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      color: var(--krds-light-color-text-basic);
+      background: transparent;
+    }
+    .btn-chip-add {
+      height: var(--krds-size-height-5);
+      padding: 0 var(--krds-padding-4);
+      border: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-gray-light);
+      border-radius: var(--krds-radius-medium2);
+      background: var(--krds-light-color-surface-white);
+      color: var(--krds-light-color-text-subtle);
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .btn-chip-add:hover { background: var(--krds-light-color-action-secondary-hover); }
+
+    /* ── 라디오 그룹 ── */
+    .radio-group {
+      display: flex;
+      align-items: center;
+      gap: var(--krds-gap-4);
+      flex-wrap: wrap;
+    }
+    .radio-opt {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--krds-gap-2);
+      cursor: pointer;
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      color: var(--krds-light-color-text-basic);
+    }
+    .radio-opt input[type="radio"] { accent-color: var(--krds-light-color-action-secondary-active); }
+
+    /* ── 결재 흐름 ── */
+    .approval-flow {
+      display: flex;
+      align-items: center;
+      gap: var(--krds-gap-3);
+      flex-wrap: wrap;
+    }
+    .approval-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--krds-gap-1);
+      padding: var(--krds-padding-4) var(--krds-padding-5);
+      border: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-gray-light);
+      border-radius: var(--krds-radius-medium2);
+      background: var(--krds-light-color-surface-white);
+      min-width: 7rem;
+      text-align: center;
+    }
+    .approval-stage.active {
+      border-color: var(--krds-light-color-action-secondary-active);
+      background: var(--krds-light-color-element-secondary-lighter);
+    }
+    .stage-label {
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      color: var(--krds-light-color-text-subtle);
+    }
+    .stage-value {
+      font-size: var(--krds-pc-font-size-label-small);
+      font-weight: var(--krds-font-weight-bold);
+      color: var(--krds-light-color-text-basic);
+    }
+    .stage-value.active { color: var(--krds-light-color-action-secondary-active); }
+    .stage-role {
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      color: var(--krds-light-color-text-subtle);
+    }
+    .flow-arrow { color: var(--krds-light-color-text-disabled); font-size: 1.6rem; }
+
+    /* ── 토글 ── */
+    .toggle-wrap { display: flex; align-items: center; gap: var(--krds-gap-2); height: var(--krds-size-height-6); }
+    .toggle-switch { position: relative; display: inline-block; width: 3.6rem; height: 2rem; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; inset: 0;
+      background: var(--krds-light-color-border-gray);
+      border-radius: var(--krds-radius-max);
+      cursor: pointer;
+      transition: background var(--krds-transition-base);
+    }
+    .toggle-slider::before {
+      content: "";
+      position: absolute;
+      width: 1.6rem; height: 1.6rem;
+      left: 2px; top: 50%; transform: translateY(-50%);
+      background: var(--krds-light-color-surface-white);
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0,0,0,.2);
+      transition: left var(--krds-transition-base);
+    }
+    .toggle-switch input:checked + .toggle-slider { background: var(--krds-light-color-action-secondary-active); }
+    .toggle-switch input:checked + .toggle-slider::before { left: calc(100% - 1.8rem); }
+
+    /* ── 절차도 테이블 ── */
+    .proc-table { width: 100%; border-collapse: collapse; }
+    .proc-table thead th {
+      padding: var(--krds-padding-3) var(--krds-padding-5);
+      text-align: left;
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      font-weight: var(--krds-font-weight-bold);
+      color: var(--krds-light-color-text-subtle);
+      background: var(--krds-light-color-background-gray-subtler);
+      border-bottom: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-gray-light);
+    }
+    .proc-table tbody td {
+      padding: var(--krds-padding-3) var(--krds-padding-5);
+      border-bottom: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-divider-gray-light);
+      vertical-align: middle;
+    }
+    .proc-table tbody tr:last-child td { border-bottom: 0; }
+    .proc-table tbody tr:hover td { background: var(--krds-light-color-action-secondary-hover); }
+    .proc-table .col-order {
+      width: 4rem; text-align: center;
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      color: var(--krds-light-color-text-subtle);
+    }
+    .proc-table .col-action { width: 3rem; text-align: center; color: var(--krds-light-color-text-disabled); cursor: pointer; }
+    .table-input,
+    .table-select {
+      width: 100%;
+      height: var(--krds-size-height-5);
+      padding: 0 var(--krds-padding-4);
+      border: var(--krds-light-border-width-static-regular) solid transparent;
+      border-radius: var(--krds-radius-small3);
+      background: transparent;
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      font-family: inherit;
+      color: var(--krds-light-color-text-basic);
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color var(--krds-transition-base);
+    }
+    .table-input:hover,
+    .table-select:hover { border-color: var(--krds-light-color-border-gray-light); }
+    .table-input:focus,
+    .table-select:focus { border-color: var(--krds-light-color-action-secondary-active); background: var(--krds-light-color-surface-white); }
+    .btn-add-row {
+      margin-top: var(--krds-gap-3);
+      display: inline-flex;
+      align-items: center;
+      gap: var(--krds-gap-2);
+      height: var(--krds-size-height-5);
+      padding: 0 var(--krds-padding-4);
+      border: var(--krds-light-border-width-static-regular) dashed var(--krds-light-color-border-gray-light);
+      border-radius: var(--krds-radius-medium2);
+      background: transparent;
+      color: var(--krds-light-color-text-subtle);
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      font-family: inherit;
+      cursor: pointer;
+      transition: border-color var(--krds-transition-base), color var(--krds-transition-base);
+    }
+    .btn-add-row:hover { border-color: var(--krds-light-color-action-secondary-active); color: var(--krds-light-color-action-secondary-active); }
+
+    /* ── 파일 업로드 ── */
+    .upload-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--krds-gap-2);
+      padding: var(--krds-padding-7);
+      border: var(--krds-light-border-width-static-regular) dashed var(--krds-light-color-border-gray);
+      border-radius: var(--krds-radius-medium3);
+      background: var(--krds-light-color-background-gray-subtler);
+      text-align: center;
+      cursor: pointer;
+      transition: border-color var(--krds-transition-base), background var(--krds-transition-base);
+    }
+    .upload-area:hover { border-color: var(--krds-light-color-action-secondary-active); background: var(--krds-light-color-action-secondary-hover); }
+    .upload-area__icon { font-size: 2rem; }
+    .upload-area__text { font-size: var(--krds-pc-font-size-label-xsmall); color: var(--krds-light-color-text-basic); }
+    .upload-area__hint { font-size: var(--krds-pc-font-size-label-xsmall); color: var(--krds-light-color-text-subtle); }
+    .file-list { display: flex; flex-direction: column; gap: var(--krds-gap-2); margin-top: var(--krds-gap-3); }
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: var(--krds-gap-3);
+      padding: var(--krds-padding-3) var(--krds-padding-5);
+      border: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-gray-light);
+      border-radius: var(--krds-radius-medium2);
+      background: var(--krds-light-color-surface-white);
+    }
+    .file-name {
+      flex: 1;
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      color: var(--krds-light-color-text-basic);
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .file-meta { font-size: var(--krds-pc-font-size-label-xsmall); color: var(--krds-light-color-text-subtle); white-space: nowrap; }
+    .file-ver {
+      padding: 0 var(--krds-padding-2);
+      border-radius: var(--krds-radius-xsmall1);
+      background: var(--krds-light-color-background-gray-subtler);
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      color: var(--krds-light-color-text-subtle);
+    }
+    .btn-file-del { background: none; border: none; cursor: pointer; color: var(--krds-light-color-text-disabled); font-size: 1.4rem; }
+    .btn-file-del:hover { color: var(--krds-light-color-element-danger); }
+
+    /* ── 중요도 ── */
+    .importance-group { display: flex; gap: var(--krds-gap-3); flex-wrap: wrap; }
+    .importance-opt { display: flex; flex-direction: column; align-items: center; gap: var(--krds-gap-1); cursor: pointer; }
+    .importance-opt input { display: none; }
+    .importance-badge {
+      padding: var(--krds-padding-2) var(--krds-padding-5);
+      border-radius: var(--krds-radius-max);
+      border: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-gray-light);
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      font-weight: 500;
+      transition: all var(--krds-transition-base);
+      background: var(--krds-light-color-surface-white);
+      color: var(--krds-light-color-text-subtle);
+    }
+    .importance-opt input:checked + .importance-badge { font-weight: var(--krds-font-weight-bold); }
+    .imp-low   input:checked + .importance-badge { background: var(--krds-light-color-element-success-lighter); color: var(--krds-light-color-element-success); border-color: var(--krds-light-color-element-success); }
+    .imp-mid   input:checked + .importance-badge { background: var(--krds-light-color-element-primary-light); color: var(--krds-light-color-element-primary); border-color: var(--krds-light-color-element-primary); }
+    .imp-high  input:checked + .importance-badge { background: var(--krds-light-color-element-warning-lighter); color: var(--krds-light-color-element-warning); border-color: var(--krds-light-color-element-warning); }
+    .imp-crit  input:checked + .importance-badge { background: var(--krds-light-color-element-danger-lighter); color: var(--krds-light-color-element-danger); border-color: var(--krds-light-color-element-danger); }
+
+    /* ── 보안 등급 카드 ── */
+    .security-group { display: flex; gap: var(--krds-gap-4); flex-wrap: wrap; }
+    .security-card {
+      flex: 1;
+      min-width: 8rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--krds-gap-2);
+      padding: var(--krds-padding-5);
+      border: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-gray-light);
+      border-radius: var(--krds-radius-medium3);
+      background: var(--krds-light-color-surface-white);
+      cursor: pointer;
+      text-align: center;
+      transition: border-color var(--krds-transition-base), background var(--krds-transition-base);
+    }
+    .security-card:hover { border-color: var(--krds-light-color-action-secondary-active); background: var(--krds-light-color-action-secondary-hover); }
+    .security-card.active { border-color: var(--krds-light-color-action-secondary-active); background: var(--krds-light-color-element-secondary-lighter); }
+    .security-icon { font-size: 2rem; }
+    .security-level {
+      font-size: var(--krds-pc-font-size-label-small);
+      font-weight: var(--krds-font-weight-bold);
+      color: var(--krds-light-color-text-basic);
+    }
+    .security-desc { font-size: var(--krds-pc-font-size-label-xsmall); color: var(--krds-light-color-text-subtle); margin: 0; }
+
+    /* ── 하단 버튼 ── */
+    .reg-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--krds-gap-3);
+      padding-bottom: var(--krds-padding-7);
+    }
+
+    /* ── inline row (라벨 + 추가버튼 나란히) ── */
+    .inline-row { display: flex; align-items: center; gap: var(--krds-gap-3); }
+    .btn-text-link {
+      display: inline-flex; align-items: center; gap: var(--krds-gap-1);
+      background: none; border: none; cursor: pointer;
+      color: var(--krds-light-color-action-secondary-active);
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      font-family: inherit;
+    }
+    .btn-text-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <div class="operating-container">
+
+    <div data-include="/html/code/header.html"></div>
+
+    <div class="organization-container">
+
+      <!-- 사이드 네비게이션 -->
+      <nav class="side-nav" aria-label="업무 네비게이션">
+        <ul class="nav-tree" role="list">
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <a href="/resources/pages/operating.html" class="nav-node__row" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">업무 테이블</span>
+            </a>
+          </li>
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <a href="/resources/pages/operating-calendar.html" class="nav-node__row" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">업무 캘린더</span>
+            </a>
+          </li>
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <a href="/resources/pages/operating-gantt.html" class="nav-node__row" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">업무 차트</span>
+            </a>
+          </li>
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <a href="/resources/pages/operating-registeration.html" class="nav-node__row is-selected" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">업무 등록</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- 메인 콘텐츠 -->
+      <main class="main">
+        <div class="reg-wrap">
+
+          <!-- 페이지 헤더 -->
+          <div class="reg-topbar">
+            <div class="reg-topbar__left">
+              <h1 class="reg-topbar__title">업무 등록</h1>
+              <span class="reg-topbar__id">STD-2026-0142</span>
+            </div>
+            <div class="reg-topbar__actions">
+              <button class="btn-ghost">목록</button>
+              <button class="btn-ghost">임시저장</button>
+              <button class="btn-solid">등록</button>
+            </div>
+          </div>
+
+          <!-- Section 1: 기본 정보 -->
+          <div class="reg-section">
+            <div class="reg-section__head">
+              <span class="reg-section__num">1</span>
+              <span class="reg-section__title">기본 정보</span>
+              <span class="reg-section__desc">업무 기본정보</span>
+            </div>
+            <div class="reg-section__body">
+
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-label">업무명<span class="req-mark">*</span></label>
+                  <input type="text" class="form-input" placeholder="예) 월별 매출 마감 보고">
+                </div>
+              </div>
+
+              <div class="form-cols">
+                <div class="form-field">
+                  <label class="form-label">업무 구분<span class="req-mark">*</span></label>
+                  <select class="form-select">
+                    <option>정기 업무</option>
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">소속 부서<span class="req-mark">*</span></label>
+                  <input type="text" class="form-input" readonly>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">재정예제</label>
+                  <select class="form-select"><option></option></select>
+                </div>
+              </div>
+
+              <div class="form-cols">
+                <div class="form-field">
+                  <label class="form-label">업무 ID</label>
+                  <input type="text" class="form-input" value="STD-2026-0142" readonly>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">관리 상태</label>
+                  <select class="form-select"><option>사용</option></select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-label">업무 설명</label>
+                  <textarea class="form-textarea" placeholder="업무의 목적과 내용을 입력하세요."></textarea>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Section 2: 업무 담당·주기 -->
+          <div class="reg-section">
+            <div class="reg-section__head">
+              <span class="reg-section__num">2</span>
+              <span class="reg-section__title">업무 담당·주기</span>
+              <span class="reg-section__desc">담당자 및 주기 설정</span>
+            </div>
+            <div class="reg-section__body">
+
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-label">업무 담당<span class="req-mark">*</span></label>
+                  <div class="chip-group">
+                    <span class="chip">우선정 이OO <button class="chip-close" type="button">×</button></span>
+                    <span class="chip">조OO (정기간담) <button class="chip-close" type="button">×</button></span>
+                    <input type="text" class="chip-search" placeholder="담당자 검색">
+                    <button class="btn-chip-add" type="button">🔍 검색</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-cols">
+                <div class="form-field">
+                  <label class="form-label">업무 주기<span class="req-mark">*</span></label>
+                  <div class="radio-group">
+                    <label class="radio-opt"><input type="radio" name="cycle" checked> <span>수시</span></label>
+                    <label class="radio-opt"><input type="radio" name="cycle"> <span>정기</span></label>
+                  </div>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">빈도</label>
+                  <select class="form-select"><option>빈도 선택</option></select>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">기간</label>
+                  <select class="form-select"><option>기간 선택</option></select>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">마감</label>
+                  <select class="form-select"><option>마감 일일</option></select>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Section 3: 전결사항·절차도 -->
+          <div class="reg-section">
+            <div class="reg-section__head">
+              <span class="reg-section__num">3</span>
+              <span class="reg-section__title">전결사항·절차도</span>
+              <span class="reg-section__desc">결재 경로와 절차 설정</span>
+            </div>
+            <div class="reg-section__body">
+
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-label">전결사항<span class="req-mark">*</span></label>
+                  <div class="approval-flow">
+                    <div class="approval-stage">
+                      <span class="stage-label">기안</span>
+                      <span class="stage-value">이OO</span>
+                      <span class="stage-role">과장</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="approval-stage">
+                      <span class="stage-label">리더</span>
+                      <span class="stage-value">이OO</span>
+                      <span class="stage-role">부장</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="approval-stage active">
+                      <span class="stage-label">담당</span>
+                      <span class="stage-value active">박OO</span>
+                      <span class="stage-role">팀장</span>
+                    </div>
+                    <button class="btn-text-link" type="button">+ 결재선 추가</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-cols">
+                <div class="form-field">
+                  <label class="form-label">전결 검사</label>
+                  <select class="form-select"><option>업무 관급</option></select>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">대결 겸자</label>
+                  <div class="toggle-wrap">
+                    <label class="toggle-switch">
+                      <input type="checkbox">
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-field">
+                  <div class="inline-row">
+                    <label class="form-label">절차도</label>
+                  </div>
+                  <table class="proc-table">
+                    <thead>
+                      <tr>
+                        <th class="col-order">순서</th>
+                        <th>단계명</th>
+                        <th>담당</th>
+                        <th>선응</th>
+                        <th class="col-action"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="col-order">1</td>
+                        <td><input type="text" class="table-input" value="요청의 수정 기한"></td>
+                        <td><select class="table-select"><option>주담당</option></select></td>
+                        <td><input type="text" class="table-input" value="검증 미요청"></td>
+                        <td class="col-action">⋮</td>
+                      </tr>
+                      <tr>
+                        <td class="col-order">2</td>
+                        <td><input type="text" class="table-input" value="담당자 매칭 / 자격"></td>
+                        <td><select class="table-select"><option>중담당</option></select></td>
+                        <td><input type="text" class="table-input" value="자격 검증 보고"></td>
+                        <td class="col-action">⋮</td>
+                      </tr>
+                      <tr>
+                        <td class="col-order">3</td>
+                        <td><input type="text" class="table-input" value="공개 및 증명"></td>
+                        <td><select class="table-select"><option>주담당</option></select></td>
+                        <td><input type="text" class="table-input" value="전자 문서"></td>
+                        <td class="col-action">⋮</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <button class="btn-add-row" type="button">+ 단계 추가</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Section 4: 양식·중요도·보안 -->
+          <div class="reg-section">
+            <div class="reg-section__head">
+              <span class="reg-section__num">4</span>
+              <span class="reg-section__title">양식·중요도·보안</span>
+              <span class="reg-section__desc">첨부 양식과 보안 등급</span>
+            </div>
+            <div class="reg-section__body">
+
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-label">양식</label>
+                  <div class="upload-area">
+                    <span class="upload-area__icon">📎</span>
+                    <p class="upload-area__text">파일을 드래그하거나 클릭하여 업로드</p>
+                    <p class="upload-area__hint">HWP · DOCX · XLSX · PDF · 최대 20MB</p>
+                  </div>
+                  <div class="file-list">
+                    <div class="file-item">
+                      <span>📄</span>
+                      <span class="file-name">업무자서_표준서식.hwp</span>
+                      <span class="file-ver">v21</span>
+                      <span class="file-meta">1024B · 2026-05-12</span>
+                      <button class="btn-file-del" type="button">✕</button>
+                    </div>
+                    <div class="file-item">
+                      <span>📄</span>
+                      <span class="file-name">경과보고서_등급서.xlsx</span>
+                      <span class="file-ver">v10</span>
+                      <span class="file-meta">9200B · 2026-05-12</span>
+                      <button class="btn-file-del" type="button">✕</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-label">중요도<span class="req-mark">*</span></label>
+                  <div class="importance-group">
+                    <label class="importance-opt imp-low">
+                      <input type="radio" name="importance" value="low">
+                      <span class="importance-badge">낮음</span>
+                    </label>
+                    <label class="importance-opt imp-mid">
+                      <input type="radio" name="importance" value="medium" checked>
+                      <span class="importance-badge">보통</span>
+                    </label>
+                    <label class="importance-opt imp-high">
+                      <input type="radio" name="importance" value="high">
+                      <span class="importance-badge">높음</span>
+                    </label>
+                    <label class="importance-opt imp-crit">
+                      <input type="radio" name="importance" value="critical">
+                      <span class="importance-badge">긴급</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-label">보안<span class="req-mark">*</span></label>
+                  <div class="security-group">
+                    <div class="security-card">
+                      <span class="security-icon">🔓</span>
+                      <span class="security-level">1급</span>
+                      <p class="security-desc">대외 공시 기준</p>
+                    </div>
+                    <div class="security-card active">
+                      <span class="security-icon">🔐</span>
+                      <span class="security-level">2급</span>
+                      <p class="security-desc">대외비</p>
+                    </div>
+                    <div class="security-card">
+                      <span class="security-icon">🔒</span>
+                      <span class="security-level">3급</span>
+                      <p class="security-desc">기밀</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-cols">
+                <div class="form-field">
+                  <label class="form-label">업무 첨부</label>
+                  <select class="form-select"><option>관본 보유 정책</option></select>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">다운로드 제약</label>
+                  <div class="toggle-wrap">
+                    <label class="toggle-switch">
+                      <input type="checkbox">
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">워터마크</label>
+                  <div class="toggle-wrap">
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked>
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- 하단 버튼 -->
+          <div class="reg-footer">
+            <button class="btn-ghost">목록</button>
+            <button class="btn-ghost">임시저장</button>
+            <button class="btn-solid">등록</button>
+          </div>
+
+        </div>
+      </main>
+
+    </div>
+  </div>
+
+</body>
+</html>
