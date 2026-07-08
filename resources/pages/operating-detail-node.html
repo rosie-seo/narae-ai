@@ -47,7 +47,7 @@
       </nav>
 
       <!-- 메인 콘텐츠 -->
-      <main class="main" style="padding:0; overflow:auto;">
+      <main class="main" style="padding:0; overflow:hidden; display:flex; flex-direction:column;">
 
         <!-- 과제 정보 헤더 -->
         <header class="gnb-sub">
@@ -64,9 +64,18 @@
           </button>
         </header>
 
-        <!-- 흐름도 (JS가 동적 렌더링) -->
-        <div class="flow-wrap">
-          <div id="flow-canvas" class="flow-canvas"></div>
+        <!-- 흐름도 (JS가 동적 렌더링, React Flow 스타일 캔버스) -->
+        <div class="flow-canvas-wrap">
+          <div class="flow-viewport" id="flow-viewport">
+            <div class="flow-world" id="flow-world">
+              <svg class="flow-edges" id="flow-edges"></svg>
+            </div>
+            <div class="flow-controls">
+              <button id="fz-in">+</button>
+              <button id="fz-out">−</button>
+              <button id="fz-fit">⤢</button>
+            </div>
+          </div>
         </div>
 
       </main>
@@ -96,10 +105,10 @@
 
   (function () {
     const raw = sessionStorage.getItem('krds_selected_task');
-    const canvas = document.getElementById('flow-canvas');
+    const wrap = document.querySelector('.flow-canvas-wrap');
 
     if (!raw) {
-      canvas.innerHTML = '<p style="padding:40px;color:#94a3b8">업무 정보가 없습니다.</p>';
+      wrap.innerHTML = '<p style="padding:40px;color:var(--krds-light-color-text-disabled)">업무 정보가 없습니다.</p>';
       return;
     }
 
@@ -124,73 +133,106 @@
     document.getElementById('detail-task-meta').textContent =
       task.owner + (teamName ? ' / ' + teamName : '') + ' / ' + task.start + ' ~ ' + task.end;
 
-    /* ── 세부과업 → 노드 렌더링 ── */
+    /* ── 세부과업 → React Flow 스타일 노드 캔버스 렌더링 ── */
     const subtasks = getSubtasks(task);
 
-    // 노드 크기 / 간격
-    const NODE_W = 168, NODE_H = 138, GAP_X = 56, PAD = 24;
-    const totalW  = subtasks.length * (NODE_W + GAP_X) + PAD * 2;
-    const centerY = 80;
+    // 단계별 노드 타입 / 태그
+    const STAGE_TYPE = { '완료': 'node-approve', '검토': 'node-branch', '접수': 'node-normal' };
 
-    // 스테이지별 CSS 클래스
-    const STAGE_CLS = { '완료': 'node--green', '검토': 'node--amber', '접수': '', '추천': 'node--select' };
-    // 스테이지별 아이콘 SVG
-    const STAGE_ICON = {
-      '완료': `<svg viewBox="0 0 18 18"><circle cx="9" cy="9" r="9" fill="#1f9d57"/><path d="M5 9.2l2.6 2.6L13 6.4" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-      '검토': `<svg viewBox="0 0 18 18"><path d="M9 1.6l7.8 14.2H1.2z" fill="#e0a400"/><rect x="8.2" y="6.6" width="1.6" height="5" rx="0.8" fill="#fff"/><circle cx="9" cy="13.4" r="1" fill="#fff"/></svg>`,
-      '접수': ``,
-      '추천': ``,
-    };
+    const NODE_W = 170, NODE_H = 54, GAP_X = 90, PAD = 40;
+    const Y = 150;
+    const nodes = subtasks.map((st, i) => ({
+      id: 'st' + i,
+      x: PAD + i * (NODE_W + GAP_X),
+      y: Y,
+      type: STAGE_TYPE[st.stage] || 'node-normal',
+      tag: st.stage,
+      title: st.name,
+      sub: `${st.assignee} · 기한 ${st.deadline}`,
+    }));
+    const edges = subtasks.slice(1).map((_, i) => ({ from: 'st' + i, to: 'st' + (i + 1) }));
 
-    // 노드 HTML 생성
-    const nodeItems = subtasks.map((st, i) => {
-      const left = PAD + i * (NODE_W + GAP_X);
-      const cls  = STAGE_CLS[st.stage] || '';
-      const icon = STAGE_ICON[st.stage] || '';
-      return `<article class="node ${cls}" style="left:${left}px; top:${centerY}px; width:${NODE_W}px;">
-        <div class="node-head">
-          <h3 class="node-title" style="font-size:12px;line-height:1.3">${escapeHtml(st.name)}</h3>
-          <span class="node-status">${icon}</span>
-        </div>
-        <dl class="node-body">
-          <div class="row"><dt>담당자</dt><dd>${escapeHtml(st.assignee)}</dd></div>
-          <div class="row"><dt>단계</dt><dd>${escapeHtml(st.stage)}</dd></div>
-          <div class="row"><dt>결재</dt><dd>${escapeHtml(st.approval)}</dd></div>
-          <div class="row"><dt>기한</dt><dd>${escapeHtml(st.deadline)}</dd></div>
-        </dl>
-      </article>`;
-    });
+    const totalW = PAD * 2 + subtasks.length * NODE_W + (subtasks.length - 1) * GAP_X;
+    const totalH = Y + NODE_H + PAD;
 
-    // SVG 연결선 생성 — 조직도뷰 라인 스타일 통일
-    const ARROW = 10;
-    const lineY = centerY + NODE_H / 2;
-    let svgPaths = '';
-    const svgDefs = `<defs>
-      <marker id="flow-arrow" markerWidth="${ARROW}" markerHeight="8" refX="${ARROW - 1}" refY="4" orient="auto" markerUnits="userSpaceOnUse">
-        <polygon class="flow-arrow-head" points="0 0, ${ARROW} 4, 0 8" />
-      </marker>
-    </defs>`;
-    for (let i = 0; i < subtasks.length - 1; i++) {
-      const x1 = PAD + i * (NODE_W + GAP_X) + NODE_W;
-      const x2 = PAD + (i + 1) * (NODE_W + GAP_X);
-      svgPaths += `<path class="line" d="M${x1},${lineY} H${x2 - ARROW}" marker-end="url(#flow-arrow)" />`;
+    function nodePort(n, side) {
+      return side === 'right' ? { x: n.x + NODE_W, y: n.y + NODE_H / 2 } : { x: n.x, y: n.y + NODE_H / 2 };
+    }
+    function edgePath(edge) {
+      const from = nodes.find(n => n.id === edge.from);
+      const to   = nodes.find(n => n.id === edge.to);
+      const p1 = nodePort(from, 'right');
+      const p2 = nodePort(to, 'left');
+      const dx = Math.max(Math.abs(p2.x - p1.x) * 0.5, 40);
+      return `M ${p1.x} ${p1.y} C ${p1.x + dx} ${p1.y}, ${p2.x - dx} ${p2.y}, ${p2.x} ${p2.y}`;
     }
 
-    const svgH = centerY + NODE_H + PAD;
-    const svg  = `<svg class="flow-lines" viewBox="0 0 ${totalW} ${svgH}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="width:${totalW}px;height:${svgH}px">${svgDefs}${svgPaths}</svg>`;
+    const world = document.getElementById('flow-world');
+    const svg   = document.getElementById('flow-edges');
+    world.style.width  = totalW + 'px';
+    world.style.height = totalH + 'px';
 
-    canvas.style.width  = totalW + 'px';
-    canvas.style.height = (centerY + NODE_H + PAD) + 'px';
-    canvas.innerHTML    = svg + nodeItems.join('');
+    svg.innerHTML = `
+      <defs>
+        <marker id="node-arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 z" fill="var(--krds-light-color-border-gray)" />
+        </marker>
+      </defs>
+      ${edges.map(e => `<path d="${edgePath(e)}" fill="none" stroke="var(--krds-light-color-border-gray-light)" stroke-width="1.8" marker-end="url(#node-arrow)" />`).join('')}
+    `;
 
-    /* ── 노드 클릭 → 드로어 열기 ── */
-    canvas.querySelectorAll('.node').forEach((el, i) => {
+    nodes.forEach((n, i) => {
+      const el = document.createElement('div');
+      el.className = `flow-node ${n.type}`;
+      el.style.left = n.x + 'px';
+      el.style.top  = n.y + 'px';
       el.style.cursor = 'pointer';
+      el.innerHTML = `
+        <div class="handle left"></div>
+        <div class="fn-tag">${escapeHtml(n.tag)}</div>
+        <div class="fn-title">${escapeHtml(n.title)}</div>
+        <div class="fn-sub">${escapeHtml(n.sub)}</div>
+        <div class="handle right"></div>
+      `;
       el.addEventListener('click', () => {
         sessionStorage.setItem('krds_selected_subtask', JSON.stringify(subtasks[i]));
         openDrawer();
       });
+      world.appendChild(el);
     });
+
+    /* ── 팬(드래그) & 줌 ── */
+    const viewport = document.getElementById('flow-viewport');
+    let zoom = 1, panX = 40, panY = 30;
+    function applyTransform() {
+      world.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+    }
+    applyTransform();
+
+    let dragging = false, lastX = 0, lastY = 0;
+    viewport.addEventListener('mousedown', (e) => {
+      dragging = true; lastX = e.clientX; lastY = e.clientY;
+      viewport.classList.add('grabbing');
+    });
+    window.addEventListener('mousemove', (e) => {
+      if (!dragging) return;
+      panX += (e.clientX - lastX);
+      panY += (e.clientY - lastY);
+      lastX = e.clientX; lastY = e.clientY;
+      applyTransform();
+    });
+    window.addEventListener('mouseup', () => { dragging = false; viewport.classList.remove('grabbing'); });
+
+    viewport.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.08 : 0.08;
+      zoom = Math.min(1.6, Math.max(0.4, zoom + delta));
+      applyTransform();
+    }, { passive: false });
+
+    document.getElementById('fz-in').onclick  = () => { zoom = Math.min(1.6, zoom + 0.15); applyTransform(); };
+    document.getElementById('fz-out').onclick = () => { zoom = Math.max(0.4, zoom - 0.15); applyTransform(); };
+    document.getElementById('fz-fit').onclick = () => { zoom = 1; panX = 40; panY = 30; applyTransform(); };
   })();
   </script>
 
