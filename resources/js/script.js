@@ -619,6 +619,84 @@ function taskCardHTML(t) {
   </li>`;
 }
 
+/* ============================================================
+   주간보고 — ORG 데이터 기반 생성 (조직도/업무와 동일한 소스 공유)
+   ============================================================ */
+const REPORT_STATUS_LABEL = { submitted: "제출완료", draft: "작성중", missing: "미제출" };
+const REPORT_STATUS_CLASS = { submitted: "krds-badge bg-light-success", draft: "krds-badge bg-light-secondary", missing: "krds-badge bg-light-gray" };
+
+function getWeekRange(offsetWeeks) {
+  const now = new Date();
+  const day = now.getDay(); // 0=일 ~ 6=토
+  const diffToMonday = (day === 0 ? -6 : 1 - day);
+  const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday + offsetWeeks * 7);
+  const friday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 4);
+  return { start: monday, end: friday };
+}
+
+function fmtYMD(d) {
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+
+function buildWeeklyReports() {
+  const { start, end } = getWeekRange(0);
+  const weekStart = fmtYMD(start), weekEnd = fmtYMD(end);
+  const reports = [];
+
+  ORG.forEach(sil => {
+    getAllLeaves(sil).forEach(leaf => {
+      if (!leaf.members || !leaf.members.length) return;
+
+      // 부서명을 시드로 한 결정적 제출 상태
+      let h = 0;
+      for (let i = 0; i < leaf.name.length; i++) h = (Math.imul(31, h) + leaf.name.charCodeAt(i)) | 0;
+      const r = Math.abs(h) % 10;
+      const status = r < 6 ? "submitted" : r < 8 ? "draft" : "missing";
+
+      const manager = leaf.members.find(m => m.role === "과장") || leaf.members[0];
+      const tasks = (leaf.tasks || []);
+      const doneCount = tasks.filter(t => t.status === "done").length;
+      const progressCount = tasks.filter(t => t.status === "progress").length;
+
+      // 보고 일자 — 해당 주(월~금) 중 결정적으로 배정된 제출일
+      const submittedDate = new Date(start.getFullYear(), start.getMonth(), start.getDate() + (Math.abs(h) % 5));
+      const submittedAt = fmtYMD(submittedDate);
+
+      reports.push({
+        id: "wr-" + leaf._id,
+        dept: leaf.name,
+        sil: sil.name,
+        author: manager.name,
+        authorRole: manager.role,
+        weekStart,
+        weekEnd,
+        submittedAt,
+        status,
+        memberCount: leaf.members.length,
+        totalCount: tasks.length,
+        doneCount,
+        progressCount,
+        tasks,
+      });
+    });
+  });
+
+  return reports;
+}
+
+function reportCardHTML(r) {
+  return `<li class="task-card">
+    <span class="${REPORT_STATUS_CLASS[r.status]}">${REPORT_STATUS_LABEL[r.status]}</span>
+    <span class="task-card__title">${escapeHtml(r.dept)} 주간보고</span>
+    <span class="task-card__meta">
+      <span class="task-card__owner">${escapeHtml(r.author)} ${escapeHtml(r.authorRole)}</span>
+      <span class="task-card__sep">·</span>
+      <span class="task-card__date">보고일 ${r.submittedAt}</span>
+    </span>
+    <span class="task-card__arrow">${arrowSVG}</span>
+  </li>`;
+}
+
 function renderContent(node) {
   /* 제목 */
   const titleEl = document.querySelector(".organization-title");
@@ -1578,8 +1656,10 @@ function setGnbActive() {
   document.querySelectorAll('.gnb-menu a.gnb-main-trigger').forEach(function (a) {
     const href = a.getAttribute('href') || '';
     const match =
-      (href.includes('organization') && path.includes('organization')) ||
-      (href.includes('operating')    && path.includes('operating'));
+      (href.includes('organization')   && path.includes('organization')) ||
+      (href.includes('operating')      && path.includes('operating')) ||
+      (href.includes('policy')         && path.includes('policy')) ||
+      (href.includes('weekly-report')  && path.includes('weekly-report'));
     if (match) {
       a.classList.add('active');
       a.setAttribute('aria-current', 'page');

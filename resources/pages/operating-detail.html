@@ -65,76 +65,12 @@
         </header>
 
         <!-- 본문: 단계별 보드 (JS가 동적 렌더링) -->
-        <div class="layout" style="grid-template-columns: minmax(0,1fr);">
+        <div class="layout">
           <main id="detail-content" class="content">
-
-            <!-- placeholder – task 미선택 시 표시 -->
-            <section class="board" data-open="true">
-              <div class="board-head">
-                <button type="button" class="board-toggle" aria-expanded="true">
-                  <span class="caret" aria-hidden="true">&#9662;</span> 완료 <span class="count">(4건)</span>
-                </button>
-              </div>
-              <table class="task-table">
-                <thead><tr>
-                  <th scope="col">업무명</th><th scope="col">업무유형</th>
-                  <th scope="col">담당자</th><th scope="col">마감일</th>
-                  <th scope="col">현재 단계</th><th scope="col">결재 상태</th>
-                  <th scope="col">우선순위</th><th scope="col">AI 리스크</th>
-                </tr></thead>
-                <tbody>
-                  <tr><td class="col-name">현황 조사 및 기초분석</td><td>내부 업무</td><td><span class="col-assignee"><span class="avatar av-1">이</span>이서연</span></td><td>2025-03-15</td><td>완료</td><td>결재완료</td><td><span class="pri pri-high">상</span></td><td class="col-risk"><span style="color:#94a3b8;font-size:11px">없음</span></td></tr>
-                  <tr><td class="col-name">과제 범위 확정</td><td>협업 업무</td><td><span class="col-assignee"><span class="avatar av-1">이</span>이서연</span></td><td>2025-04-10</td><td>완료</td><td>결재완료</td><td><span class="pri pri-mid">중</span></td><td class="col-risk"><span style="color:#94a3b8;font-size:11px">없음</span></td></tr>
-                  <tr><td class="col-name">추진 계획 수립</td><td>내부 업무</td><td><span class="col-assignee"><span class="avatar av-1">이</span>이서연</span></td><td>2025-05-20</td><td>완료</td><td>결재완료</td><td><span class="pri pri-high">상</span></td><td class="col-risk"><span style="color:#94a3b8;font-size:11px">없음</span></td></tr>
-                  <tr><td class="col-name">관련 부서 협의</td><td>협업 업무</td><td><span class="col-assignee"><span class="avatar av-1">이</span>이서연</span></td><td>2025-07-01</td><td>완료</td><td>결재완료</td><td><span class="pri pri-low">하</span></td><td class="col-risk"><span style="color:#94a3b8;font-size:11px">없음</span></td></tr>
-                </tbody>
-              </table>
-            </section>
-
-            <!-- 검토 -->
-            <section class="board" data-open="true">
-              <div class="board-head">
-                <button type="button" class="board-toggle" aria-expanded="true">
-                  <span class="caret" aria-hidden="true">&#9662;</span> 검토 <span class="count">(2건)</span>
-                </button>
-              </div>
-              <table class="task-table">
-                <thead><tr>
-                  <th scope="col">업무명</th><th scope="col">업무유형</th>
-                  <th scope="col">담당자</th><th scope="col">마감일</th>
-                  <th scope="col">현재 단계</th><th scope="col">결재 상태</th>
-                  <th scope="col">우선순위</th><th scope="col">AI 리스크</th>
-                </tr></thead>
-                <tbody>
-                  <tr><td class="col-name">초안 작성</td><td>내부 업무</td><td><span class="col-assignee"><span class="avatar av-1">이</span>이서연</span></td><td>2025-09-30</td><td>검토</td><td>상신완료</td><td><span class="pri pri-high">상</span></td><td class="col-risk"><span class="tag-risk">검토 지연</span></td></tr>
-                  <tr><td class="col-name">초안 검토 및 수정</td><td>검토 업무</td><td><span class="col-assignee"><span class="avatar av-1">이</span>이서연</span></td><td>2025-10-31</td><td>검토</td><td>상신완료</td><td><span class="pri pri-mid">중</span></td><td class="col-risk"><span class="tag-risk">이해관계자 미합의</span></td></tr>
-                </tbody>
-              </table>
-            </section>
-
-            <!-- 접수 -->
-            <section class="board" data-open="true">
-              <div class="board-head">
-                <button type="button" class="board-toggle" aria-expanded="true">
-                  <span class="caret" aria-hidden="true">&#9662;</span> 접수 <span class="count">(2건)</span>
-                </button>
-              </div>
-              <table class="task-table">
-                <thead><tr>
-                  <th scope="col">업무명</th><th scope="col">업무유형</th>
-                  <th scope="col">담당자</th><th scope="col">마감일</th>
-                  <th scope="col">현재 단계</th><th scope="col">결재 상태</th>
-                  <th scope="col">우선순위</th><th scope="col">AI 리스크</th>
-                </tr></thead>
-                <tbody>
-                  <tr><td class="col-name">최종안 확정</td><td>조정 업무</td><td><span class="col-assignee need"><span class="dot"></span>지정 필요</span></td><td>2025-11-30</td><td>접수</td><td>미상신</td><td><span class="pri pri-high">상</span></td><td class="col-risk"><span class="tag-risk">일정지연</span><span class="tag-risk">리소스 부족</span></td></tr>
-                  <tr><td class="col-name">최종 보고 및 결재</td><td>내부 업무</td><td><span class="col-assignee need"><span class="dot"></span>지정 필요</span></td><td>2025-12-31</td><td>접수</td><td>미상신</td><td><span class="pri pri-mid">중</span></td><td class="col-risk"><span class="tag-risk">선행업무 미완료</span></td></tr>
-                </tbody>
-              </table>
-            </section>
-
+            <p style="padding:24px;color:var(--krds-light-color-text-disabled)">업무 정보를 불러오는 중입니다…</p>
           </main>
 
+          <aside id="detail-sidebar"></aside>
         </div>
 
       </main>
@@ -165,9 +101,10 @@
   (function () {
     const raw = sessionStorage.getItem('krds_selected_task');
     const content = document.getElementById('detail-content');
+    const sidebar = document.getElementById('detail-sidebar');
 
     if (!raw) {
-      content.innerHTML = '<p style="padding:24px;color:#94a3b8">업무 정보가 없습니다.</p>';
+      content.innerHTML = '<p style="padding:24px;color:var(--krds-light-color-text-disabled)">업무 정보가 없습니다.</p>';
       return;
     }
 
@@ -180,15 +117,18 @@
     document.getElementById('detail-task-name').textContent = task.title;
     document.title = task.title + ' · 과업 리스트 뷰';
 
-    let teamName = '';
+    let teamLeaf = null;
     for (const sil of ORG) {
       for (const leaf of getAllLeaves(sil)) {
         if ((leaf.tasks || []).some(t => t.title === task.title && t.owner === task.owner)) {
-          teamName = leaf.name; break;
+          teamLeaf = leaf; break;
         }
       }
-      if (teamName) break;
+      if (teamLeaf) break;
     }
+    const teamName   = teamLeaf ? teamLeaf.name : '';
+    const ownerMember = teamLeaf ? (teamLeaf.members || []).find(m => m.name === task.owner) : null;
+
     document.getElementById('detail-task-meta').textContent =
       task.owner + (teamName ? ' / ' + teamName : '') + ' / ' + task.start + ' ~ ' + task.end;
 
@@ -240,8 +180,101 @@
       </section>`;
     }
 
+    /* ── 과제 히스토리 (같은 부서의 이전 연도 유사 사업 이력) ── */
+    const HIST_STOPWORDS = ['수립','검토','보고','편성','개선','개정','점검','분석','제출','관리','운영','계획','기획',
+      '지침','방안','대책','체계','사업','시행','추진','조사','실시','작성','확정','대응','현황','종합',
+      '및','등','상반기','하반기','1차','2차','3차','4차'];
+
+    function coreTokens(title) {
+      return title
+        .replace(/^\d{4}(년도?)?\s*/, '')
+        .split(/\s+/)
+        .filter(w => w && !HIST_STOPWORDS.includes(w) && !/^\d+$/.test(w));
+    }
+    function taskYear(t) {
+      const m = t.title.match(/(\d{4})년도?/);
+      return m ? parseInt(m[1], 10) : new Date(t.start).getFullYear();
+    }
+
+    const currentYear   = taskYear(task);
+    const currentTokens = coreTokens(task.title);
+    const similarPast = (teamLeaf ? (teamLeaf.tasks || []) : [])
+      .filter(t => !(t.title === task.title && t.start === task.start && t.owner === task.owner))
+      .filter(t => taskYear(t) < currentYear)
+      .map(t => ({ t, overlap: coreTokens(t.title).filter(w => currentTokens.includes(w)).length }))
+      .filter(x => x.overlap > 0)
+      .sort((a, b) => a.t.start.localeCompare(b.t.start))
+      .map(x => x.t);
+
+    const HIST_DOT_CLASS   = { done: 'ms-dot-done', progress: 'ms-dot-prog', wait: 'ms-dot-todo' };
+    const HIST_ICON = {
+      done: '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="var(--krds-light-color-text-success)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+      progress: '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="3" stroke="var(--krds-light-color-button-primary-fill)" stroke-width="1.6"/></svg>',
+      wait: '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="3" stroke="var(--krds-light-color-text-subtle)" stroke-width="1.4" stroke-dasharray="2 2"/></svg>',
+    };
+    function historyBoardHTML() {
+      const items = similarPast.length
+        ? similarPast.map(t => `
+          <div class="ms-item" data-hist-title="${escapeHtml(t.title)}" data-hist-owner="${escapeHtml(t.owner)}" style="cursor:pointer">
+            <div class="ms-dot ${HIST_DOT_CLASS[t.status] || 'ms-dot-todo'}">${HIST_ICON[t.status] || HIST_ICON.wait}</div>
+            <div class="ms-body">
+              <div class="ms-name">${taskYear(t)}년 · ${escapeHtml(t.title)}</div>
+              <div class="ms-meta">${escapeHtml(t.start)} ~ ${escapeHtml(t.end)} · 담당 ${escapeHtml(t.owner)}</div>
+            </div>
+            <span class="${STATUS_CLASS[t.status] || 'krds-badge small bg-light-gray'}">${STATUS_LABEL[t.status] || t.status}</span>
+          </div>
+        `).join('')
+        : `<p style="padding:var(--krds-padding-9);color:var(--krds-light-color-text-disabled);font-size:var(--krds-pc-font-size-label-xsmall)">같은 부서에서 진행된 유사한 이전 연도 사업 이력이 없습니다.</p>`;
+      return `<section class="board" data-open="true">
+        <div class="board-head">
+          <button type="button" class="board-toggle" aria-expanded="true">
+            <span class="caret" aria-hidden="true">&#9662;</span> 과제 히스토리 (이전 연도 유사 사업) <span class="count">(${similarPast.length}건)</span>
+          </button>
+        </div>
+        <div class="milestone-line">${items}</div>
+      </section>`;
+    }
+
+    /* ── 담당 / 소요시간 사이드바 ── */
+    function parseYMD(s) { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); }
+    const startD = parseYMD(task.start), endD = parseYMD(task.end), today = new Date();
+    const totalDays     = Math.max(1, Math.round((endD - startD) / 86400000));
+    const elapsedDays   = Math.min(totalDays, Math.max(0, Math.round((today - startD) / 86400000)));
+    const remainingDays = Math.max(0, totalDays - elapsedDays);
+    const elapsedPct    = Math.min(100, Math.round((elapsedDays / totalDays) * 100));
+
+    function sidebarHTML() {
+      return `
+        <div class="card" style="margin:0 0 16px;">
+          <div class="section-header"><span class="section-title">담당</span></div>
+          <div class="info-row">
+            <span class="info-label">담당자</span>
+            <span class="info-val">
+              <span class="avatar-sm ${ownerColorClass(task.owner)}">${escapeHtml(task.owner.slice(0, 1))}</span>
+              ${escapeHtml(task.owner)}${ownerMember ? ' · ' + escapeHtml(ownerMember.position) : ''}
+            </span>
+          </div>
+          <div class="info-row"><span class="info-label">부서</span><span class="info-val">${escapeHtml(teamName || '-')}</span></div>
+          ${ownerMember ? `<div class="info-row"><span class="info-label">이메일</span><span class="info-val">${escapeHtml(ownerMember.email)}</span></div>` : ''}
+          ${ownerMember ? `<div class="info-row"><span class="info-label">연락처</span><span class="info-val">${escapeHtml(ownerMember.phone)}</span></div>` : ''}
+        </div>
+
+        <div class="card" style="margin:0;">
+          <div class="section-header"><span class="section-title">소요시간</span><span class="progress-num">${elapsedPct}%</span></div>
+          <div style="padding:0 var(--krds-padding-9) var(--krds-padding-6)">
+            <div class="progress-track"><div class="progress-fill" style="width:${elapsedPct}%"></div></div>
+          </div>
+          <div class="info-row"><span class="info-label">전체 기간</span><span class="info-val">${task.start} ~ ${task.end}</span></div>
+          <div class="info-row"><span class="info-label">총 소요일</span><span class="info-val">${totalDays}일</span></div>
+          <div class="info-row"><span class="info-label">경과일</span><span class="info-val">${elapsedDays}일</span></div>
+          <div class="info-row"><span class="info-label">잔여일</span><span class="info-val">${remainingDays}일</span></div>
+        </div>
+      `;
+    }
+
     /* ── 렌더링 ── */
-    content.innerHTML = STAGE_ORDER.map(s => boardHTML(s, groups[s])).join('');
+    content.innerHTML = historyBoardHTML() + STAGE_ORDER.map(s => boardHTML(s, groups[s])).join('');
+    sidebar.innerHTML = sidebarHTML();
 
     /* ── 접기/펼치기 ── */
     content.querySelectorAll('.board-toggle').forEach(btn => {
@@ -261,6 +294,17 @@
       if (st) {
         sessionStorage.setItem('krds_selected_subtask', JSON.stringify(st));
         openDrawer();
+      }
+    });
+
+    /* ── 히스토리 항목 클릭 → 해당 이전 연도 사업의 상세로 이동 ── */
+    content.addEventListener('click', e => {
+      const item = e.target.closest('.ms-item[data-hist-title]');
+      if (!item) return;
+      const past = similarPast.find(t => t.title === item.dataset.histTitle && t.owner === item.dataset.histOwner);
+      if (past) {
+        sessionStorage.setItem('krds_selected_task', JSON.stringify(past));
+        window.location.reload();
       }
     });
   })();
