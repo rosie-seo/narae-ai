@@ -73,7 +73,7 @@ function render() {
 
   let headerLabel;
   if (path.length === 0) {
-    headerLabel = "조직 (1depth)";
+    headerLabel = "조직";
   } else if (kind === "worker") {
     headerLabel = "소속 근무자";
   } else {
@@ -536,7 +536,15 @@ function computeGoalAnalysis(task) {
   else if (diff >= 8) { statusLabel = "목표 초과 달성"; statusClass = "goal-ahead"; }
   else { statusLabel = "목표대로 진행중"; statusClass = "goal-ok"; }
 
-  return { targetPct, actualPct, diff, statusLabel, statusClass };
+  // 매출이익 목표/실제 (억원 단위) — 업무명을 시드로 한 결정적 의사난수
+  let h2 = 0;
+  for (let i = 0; i < task.title.length; i++) h2 = (Math.imul(37, h2) + task.title.charCodeAt(i)) | 0;
+  const profitTarget = Math.round((1.5 + (Math.abs(h2) % 350) / 100) * 10) / 10; // 1.5 ~ 5.0억원
+  const profitOffset = (Math.abs(h2 >> 3) % 41) - 20; // -20 ~ +20%p
+  const profitAchievePct = task.status === "wait" ? 0 : Math.max(0, 100 + profitOffset);
+  const profitActual = Math.round(profitTarget * profitAchievePct / 100 * 10) / 10;
+
+  return { targetPct, actualPct, diff, statusLabel, statusClass, profitTarget, profitActual, profitAchievePct };
 }
 
 function renderGoalAnalysis(task) {
@@ -553,15 +561,30 @@ function renderGoalAnalysis(task) {
         <span class="goal-analysis__badge ${g.statusClass}">${g.statusLabel}</span>
       </div>
       <div class="goal-analysis__metrics">
-        <div class="goal-metric">
-          <div class="goal-metric__label">목표 진척률 <span class="goal-metric__hint">(마감 ${fmtDue(task.end)} 기준 경과율)</span></div>
-          <div class="goal-metric__bar"><div class="goal-metric__fill goal-metric__fill--target" style="width:${g.targetPct}%"></div></div>
-          <div class="goal-metric__value">${g.targetPct}%</div>
+        <div class="goal-metric-group">
+          <div class="goal-metric">
+            <div class="goal-metric__label">목표 진척률 <span class="goal-metric__hint">(마감 ${fmtDue(task.end)} 기준 경과율)</span></div>
+            <div class="goal-metric__bar"><div class="goal-metric__fill goal-metric__fill--target" style="width:${g.targetPct}%"></div></div>
+            <div class="goal-metric__value">${g.targetPct}%</div>
+          </div>
+          <div class="goal-metric">
+            <div class="goal-metric__label">실제 진척률</div>
+            <div class="goal-metric__bar"><div class="goal-metric__fill goal-metric__fill--actual" style="width:${g.actualPct}%"></div></div>
+            <div class="goal-metric__value">${g.actualPct}%</div>
+          </div>
         </div>
-        <div class="goal-metric">
-          <div class="goal-metric__label">실제 진척률</div>
-          <div class="goal-metric__bar"><div class="goal-metric__fill goal-metric__fill--actual" style="width:${g.actualPct}%"></div></div>
-          <div class="goal-metric__value">${g.actualPct}%</div>
+        <div class="goal-metric-divider"></div>
+        <div class="goal-metric-group goal-metric-group--profit">
+          <div class="goal-metric">
+            <div class="goal-metric__label">매출이익 목표</div>
+            <div class="goal-metric__bar"><div class="goal-metric__fill goal-metric__fill--profit-target" style="width:100%"></div></div>
+            <div class="goal-metric__value">${g.profitTarget}억원</div>
+          </div>
+          <div class="goal-metric">
+            <div class="goal-metric__label">매출이익 실제</div>
+            <div class="goal-metric__bar"><div class="goal-metric__fill goal-metric__fill--profit-actual" style="width:${Math.min(100, g.profitAchievePct)}%"></div></div>
+            <div class="goal-metric__value">${g.profitActual}억원</div>
+          </div>
         </div>
       </div>
       <div class="goal-analysis__note">${diffText}</div>

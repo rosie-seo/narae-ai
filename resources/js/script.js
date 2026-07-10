@@ -1659,7 +1659,8 @@ function setGnbActive() {
       (href.includes('organization')   && path.includes('organization')) ||
       (href.includes('operating')      && path.includes('operating')) ||
       (href.includes('policy')         && path.includes('policy')) ||
-      (href.includes('weekly-report')  && path.includes('weekly-report'));
+      (href.includes('weekly-report')  && path.includes('weekly-report')) ||
+      (href.includes('monitoring')     && path.includes('monitoring'));
     if (match) {
       a.classList.add('active');
       a.setAttribute('aria-current', 'page');
@@ -1671,3 +1672,72 @@ function setGnbActive() {
 }
 setGnbActive();
 document.addEventListener('ui-include:done', setGnbActive);
+
+/* ============================================================
+   모니터링 공용 유틸 (부서 대시보드 · 리스크 알림)
+   ============================================================ */
+function parseISODate(iso) {
+  // "2026-07-15" -> local Date, avoids UTC off-by-one
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+function diffDays(a, b) { return Math.round((b - a) / 86400000); }
+function fmtDue(iso) {
+  const d = parseISODate(iso);
+  return `${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function hashSeed(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+
+/* 업무명을 시드로 한 결정적 의사난수로 실제 진척률을 만들고, 목표 대비 편차로 리스크 등급을 매김 */
+function computeTaskRisk(task) {
+  const start = parseISODate(task.start);
+  const end = parseISODate(task.end);
+  const today = new Date();
+  const totalSpan = Math.max(1, diffDays(start, end));
+  const elapsed = diffDays(start, today);
+  const daysToEnd = diffDays(today, end);
+
+  if (task.status === "done") return { tier: "ok", diff: 0, daysToEnd };
+  if (task.status === "wait" && elapsed <= 0) return { tier: "ok", diff: 0, daysToEnd };
+
+  const targetPct = Math.round((Math.min(totalSpan, Math.max(0, elapsed)) / totalSpan) * 100);
+  const offset = (hashSeed(task.title) % 31) - 15;
+  const actualPct = task.status === "wait" ? 0 : Math.min(96, Math.max(4, targetPct + offset));
+  const diff = actualPct - targetPct;
+
+  let tier = "ok";
+  if (daysToEnd <= -14 || diff <= -20) tier = "danger";
+  else if (daysToEnd < 0 || diff <= -8 || (daysToEnd <= 7 && diff < 0)) tier = "warning";
+
+  // 초과일수를 우선하고 진척률 편차로 보정하는 단일 지연 심각도 점수 (Top5·정렬 공용)
+  const severity = (daysToEnd < 0 ? -daysToEnd * 3 : 0) + Math.max(0, -diff);
+
+  return { tier, diff, daysToEnd, targetPct, actualPct, severity };
+}
+
+function getAllTasksFlat() {
+  const rows = [];
+  ORG.forEach(sil => {
+    getAllLeaves(sil).forEach(leaf => {
+      (leaf.tasks || []).forEach(task => rows.push({ task, leaf, sil: sil.name }));
+    });
+  });
+  return rows;
+}
+
+function getLeafLead(leaf) {
+  const members = leaf.members || [];
+  return members.find(m => m.role === "과장") || members[0] || null;
+}
+
+function getRiskTasks() {
+  return getAllTasksFlat()
+    .map(row => ({ ...row, risk: computeTaskRisk(row.task) }))
+    .filter(row => row.risk.tier !== "ok")
+    .sort((a, b) => b.risk.severity - a.risk.severity);
+}

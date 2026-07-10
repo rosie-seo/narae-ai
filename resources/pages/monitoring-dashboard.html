@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>부서 대시보드</title>
+    <link rel="stylesheet" href="/resources/css/custom.css">
+    <link href="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.css" type="text/css" rel="stylesheet" />
+    <script src="/resources/js/component/ui-include.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.js"></script>
+</head>
+<body>
+
+<div class="operating-container">
+
+  <div data-include="/html/code/header.html"></div>
+
+  <div class="organization-container">
+
+    <!-- 사이드 네비게이션 -->
+    <nav class="side-nav" aria-label="모니터링 네비게이션">
+      <ul class="nav-tree" role="list">
+        <li class="nav-node nav-node--leaf nav-node--depth0">
+          <a href="/resources/pages/monitoring-dashboard.html" class="nav-node__row is-selected" style="--depth: 0">
+            <span class="nav-node__caret"></span>
+            <span class="nav-node__label">부서 대시보드</span>
+          </a>
+        </li>
+        <li class="nav-node nav-node--leaf nav-node--depth0">
+          <a href="/resources/pages/monitoring-risk.html" class="nav-node__row" style="--depth: 0">
+            <span class="nav-node__caret"></span>
+            <span class="nav-node__label">리스크 알림</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- 메인 콘텐츠 -->
+    <main class="main">
+    <div class="page-header">
+      <div class="page-title-group">
+        <div class="page-title">부서 대시보드</div>
+        <div class="page-desc">결재 프로세스 전반의 처리 현황과 병목을 한눈에 확인합니다 · 오늘 기준</div>
+      </div>
+    </div>
+
+    <div class="mon-kpis" id="monKpis"></div>
+
+    <div class="mon-grid">
+      <section class="mon-card mon-card--wide">
+        <div class="mon-card__head">
+          <h2>단계별 병목 히트맵</h2>
+          <span class="mon-card__hint">부서 × 결재 단계 · 값이 높을수록 병목이 심함</span>
+        </div>
+        <div class="mon-heatmap" id="monHeatmap"></div>
+      </section>
+
+      <section class="mon-card">
+        <div class="mon-card__head"><h2>지연결재 Top 5</h2></div>
+        <ol class="mon-top5" id="monTop5"></ol>
+      </section>
+
+      <section class="mon-card">
+        <div class="mon-card__head">
+          <h2>반려 / 재상신율</h2>
+          <span class="mon-card__hint">기안 · 검토 · 승인 단계별</span>
+        </div>
+        <div class="mon-ratebars" id="monReject"></div>
+      </section>
+
+      <section class="mon-card">
+        <div class="mon-card__head"><h2>SLA 준수율 (부서별)</h2></div>
+        <div class="mon-ratebars" id="monSla"></div>
+      </section>
+
+      <section class="mon-card">
+        <div class="mon-card__head">
+          <h2>결재 적체 추세</h2>
+          <span class="mon-card__hint" id="monTrendHint"></span>
+        </div>
+        <div class="mon-trend" id="monTrend"></div>
+      </section>
+
+      <section class="mon-card">
+        <div class="mon-card__head"><h2>결재 지연 원인 분포</h2></div>
+        <div class="mon-dist" id="monDist"></div>
+      </section>
+
+      <section class="mon-card mon-card--wide">
+        <div class="mon-card__head">
+          <h2>담당자 부하 vs 지연</h2>
+          <span class="mon-card__hint">점이 우상단일수록 과부하 + 지연 위험이 큼</span>
+        </div>
+        <div class="mon-scatter" id="monScatter"></div>
+        <div class="mon-scatter__legend" id="monScatterLegend"></div>
+      </section>
+
+      <section class="mon-card mon-card--wide mon-card--ai">
+        <div class="mon-card__head"><h2><span class="mon-ai-badge">Narae AI</span>예측 인사이트</h2></div>
+        <div class="mon-ai__list" id="monAi"></div>
+      </section>
+    </div>
+    </main>
+
+  </div>
+</div>
+
+<script src="/resources/js/script.js"></script>
+<script>
+(function () {
+  const DEPTS = ORG.map(o => o.name);
+  const STAGES = ["기안", "검토", "합의", "결재", "시행"];
+  const DEPT_COLORS = ["#256ef4", "#0b78cb", "#228738", "#c78500", "#d63d4a"];
+  const REASON_COLORS = ["#256ef4", "#228738", "#c78500", "#d63d4a"];
+  const HEAT_SCALE = ["#fdefec", "#fcdfd9", "#f7afa1", "#f48771", "#f05f42", "#de3412", "#bd2c0f"];
+
+  function pick(seed, min, max) { return min + (hashSeed(seed) % (max - min + 1)); }
+
+  /* ---------- 1) 결재 프로세스 BI (KPI) ---------- */
+  const deptTotals = DEPTS.map(d => pick(d + ":total", 60, 180));
+  const totalApprovals = deptTotals.reduce((s, v) => s + v, 0);
+  const avgHours = Math.round(DEPTS.reduce((s, d) => s + pick(d + ":hrs", 6, 30), 0) / DEPTS.length);
+  const pendingCount = DEPTS.reduce((s, d) => s + pick(d + ":pending", 3, 22), 0);
+  const onTimeByDept = DEPTS.map(d => pick(d + ":ontime", 70, 96));
+  const onTimeRate = Math.round(onTimeByDept.reduce((s, v) => s + v, 0) / DEPTS.length);
+  const totalDelta = pick("kpi:total:delta", -8, 14);
+  const hoursDelta = pick("kpi:hrs:delta", -3, 5) - 1;
+
+  document.getElementById("monKpis").innerHTML = `
+    <div class="mon-kpi">
+      <div class="mon-kpi__label">이번 달 총 결재건수</div>
+      <div class="mon-kpi__value">${totalApprovals.toLocaleString()}<span class="unit">건</span></div>
+      <div class="mon-kpi__delta">전월 대비 ${totalDelta >= 0 ? '+' : ''}${totalDelta}%</div>
+    </div>
+    <div class="mon-kpi">
+      <div class="mon-kpi__label">평균 처리시간</div>
+      <div class="mon-kpi__value">${avgHours}<span class="unit">시간</span></div>
+      <div class="mon-kpi__delta ${hoursDelta > 0 ? 'up' : 'down'}">전월 대비 ${hoursDelta >= 0 ? '+' : ''}${hoursDelta}시간</div>
+    </div>
+    <div class="mon-kpi">
+      <div class="mon-kpi__label">결재 대기중</div>
+      <div class="mon-kpi__value">${pendingCount}<span class="unit">건</span></div>
+      <div class="mon-kpi__delta ${pendingCount > 60 ? 'up' : 'down'}">${pendingCount > 60 ? '적체 주의' : '정상 범위'}</div>
+    </div>
+    <div class="mon-kpi">
+      <div class="mon-kpi__label">기한내 결재율</div>
+      <div class="mon-kpi__value">${onTimeRate}<span class="unit">%</span></div>
+      <div class="mon-kpi__delta ${onTimeRate < 85 ? 'up' : 'down'}">${onTimeRate < 85 ? 'SLA 목표 미달' : 'SLA 목표 달성'}</div>
+    </div>
+  `;
+
+  /* ---------- 2) 단계별 병목 히트맵 ---------- */
+  const heatmapEl = document.getElementById("monHeatmap");
+  let heatHtml = `<div class="mon-heatmap__corner"></div>`;
+  STAGES.forEach(stage => heatHtml += `<div class="mon-heatmap__colhead">${stage}</div>`);
+  DEPTS.forEach(dept => {
+    heatHtml += `<div class="mon-heatmap__rowhead">${dept}</div>`;
+    STAGES.forEach(stage => {
+      const severity = pick(dept + ":" + stage, 8, 96);
+      const colorIdx = Math.min(HEAT_SCALE.length - 1, Math.floor(severity / 100 * HEAT_SCALE.length));
+      const textColor = colorIdx >= 5 ? "#fff" : "#1e2124";
+      heatHtml += `<div class="mon-heatmap__cell" style="background:${HEAT_SCALE[colorIdx]};color:${textColor}" title="${dept} · ${stage} 단계 병목도 ${severity}%">${severity}%</div>`;
+    });
+  });
+  heatmapEl.innerHTML = heatHtml;
+
+  /* ---------- 3) 지연결재 Top 5 ---------- */
+  const top5 = getRiskTasks().slice(0, 5);
+  document.getElementById("monTop5").innerHTML = top5.length
+    ? top5.map((row, i) => {
+        const overdue = row.risk.daysToEnd < 0;
+        const delayLabel = overdue ? `D+${-row.risk.daysToEnd}` : `${Math.abs(row.risk.diff)}%p 지연`;
+        return `
+          <li class="mon-top5__item" data-tier="${row.risk.tier}">
+            <span class="mon-top5__rank">${i + 1}</span>
+            <div class="mon-top5__body">
+              <div class="mon-top5__title" title="${escapeHtml(row.task.title)}">${escapeHtml(row.task.title)}</div>
+              <div class="mon-top5__meta">${escapeHtml(row.sil)} · ${escapeHtml(row.leaf.name)} · ${escapeHtml(row.task.owner)}</div>
+            </div>
+            <span class="mon-top5__delay ${row.risk.tier}">${delayLabel}</span>
+          </li>
+        `;
+      }).join("")
+    : `<li class="mon-top5__meta">지연중인 결재 항목이 없습니다.</li>`;
+
+  /* ---------- 4) 반려 / 재상신율 ---------- */
+  const rejectStages = [
+    { label: "기안", rate: pick("reject:기안", 4, 22) },
+    { label: "검토", rate: pick("reject:검토", 3, 18) },
+    { label: "승인", rate: pick("reject:승인", 2, 14) },
+  ];
+  document.getElementById("monReject").innerHTML = rejectStages.map(s => `
+    <div class="mon-ratebar">
+      <div class="mon-ratebar__label">${s.label}</div>
+      <div class="mon-ratebar__bar"><div class="mon-ratebar__fill" style="width:${s.rate}%;background:var(--krds-light-color-element-warning)"></div></div>
+      <div class="mon-ratebar__value">${s.rate}%</div>
+    </div>
+  `).join("");
+
+  /* ---------- 5) SLA 준수율 (부서별) ---------- */
+  document.getElementById("monSla").innerHTML = DEPTS.map((d, i) => `
+    <div class="mon-ratebar">
+      <div class="mon-ratebar__label">${d}</div>
+      <div class="mon-ratebar__bar"><div class="mon-ratebar__fill" style="width:${onTimeByDept[i]}%;background:${DEPT_COLORS[i]}"></div></div>
+      <div class="mon-ratebar__value">${onTimeByDept[i]}%</div>
+    </div>
+  `).join("");
+
+  /* ---------- 6) 결재 적체 추세 ---------- */
+  const weeks = 10;
+  const trend = [];
+  let base = pick("trend:base", 30, 55);
+  for (let w = 0; w < weeks; w++) {
+    base = Math.max(8, base + (pick("trend:" + w, 0, 16) - 7));
+    trend.push(base);
+  }
+  const maxTrend = Math.max(...trend);
+  const trendDelta = trend[trend.length - 1] - trend[0];
+  document.getElementById("monTrendHint").textContent =
+    `최근 ${weeks}주 · ${trendDelta >= 0 ? "+" : ""}${trendDelta}건`;
+  document.getElementById("monTrend").innerHTML = trend.map((v, i) => `
+    <div class="mon-trend__col ${i === trend.length - 1 ? 'mon-trend__col--last' : ''}">
+      <div class="mon-trend__bar" style="height:${Math.round(v / maxTrend * 100)}%" title="${i + 1}주차 적체 ${v}건"></div>
+      <div class="mon-trend__label">${i + 1}주</div>
+    </div>
+  `).join("");
+
+  /* ---------- 7) 결재 지연 원인 분포 ---------- */
+  const reasons = ["담당자 미확인", "결재선 대기", "보완자료 필요", "시스템 지연"];
+  const reasonRaw = reasons.map((r, i) => pick("reason:" + r, 8, 40));
+  const reasonSum = reasonRaw.reduce((s, v) => s + v, 0);
+  const reasonPct = reasonRaw.map(v => Math.round(v / reasonSum * 100));
+  document.getElementById("monDist").innerHTML = `
+    <div class="mon-dist__bar">
+      ${reasons.map((r, i) => `<div class="mon-dist__seg" style="width:${reasonPct[i]}%;background:${REASON_COLORS[i]}" title="${r} ${reasonPct[i]}%"></div>`).join("")}
+    </div>
+    <div class="mon-dist__legend">
+      ${reasons.map((r, i) => `
+        <div class="mon-dist__item">
+          <span class="mon-dist__swatch" style="background:${REASON_COLORS[i]}"></span>
+          ${r}
+          <span class="mon-dist__pct">${reasonPct[i]}%</span>
+        </div>
+      `).join("")}
+    </div>
+  `;
+
+  /* ---------- 8) 담당자 부하 vs 지연 (산점도) ---------- */
+  const flat = getAllTasksFlat().filter(row => row.task.status !== "done");
+  const byOwner = new Map();
+  flat.forEach(row => {
+    if (!byOwner.has(row.task.owner)) byOwner.set(row.task.owner, []);
+    byOwner.get(row.task.owner).push(row);
+  });
+  const ownerPoints = [...byOwner.entries()].map(([owner, rows]) => {
+    const risks = rows.map(r => computeTaskRisk(r.task));
+    const avgDiff = risks.reduce((s, r) => s + r.diff, 0) / risks.length;
+    let tier = "ok";
+    if (avgDiff <= -15) tier = "danger";
+    else if (avgDiff <= -5) tier = "warning";
+    return { owner, workload: rows.length, avgDiff, tier };
+  }).slice(0, 18);
+
+  const maxWorkload = Math.max(...ownerPoints.map(p => p.workload), 1);
+  const maxDelay = Math.max(...ownerPoints.map(p => Math.max(0, -p.avgDiff)), 1);
+  const TIER_COLOR = { ok: "#228738", warning: "#c78500", danger: "#d63d4a" };
+  document.getElementById("monScatter").innerHTML = `
+    <div class="mon-scatter__axis-y"><span>지연 큼</span><span>지연 적음</span></div>
+    <div class="mon-scatter__axis-x"><span>업무 적음</span><span>업무 많음</span></div>
+    ${ownerPoints.map(p => {
+      const x = (p.workload / maxWorkload) * 92 + 4;
+      const y = (Math.max(0, -p.avgDiff) / maxDelay) * 92 + 4;
+      return `<div class="mon-scatter__dot" style="left:${x}%;bottom:${y}%;background:${TIER_COLOR[p.tier]}" title="${p.owner} · 담당 ${p.workload}건 · 목표 대비 평균 ${Math.round(p.avgDiff)}%p"></div>`;
+    }).join("")}
+  `;
+  document.getElementById("monScatterLegend").innerHTML = `
+    <span><i style="background:${TIER_COLOR.ok}"></i>정상</span>
+    <span><i style="background:${TIER_COLOR.warning}"></i>주의</span>
+    <span><i style="background:${TIER_COLOR.danger}"></i>위험</span>
+  `;
+
+  /* ---------- 9) 예측 AI ---------- */
+  let worstStage = STAGES[0], worstDept = DEPTS[0], worstVal = -1;
+  DEPTS.forEach(dept => STAGES.forEach(stage => {
+    const v = pick(dept + ":" + stage, 8, 96);
+    if (v > worstVal) { worstVal = v; worstStage = stage; worstDept = dept; }
+  }));
+  const worstSlaIdx = onTimeByDept.indexOf(Math.min(...onTimeByDept));
+  const recentAvg = (trend[weeks - 1] + trend[weeks - 2] + trend[weeks - 3]) / 3;
+  const prevAvg = (trend[weeks - 4] + trend[weeks - 5] + trend[weeks - 6]) / 3;
+  const growthRate = (recentAvg - prevAvg) / prevAvg;
+  const projected = Math.max(0, Math.round(trend[weeks - 1] * (1 + growthRate)));
+
+  document.getElementById("monAi").innerHTML = `
+    <div class="mon-ai__item"><i>1</i>
+      <span><b>${worstDept} · ${worstStage}</b> 단계의 병목도가 ${worstVal}%로 가장 높습니다. 해당 단계 결재선의 처리 인력 재배치를 검토해 보세요.</span>
+    </div>
+    <div class="mon-ai__item"><i>2</i>
+      <span>현재 추세가 이어질 경우 다음 주 결재 적체는 약 <b>${projected}건</b>${growthRate >= 0 ? "으로 증가" : "로 감소"}할 것으로 예측됩니다.</span>
+    </div>
+    <div class="mon-ai__item"><i>3</i>
+      <span><b>${DEPTS[worstSlaIdx]}</b>의 SLA 준수율이 ${onTimeByDept[worstSlaIdx]}%로 부서 중 가장 낮아, 우선 점검이 필요합니다.</span>
+    </div>
+  `;
+})();
+</script>
+
+</body>
+</html>

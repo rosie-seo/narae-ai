@@ -17,6 +17,7 @@
  * │  § 14  관련 규정 뷰           (operating-detail-policy.html)
  * │  § 15  규정 업로드            (policy.html)
  * │  § 16  AI 에이전트           (ai-agent.html)
+ * │  § 17  모니터링              (monitoring-dashboard.html, monitoring-risk.html)
  * └──────────────────────────────────────────────────────────────────
  */
 
@@ -5552,6 +5553,9 @@ label {
   #orgBoard {
     display: flex;
     height: calc(100vh - 52px);
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
   }
   #orgBoard .columns {
     display: flex;
@@ -5953,8 +5957,11 @@ label {
   #orgBoard .goal-analysis__badge.goal-ahead { background: var(--krds-light-color-surface-primary-subtler); color: var(--krds-light-color-text-primary); }
 
   #orgBoard .goal-analysis__metrics { display: flex; flex-direction: column; gap: var(--krds-number-4); }
+  #orgBoard .goal-metric-group { display: flex; flex-direction: column; gap: var(--krds-number-4); }
+  #orgBoard .goal-metric-divider { height: 1px; background: var(--krds-light-color-divider-gray-light); margin: var(--krds-number-2) 0; }
   #orgBoard .goal-metric { display: flex; align-items: center; gap: var(--krds-number-4); }
   #orgBoard .goal-metric__label { flex: 0 0 170px; font-size: 11px; color: var(--krds-light-color-text-subtle); }
+  #orgBoard .goal-metric-group--profit .goal-metric__label { color: var(--krds-light-color-text-information); }
   #orgBoard .goal-metric__hint { color: var(--krds-light-color-text-disabled); }
   #orgBoard .goal-metric__bar {
     flex: 1;
@@ -5966,6 +5973,8 @@ label {
   #orgBoard .goal-metric__fill { height: 100%; border-radius: var(--krds-radius-max); }
   #orgBoard .goal-metric__fill--target { background: var(--krds-light-color-border-gray); }
   #orgBoard .goal-metric__fill--actual { background: var(--krds-light-color-element-primary); }
+  #orgBoard .goal-metric__fill--profit-target { background: var(--krds-color-light-information-20); }
+  #orgBoard .goal-metric__fill--profit-actual { background: var(--krds-light-color-element-information); }
   #orgBoard .goal-metric__value { flex: 0 0 36px; text-align: right; font-size: 12px; font-weight: 700; color: var(--krds-light-color-text-basic); }
   #orgBoard .goal-analysis__note { margin-top: var(--krds-number-4); font-size: 11px; color: var(--krds-light-color-text-subtle); }
 
@@ -6216,4 +6225,124 @@ label {
   border-radius: 50%;
 }
 .day-col__empty { color: var(--krds-light-color-text-disabled); }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   §  17  모니터링 — 부서 대시보드 · 리스크 알림
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* ===== 부서 대시보드 : KPI 타일 ===== */
+.mon-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--krds-gap-5); margin-bottom: var(--krds-padding-7); }
+.mon-kpi { background: var(--krds-light-color-surface-white); border: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-gray-light); border-radius: var(--krds-radius-medium2); padding: var(--krds-padding-6); }
+.mon-kpi__label { font-size: 12px; color: var(--krds-light-color-text-subtle); margin-bottom: var(--krds-number-3); }
+.mon-kpi__value { font-size: 24px; font-weight: 800; color: var(--krds-light-color-text-basic); }
+.mon-kpi__value .unit { font-size: 13px; font-weight: 600; color: var(--krds-light-color-text-subtle); margin-left: 2px; }
+.mon-kpi__delta { margin-top: var(--krds-number-3); font-size: 11px; font-weight: 700; }
+.mon-kpi__delta.up { color: var(--krds-light-color-text-danger); }
+.mon-kpi__delta.down { color: var(--krds-light-color-text-success); }
+
+/* ===== 카드 그리드 ===== */
+.mon-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--krds-gap-5); }
+.mon-card { background: var(--krds-light-color-surface-white); border: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-gray-light); border-radius: var(--krds-radius-medium2); padding: var(--krds-padding-6); }
+.mon-card--wide { grid-column: span 2; }
+.mon-card__head { display: flex; align-items: baseline; gap: var(--krds-gap-3); margin-bottom: var(--krds-padding-5); flex-wrap: wrap; }
+.mon-card__head h2 { font-size: 14px; font-weight: 700; color: var(--krds-light-color-text-basic); }
+.mon-card__hint { font-size: 11px; color: var(--krds-light-color-text-disabled); }
+
+/* ===== 단계별 병목 히트맵 ===== */
+.mon-heatmap { display: grid; grid-template-columns: 108px repeat(5, 1fr); gap: 4px; }
+.mon-heatmap__corner { }
+.mon-heatmap__colhead, .mon-heatmap__rowhead { font-size: 11px; color: var(--krds-light-color-text-subtle); display: flex; align-items: center; }
+.mon-heatmap__colhead { justify-content: center; padding-bottom: 4px; font-weight: 600; }
+.mon-heatmap__rowhead { font-weight: 600; }
+.mon-heatmap__cell { height: 40px; border-radius: var(--krds-radius-small2); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; cursor: default; }
+
+/* ===== 지연결재 Top 5 ===== */
+.mon-top5 { display: flex; flex-direction: column; gap: var(--krds-number-4); list-style: none; }
+.mon-top5__item { display: flex; align-items: center; gap: var(--krds-number-4); }
+.mon-top5__rank { flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%; background: var(--krds-light-color-surface-gray-subtler); color: var(--krds-light-color-text-subtle); font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+.mon-top5__item[data-tier="danger"] .mon-top5__rank { background: var(--krds-light-color-surface-danger-subtler); color: var(--krds-light-color-text-danger); }
+.mon-top5__item[data-tier="warning"] .mon-top5__rank { background: var(--krds-light-color-surface-warning-subtler); color: var(--krds-light-color-text-warning); }
+.mon-top5__body { min-width: 0; flex: 1; }
+.mon-top5__title { font-size: 12.5px; font-weight: 600; color: var(--krds-light-color-text-basic); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mon-top5__meta { font-size: 11px; color: var(--krds-light-color-text-disabled); margin-top: 2px; }
+.mon-top5__delay { flex-shrink: 0; font-size: 12px; font-weight: 800; }
+.mon-top5__delay.danger { color: var(--krds-light-color-text-danger); }
+.mon-top5__delay.warning { color: var(--krds-light-color-text-warning); }
+
+/* ===== 비율 막대 (반려/재상신율, SLA 준수율 공용) ===== */
+.mon-ratebars { display: flex; flex-direction: column; gap: var(--krds-number-5); }
+.mon-ratebar { display: flex; align-items: center; gap: var(--krds-number-4); }
+.mon-ratebar__label { flex: 0 0 96px; font-size: 11.5px; color: var(--krds-light-color-text-subtle); }
+.mon-ratebar__bar { flex: 1; height: 8px; border-radius: var(--krds-radius-max); background: var(--krds-light-color-surface-gray-subtle); overflow: hidden; }
+.mon-ratebar__fill { height: 100%; border-radius: var(--krds-radius-max); }
+.mon-ratebar__value { flex: 0 0 40px; text-align: right; font-size: 12px; font-weight: 700; color: var(--krds-light-color-text-basic); }
+
+/* ===== 결재 적체 추세 ===== */
+.mon-trend { display: flex; align-items: flex-end; gap: 6px; height: 120px; }
+.mon-trend__col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 4px; }
+.mon-trend__bar { width: 100%; min-height: 2px; border-radius: var(--krds-radius-small2) var(--krds-radius-small2) 0 0; background: var(--krds-color-light-primary-20); }
+.mon-trend__col--last .mon-trend__bar { background: var(--krds-light-color-element-primary); }
+.mon-trend__label { font-size: 10px; color: var(--krds-light-color-text-disabled); }
+
+/* ===== 결재 지연 원인 분포 ===== */
+.mon-dist__bar { display: flex; height: 14px; border-radius: var(--krds-radius-max); overflow: hidden; margin-bottom: var(--krds-padding-5); }
+.mon-dist__seg { height: 100%; }
+.mon-dist__seg + .mon-dist__seg { border-left: 2px solid var(--krds-light-color-surface-white); }
+.mon-dist__legend { display: flex; flex-direction: column; gap: var(--krds-number-3); }
+.mon-dist__item { display: flex; align-items: center; gap: var(--krds-number-3); font-size: 12px; color: var(--krds-light-color-text-basic); }
+.mon-dist__swatch { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.mon-dist__pct { margin-left: auto; font-weight: 700; }
+
+/* ===== 담당자 부하 vs 지연 (산점도) ===== */
+.mon-scatter { position: relative; height: 220px; border-left: 1px solid var(--krds-light-color-border-gray-light); border-bottom: 1px solid var(--krds-light-color-border-gray-light); margin: var(--krds-number-4) var(--krds-padding-7) var(--krds-padding-6) 34px; }
+.mon-scatter__dot { position: absolute; width: 12px; height: 12px; border-radius: 50%; transform: translate(-50%, 50%); cursor: default; border: 2px solid var(--krds-light-color-surface-white); box-shadow: 0 0 0 1px rgba(0,0,0,.08); }
+.mon-scatter__axis-x { position: absolute; bottom: -20px; left: 0; right: 0; display: flex; justify-content: space-between; font-size: 10px; color: var(--krds-light-color-text-disabled); }
+.mon-scatter__axis-y { position: absolute; top: -8px; left: -38px; bottom: 0; width: 32px; display: flex; flex-direction: column; justify-content: space-between; text-align: right; font-size: 10px; color: var(--krds-light-color-text-disabled); }
+.mon-scatter__legend { display: flex; gap: var(--krds-gap-5); margin-top: var(--krds-padding-7); font-size: 11px; color: var(--krds-light-color-text-subtle); }
+.mon-scatter__legend span { display: inline-flex; align-items: center; gap: 5px; }
+.mon-scatter__legend i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+/* ===== 예측 AI ===== */
+.mon-card--ai { background: linear-gradient(180deg, var(--krds-color-light-primary-5), var(--krds-light-color-surface-white)); border-color: var(--krds-color-light-primary-10); }
+.mon-ai-badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: var(--krds-radius-max); background: var(--krds-light-color-element-primary); color: #fff; font-size: 10px; font-weight: 800; margin-right: 6px; vertical-align: middle; }
+.mon-ai__list { display: flex; flex-direction: column; gap: var(--krds-number-5); }
+.mon-ai__item { display: flex; gap: var(--krds-number-4); align-items: flex-start; font-size: 12.5px; line-height: 1.55; color: var(--krds-light-color-text-basic); }
+.mon-ai__item i { flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%; background: var(--krds-color-light-primary-10); color: var(--krds-color-light-primary-70); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; font-style: normal; }
+
+@media (max-width: 1100px) {
+  .mon-kpis { grid-template-columns: repeat(2, 1fr); }
+  .mon-grid { grid-template-columns: 1fr; }
+  .mon-card--wide { grid-column: span 1; }
+}
+
+/* ===== 리스크 알림 ===== */
+.risk-summary { display: flex; gap: var(--krds-gap-5); margin-bottom: var(--krds-padding-7); }
+.risk-stat { flex: 1; background: var(--krds-light-color-surface-white); border: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-gray-light); border-radius: var(--krds-radius-medium2); padding: var(--krds-padding-6); display: flex; align-items: center; gap: var(--krds-gap-4); }
+.risk-stat__icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+.risk-stat--danger .risk-stat__icon { background: var(--krds-light-color-surface-danger-subtler); color: var(--krds-light-color-text-danger); }
+.risk-stat--warning .risk-stat__icon { background: var(--krds-light-color-surface-warning-subtler); color: var(--krds-light-color-text-warning); }
+.risk-stat--total .risk-stat__icon { background: var(--krds-light-color-surface-gray-subtler); color: var(--krds-light-color-text-subtle); }
+.risk-stat__value { font-size: 22px; font-weight: 800; color: var(--krds-light-color-text-basic); line-height: 1.2; }
+.risk-stat__label { font-size: 11.5px; color: var(--krds-light-color-text-subtle); }
+
+.risk-filter { display: flex; gap: var(--krds-gap-3); margin-bottom: var(--krds-padding-6); }
+
+.risk-list-panel { display: flex; flex-direction: column; gap: var(--krds-number-5); }
+.risk-card { border: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-gray-light); border-radius: var(--krds-radius-medium2); padding: var(--krds-padding-6); background: var(--krds-light-color-surface-white); }
+.risk-card--danger { border-left: 3px solid var(--krds-light-color-element-danger); }
+.risk-card--warning { border-left: 3px solid var(--krds-light-color-element-warning); }
+.risk-card__top { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--krds-gap-4); }
+.risk-card__title { font-size: 13.5px; font-weight: 700; color: var(--krds-light-color-text-basic); margin-bottom: 4px; }
+.risk-card__meta { font-size: 11.5px; color: var(--krds-light-color-text-subtle); display: flex; flex-wrap: wrap; gap: var(--krds-gap-3); }
+.risk-card__meta span + span::before { content: "·"; margin-right: var(--krds-gap-3); color: var(--krds-light-color-border-gray); }
+.risk-card__note { margin-top: var(--krds-number-4); font-size: 12px; color: var(--krds-light-color-text-subtle); }
+
+.risk-route { margin-top: var(--krds-padding-5); padding-top: var(--krds-padding-5); border-top: 1px dashed var(--krds-light-color-border-gray-light); display: flex; align-items: center; justify-content: space-between; gap: var(--krds-gap-4); flex-wrap: wrap; }
+.risk-route__suggest { display: flex; align-items: center; gap: var(--krds-gap-3); font-size: 12px; color: var(--krds-light-color-text-basic); }
+.risk-route__suggest b { font-weight: 700; }
+.risk-route__suggest .role { color: var(--krds-light-color-text-disabled); font-size: 11px; }
+.risk-route__btn { flex-shrink: 0; }
+.risk-route.is-sent .risk-route__suggest { color: var(--krds-light-color-text-success); }
+
+.risk-empty { text-align: center; padding: 60px 0; color: var(--krds-light-color-text-disabled); font-size: 13px; }
 .day-col__empty::before { display: none; }
