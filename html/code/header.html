@@ -51,9 +51,14 @@
                         </nav>
                             <!-- 폼그룹 -->
                         <div class="form-group">
-                            <div class="form-conts">
-                                <input type="text" id="consult_name" class="krds-input" placeholder="AI에게 질문해보세요!" readonly style="cursor:pointer"
-                                  onclick="window.open('/resources/pages/ai-agent.html', '_blank')">
+                            <div class="form-conts ai-entry" role="button" tabindex="0" aria-label="AI에게 질문해보세요"
+                              onclick="window.open('/resources/pages/ai-agent.html', '_blank')"
+                              onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.open('/resources/pages/ai-agent.html', '_blank')}">
+                                <span class="ai-entry__icon" aria-hidden="true"></span>
+                                <input type="text" id="consult_name" class="krds-input ai-entry__input" placeholder="AI에게 질문해보세요!" readonly tabindex="-1">
+                                <svg class="ai-entry__arrow" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                                  <path d="M2.5 7h9M7.5 3l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
                             </div>
                         </div>
                         <!-- //폼그룹 -->

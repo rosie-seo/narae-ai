@@ -42,6 +42,10 @@
         <div class="page-title">부서 대시보드</div>
         <div class="page-desc">결재 프로세스 전반의 처리 현황과 병목을 한눈에 확인합니다 · 오늘 기준</div>
       </div>
+      <div class="page-header__actions">
+        <span class="page-header__updated" id="monUpdatedAt"></span>
+        <button type="button" class="krds-btn small secondary" id="monRefreshBtn">업데이트</button>
+      </div>
     </div>
 
     <div class="mon-kpis" id="monKpis"></div>
@@ -110,11 +114,14 @@
 (function () {
   const DEPTS = ORG.map(o => o.name);
   const STAGES = ["기안", "검토", "합의", "결재", "시행"];
-  const DEPT_COLORS = ["#256ef4", "#0b78cb", "#228738", "#c78500", "#d63d4a"];
-  const REASON_COLORS = ["#256ef4", "#228738", "#c78500", "#d63d4a"];
-  const HEAT_SCALE = ["#fdefec", "#fcdfd9", "#f7afa1", "#f48771", "#f05f42", "#de3412", "#bd2c0f"];
+  const DEPT_COLORS = ["#518bf6", "#3c93d5", "#4e9f60", "#d29d33", "#de646e"];
+  const REASON_COLORS = ["#518bf6", "#4e9f60", "#d29d33", "#de646e"];
+  const HEAT_SCALE = ["#fdf2f0", "#fde5e1", "#f9bfb4", "#f69f8d", "#f37f68", "#e55d41", "#ca563f"];
 
-  function pick(seed, min, max) { return min + (hashSeed(seed) % (max - min + 1)); }
+  let refreshNonce = 0;
+  function pick(seed, min, max) { return min + (hashSeed(refreshNonce + ":" + seed) % (max - min + 1)); }
+
+  function renderDashboard() {
 
   /* ---------- 1) 결재 프로세스 BI (KPI) ---------- */
   const deptTotals = DEPTS.map(d => pick(d + ":total", 60, 180));
@@ -192,7 +199,7 @@
   document.getElementById("monReject").innerHTML = rejectStages.map(s => `
     <div class="mon-ratebar">
       <div class="mon-ratebar__label">${s.label}</div>
-      <div class="mon-ratebar__bar"><div class="mon-ratebar__fill" style="width:${s.rate}%;background:var(--krds-light-color-element-warning)"></div></div>
+      <div class="mon-ratebar__bar"><div class="mon-ratebar__fill" style="width:${s.rate}%;background:var(--krds-color-light-warning-20)"></div></div>
       <div class="mon-ratebar__value">${s.rate}%</div>
     </div>
   `).join("");
@@ -263,7 +270,7 @@
 
   const maxWorkload = Math.max(...ownerPoints.map(p => p.workload), 1);
   const maxDelay = Math.max(...ownerPoints.map(p => Math.max(0, -p.avgDiff)), 1);
-  const TIER_COLOR = { ok: "#228738", warning: "#c78500", danger: "#d63d4a" };
+  const TIER_COLOR = { ok: "#439956", warning: "#cf9726", danger: "#dc5a65" };
   document.getElementById("monScatter").innerHTML = `
     <div class="mon-scatter__axis-y"><span>지연 큼</span><span>지연 적음</span></div>
     <div class="mon-scatter__axis-x"><span>업무 적음</span><span>업무 많음</span></div>
@@ -302,6 +309,31 @@
       <span><b>${DEPTS[worstSlaIdx]}</b>의 SLA 준수율이 ${onTimeByDept[worstSlaIdx]}%로 부서 중 가장 낮아, 우선 점검이 필요합니다.</span>
     </div>
   `;
+
+  } // renderDashboard
+
+  function updateTimestamp() {
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2, "0");
+    const mm = String(now.getMinutes()).padStart(2, "0");
+    document.getElementById("monUpdatedAt").textContent = `마지막 업데이트 ${hh}:${mm}`;
+  }
+
+  const refreshBtn = document.getElementById("monRefreshBtn");
+  refreshBtn.addEventListener("click", () => {
+    refreshBtn.disabled = true;
+    refreshBtn.textContent = "업데이트 중…";
+    setTimeout(() => {
+      refreshNonce++;
+      renderDashboard();
+      updateTimestamp();
+      refreshBtn.disabled = false;
+      refreshBtn.textContent = "업데이트";
+    }, 400);
+  });
+
+  renderDashboard();
+  updateTimestamp();
 })();
 </script>
 

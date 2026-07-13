@@ -16,7 +16,7 @@
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="sb-top">
-      <button class="new-btn">
+      <button class="new-btn" onclick="newChat()">
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="white" stroke-width="1.6" stroke-linecap="round"/></svg>
         새 채팅
       </button>
@@ -35,11 +35,29 @@
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.3 4H13l-3.5 2.5 1.3 4.2L7 9.2 3.2 11.7l1.3-4.2L1 5h4.7L7 1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>문서 요약
       </div>
     </nav>
-    <div class="sb-section">
+    <div class="sb-section" id="sbSection">
       <div class="sb-section-lbl">최근 항목</div>
-      <div class="hi on"><div class="hdot"></div>개별 과제 관리에 대해</div>
-      <div class="hi"><div class="hdot"></div>계획 타임라인 작성</div>
-      <div class="hi"><div class="hdot"></div>회의록 관리 자동화</div>
+      <div class="hi on" data-key="task" onclick="selectRecent('task')">
+        <div class="hdot"></div>
+        <span class="hi-label">개별 과제 관리에 대해</span>
+        <button type="button" class="hi-rename-btn" onclick="event.stopPropagation(); startRename(this)" title="이름 변경">
+          <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M9.5 2l2.5 2.5L4.5 12H2v-2.5L9.5 2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="hi" data-key="timeline" onclick="selectRecent('timeline')">
+        <div class="hdot"></div>
+        <span class="hi-label">계획 타임라인 작성</span>
+        <button type="button" class="hi-rename-btn" onclick="event.stopPropagation(); startRename(this)" title="이름 변경">
+          <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M9.5 2l2.5 2.5L4.5 12H2v-2.5L9.5 2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="hi" data-key="minutes" onclick="selectRecent('minutes')">
+        <div class="hdot"></div>
+        <span class="hi-label">회의록 관리 자동화</span>
+        <button type="button" class="hi-rename-btn" onclick="event.stopPropagation(); startRename(this)" title="이름 변경">
+          <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M9.5 2l2.5 2.5L4.5 12H2v-2.5L9.5 2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
     </div>
   </aside>
 
@@ -48,10 +66,9 @@
 
     <!-- topbar -->
     <div class="ctopbar">
-      <button class="ctit-btn">
-        개별 과제 관리에 대해서 질문을 함께
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="#8A94A8" stroke-width="1.4" stroke-linecap="round"/></svg>
-      </button>
+      <div class="ctit-btn">
+        <span id="ctitTxt">개별 과제 관리에 대해서 질문을 함께</span>
+      </div>
       <button class="cx-btn" onclick="window.close()">
         <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1 1l9 9M10 1L1 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       </button>
@@ -68,20 +85,22 @@
     </div>
 
     <!-- messages -->
-    <div class="msgs" id="msgs">
-      <div class="mai">
-        <div class="aav">N</div>
-        <div class="bai">
-          <p>나래 AI의 핵심 기능 6가지를 정리해드릴게요.</p>
-          <ol>
-            <li><strong>과제·업무 관리</strong> — 부서/팀/개인 단위 협업 및 결과 자동 기록</li>
-            <li><strong>AI 워크플로</strong> — 반복 업무 자동화, 일정·액션아이템 자동 추출</li>
-            <li><strong>과제 중심 업무 관리</strong> — 목표·하위 과제·담당자 연결 체계 확인</li>
-            <li><strong>공공기관 특화 법령 관리</strong> — 현행법령 기반 데이터 체계 지원</li>
-            <li><strong>AI 어시스턴트</strong> — 과제 기반 컨텍스트 Q&amp;A</li>
-            <li><strong>AI 리스크 관리</strong> — 성과 데이터 분석 및 감사 대비 보고</li>
-          </ol>
-          <p>참고자료는 따로 링크로 첨부가 필요하면 알려주세요!</p>
+    <div class="msgs-scroll" id="msgsScroll">
+      <div class="msgs" id="msgs">
+        <div class="mai">
+          <div class="aav"></div>
+          <div class="bai">
+            <p>나래 AI의 핵심 기능 6가지를 정리해드릴게요.</p>
+            <ol>
+              <li><strong>과제·업무 관리</strong> — 부서/팀/개인 단위 협업 및 결과 자동 기록</li>
+              <li><strong>AI 워크플로</strong> — 반복 업무 자동화, 일정·액션아이템 자동 추출</li>
+              <li><strong>과제 중심 업무 관리</strong> — 목표·하위 과제·담당자 연결 체계 확인</li>
+              <li><strong>공공기관 특화 법령 관리</strong> — 현행법령 기반 데이터 체계 지원</li>
+              <li><strong>AI 어시스턴트</strong> — 과제 기반 컨텍스트 Q&amp;A</li>
+              <li><strong>AI 리스크 관리</strong> — 성과 데이터 분석 및 감사 대비 보고</li>
+            </ol>
+            <p>참고자료는 따로 링크로 첨부가 필요하면 알려주세요!</p>
+          </div>
         </div>
       </div>
     </div>
@@ -176,6 +195,105 @@ const BLOCKED={
   열람자:'열람자 권한으로는 해당 기능을 사용할 수 없습니다. 담당자 이상의 권한이 필요하며, 시스템 관리자에게 문의해주세요.',
 };
 
+const RECENTS = {
+  task: {
+    title: '개별 과제 관리에 대해서 질문을 함께',
+    msgs: [
+      { role: 'ai', html: '<p>나래 AI의 핵심 기능 6가지를 정리해드릴게요.</p>'
+        + '<ol>'
+        + '<li><strong>과제·업무 관리</strong> — 부서/팀/개인 단위 협업 및 결과 자동 기록</li>'
+        + '<li><strong>AI 워크플로</strong> — 반복 업무 자동화, 일정·액션아이템 자동 추출</li>'
+        + '<li><strong>과제 중심 업무 관리</strong> — 목표·하위 과제·담당자 연결 체계 확인</li>'
+        + '<li><strong>공공기관 특화 법령 관리</strong> — 현행법령 기반 데이터 체계 지원</li>'
+        + '<li><strong>AI 어시스턴트</strong> — 과제 기반 컨텍스트 Q&amp;A</li>'
+        + '<li><strong>AI 리스크 관리</strong> — 성과 데이터 분석 및 감사 대비 보고</li>'
+        + '</ol>'
+        + '<p>참고자료는 따로 링크로 첨부가 필요하면 알려주세요!</p>' },
+    ],
+  },
+  timeline: {
+    title: '계획 타임라인 작성',
+    msgs: [
+      { role: 'user', text: '이번 분기 계획 타임라인을 작성해줘' },
+      { role: 'ai', html: '<p><strong>2026년 1분기 계획 타임라인 (초안)</strong></p>'
+        + '<ul>'
+        + '<li><strong>1월:</strong> 목표 수립 및 과제 배분</li>'
+        + '<li><strong>2월:</strong> 중간 점검 및 리스크 과제 조정</li>'
+        + '<li><strong>3월:</strong> 성과 취합 및 분기 보고</li>'
+        + '</ul>'
+        + '<p>세부 일정은 부서별 과제 데이터를 기준으로 자동 배치했습니다. 특정 부서만 반영해드릴까요?</p>' },
+    ],
+  },
+  minutes: {
+    title: '회의록 관리 자동화',
+    msgs: [
+      { role: 'user', text: '회의록 관리를 자동화하고 싶어' },
+      { role: 'ai', html: '<p><strong>회의록 자동화 제안</strong></p>'
+        + '<ol>'
+        + '<li>회의 음성/텍스트 업로드 시 요약본 자동 생성</li>'
+        + '<li>액션 아이템·담당자·기한 자동 추출 후 과제로 등록</li>'
+        + '<li>다음 회의 전 미완료 액션아이템 자동 리마인드</li>'
+        + '</ol>'
+        + '<p>회의록 원문 파일을 첨부해주시면 바로 요약을 시작할 수 있어요.</p>' },
+    ],
+  },
+};
+
+function startRename(btn){
+  const item = btn.closest('.hi');
+  const label = item.querySelector('.hi-label');
+  if (!label) return;
+  const original = label.textContent;
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'hi-rename-input';
+  input.value = original;
+  input.onclick = e => e.stopPropagation();
+  input.onkeydown = e => {
+    if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+    else if (e.key === 'Escape') { e.preventDefault(); input.value = original; input.blur(); }
+  };
+  input.onblur = () => {
+    const val = input.value.trim();
+    const newLabel = document.createElement('span');
+    newLabel.className = 'hi-label';
+    newLabel.textContent = val || original;
+    input.replaceWith(newLabel);
+  };
+
+  label.replaceWith(input);
+  input.focus();
+  input.select();
+}
+
+function newChat(){
+  document.querySelectorAll('#sbSection .hi').forEach(el => el.classList.remove('on'));
+  document.getElementById('ctitTxt').textContent = '새 채팅';
+
+  const m = document.getElementById('msgs');
+  m.innerHTML = '';
+  addAI('<p>새로운 대화를 시작합니다. 무엇을 도와드릴까요?</p>');
+
+  const inp = document.getElementById('inp');
+  inp.value = '';
+  inp.focus();
+}
+
+function selectRecent(key){
+  document.querySelectorAll('#sbSection .hi').forEach(el => el.classList.toggle('on', el.dataset.key === key));
+
+  const convo = RECENTS[key];
+  document.getElementById('ctitTxt').textContent = convo.title;
+
+  const m = document.getElementById('msgs');
+  m.innerHTML = '';
+  convo.msgs.forEach(msg => {
+    if (msg.role === 'user') addUser(msg.text);
+    else addAI(msg.html);
+  });
+}
+
 function cycleRole(){
   ri=(ri+1)%ROLES.length;
   const r=ROLES[ri];
@@ -230,7 +348,7 @@ function addAI(html){
   const m=document.getElementById('msgs');
   const d=document.createElement('div');
   d.className='mai';
-  d.innerHTML='<div class="aav">N</div><div class="bai">'+html+'</div>';
+  d.innerHTML='<div class="aav"></div><div class="bai">'+html+'</div>';
   m.appendChild(d);scroll();
 }
 
@@ -238,7 +356,7 @@ function addBlocked(reason){
   const m=document.getElementById('msgs');
   const d=document.createElement('div');
   d.className='mai';
-  d.innerHTML='<div class="aav" style="background:#FEF2F2;border-color:#FCA5A5;color:#B91C1C">✕</div>'
+  d.innerHTML='<div class="aav aav--error">✕</div>'
     +'<div class="blk"><div class="blk-ic">!</div>'
     +'<div><strong style="color:#991B1B">접근 차단</strong><br/>'+esc(reason)+'</div></div>';
   m.appendChild(d);scroll();
@@ -248,12 +366,12 @@ function showTyping(cb){
   const m=document.getElementById('msgs');
   const d=document.createElement('div');
   d.className='mai';d.id='typing';
-  d.innerHTML='<div class="aav">N</div><div class="bai" style="padding:10px 16px"><div class="dots"><span></span><span></span><span></span></div></div>';
+  d.innerHTML='<div class="aav"></div><div class="bai" style="padding:10px 16px"><div class="dots"><span></span><span></span><span></span></div></div>';
   m.appendChild(d);scroll();
   setTimeout(()=>{d.remove();cb();},800+Math.random()*300);
 }
 
-function scroll(){const m=document.getElementById('msgs');m.scrollTop=m.scrollHeight;}
+function scroll(){const m=document.getElementById('msgsScroll');m.scrollTop=m.scrollHeight;}
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 renderChips();
