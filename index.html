@@ -12,9 +12,102 @@
 <body>
     <div data-include="/html/code/header.html"></div>
 
-<div class="board" id="orgBoard">
-  <div class="columns" id="columns"></div>
-  <div class="main" id="main"></div>
+<div class="index-shell" id="indexShell">
+  <section class="index-split-section index-split-section--org">
+    <div class="index-section-head">조직도</div>
+    <div class="board" id="orgBoard">
+      <div class="columns" id="columns"></div>
+    </div>
+  </section>
+
+  <!-- 사업 관리 > 업무 차트의 전체 조직 간트 차트 (조직도와 한 화면에 함께 노출, 조직도 폭에 반응해 남은 폭을 채움) -->
+  <section class="index-split-section index-split-section--gantt">
+    <div class="index-section-head">간트 차트</div>
+    <div class="operating-container" id="bizGanttPanel">
+    <div class="organization-container">
+      <main class="main gantt-page">
+
+        <!-- 간트 툴바 -->
+        <div class="gantt-topbar">
+          <div style="position:relative">
+            <button class="tn-select" id="biz-team-btn" style="cursor:pointer;text-align:left;min-width:160px">팀을 선택해주세요.</button>
+            <div class="gantt-dropdown" id="biz-team-dd">
+              <div class="dropdown-item selected" data-team="">전체 팀</div>
+            </div>
+          </div>
+          <div style="position:relative">
+            <button class="tn-select" id="biz-member-btn" style="cursor:pointer;text-align:left;min-width:160px">팀원을 선택해주세요.</button>
+            <div class="gantt-dropdown" id="biz-member-dd">
+              <div class="dropdown-item selected" data-member="">전체 팀원</div>
+            </div>
+          </div>
+          <!-- Legend -->
+          <div class="legend">
+            <span class="legend-item"><span class="legend-dot legend-dot--progress"></span> 진행중</span>
+            <span class="legend-item"><span class="legend-dot legend-dot--done"></span> 종결</span>
+            <span class="legend-item"><span class="legend-dot legend-dot--wait"></span> 대기</span>
+            <span class="legend-item"><span class="legend-dot overload"></span> 과부하 (3건+)</span>
+            <span class="legend-item"><span class="legend-dot warning"></span> 주의 (2건)</span>
+            <span class="legend-item"><span class="legend-link-line"></span> 연계관계</span>
+          </div>
+          <div class="tn-right">
+            <button type="button" class="krds-btn small secondary" id="biz-btn-day">일</button>
+            <button type="button" class="krds-btn small secondary active" id="biz-btn-week">주</button>
+            <button type="button" class="krds-btn small secondary" id="biz-btn-month">월</button>
+          </div>
+        </div>
+
+        <!-- 간트 차트 -->
+        <div class="gantt-wrapper">
+          <div class="task-list">
+            <div class="tl-header">
+              <div class="tl-header-labels">
+                <span class="tl-label-task">업무 목록</span>
+                <span class="tl-label-count">건수</span>
+              </div>
+            </div>
+            <div class="tl-body" id="biz-task-list-body"></div>
+          </div>
+
+          <div class="gantt-area">
+            <div class="gantt-header">
+              <div class="gantt-header-weeks" id="biz-gantt-weeks"></div>
+              <div class="gantt-header-days" id="biz-gantt-days"></div>
+            </div>
+            <div class="gantt-body">
+              <svg id="biz-dep-svg" style="position:absolute;top:0;left:0;width:100%;pointer-events:none;z-index:20;overflow:visible"></svg>
+              <div class="gantt-rows" id="biz-gantt-rows"></div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+    </div>
+  </section>
+</div>
+
+<!-- 업무 차트 바 호버 팝업 (tooltip) -->
+<div class="gantt-popup" id="biz-bar-popup">
+  <div class="popup-title" id="biz-popup-title"></div>
+  <div class="popup-row"><span class="popup-label">담당자</span><span class="popup-value" id="biz-popup-assignee"></span></div>
+  <div class="popup-row"><span class="popup-label">기간</span><span class="popup-value" id="biz-popup-dates"></span></div>
+  <div class="popup-row"><span class="popup-label">진행률</span><span class="popup-value" id="biz-popup-progress"></span></div>
+  <div class="popup-row" id="biz-popup-load-row" style="display:none"><span class="popup-label">담당자 부하</span><span class="popup-value" id="biz-popup-load"></span></div>
+</div>
+
+<!-- 업무 차트: 업무 미리보기(프로세싱 뷰) 모달 -->
+<div class="pv-modal-backdrop" id="bizPvModalBackdrop">
+  <div class="pv-modal-panel">
+    <div class="pv-modal-head">
+      <div class="pv-modal-titles">
+        <strong class="pv-modal-title" id="bizPvModalTitle"></strong>
+        <span class="pv-modal-sub" id="bizPvModalSub"></span>
+      </div>
+      <button type="button" class="pv-modal-close" id="bizPvModalClose" aria-label="닫기">&times;</button>
+    </div>
+    <div class="pv-modal-body" id="bizPvModalBody"></div>
+  </div>
 </div>
 
 <script src="/resources/js/script.js"></script>
@@ -25,21 +118,11 @@
 /* ===================== 상태 ===================== */
 let path = [];          // 선택된 org 노드 배열
 let selectedWorker = null;
-let openTask = null;    // 현재 열려있는 업무(워크플로우 보기)
-let flowZoom = 1;
+let flowZoom = 1;       // 사업 관리 > 업무 차트의 프로세싱 뷰 미리보기 모달에서 사용
 let flowPanX = 40;
 let flowPanY = 30;
-let taskGroupOpen = { regular: true, irregular: true }; // 정기/비정기 업무 그룹 펼침 상태
 
 const columnsEl = document.getElementById("columns");
-const mainEl = document.getElementById("main");
-
-/* 업무명을 시드로 정기/비정기 업무를 결정적으로 구분 (표시 전용, 실제 업무 데이터와는 연계하지 않음) */
-function isRegularTask(title) {
-  let h = 0;
-  for (let i = 0; i < title.length; i++) h = (Math.imul(31, h) + title.charCodeAt(i)) | 0;
-  return (Math.abs(h) % 3) === 0;
-}
 
 function currentLevelItems() {
   if (path.length === 0) return { items: ORG, kind: "org" };
@@ -60,7 +143,6 @@ function render() {
     col.onclick = () => {
       path = path.slice(0, idx);
       selectedWorker = null;
-      openTask = null;
       render();
     };
     columnsEl.appendChild(col);
@@ -101,7 +183,6 @@ function render() {
       `;
       row.onclick = () => {
         selectedWorker = item;
-        openTask = null;
         render();
       };
     } else {
@@ -113,7 +194,6 @@ function render() {
       row.onclick = () => {
         path = [...path, item];
         selectedWorker = null;
-        openTask = null;
         render();
       };
     }
@@ -132,90 +212,34 @@ function render() {
     columnsEl.appendChild(taskCol);
     const taskRowsEl = taskCol.querySelector("#task-rows");
     const leaf = path[path.length - 1];
+    // 업무 테이블(operating.html)과 동일한 ORG 업무 데이터를 그대로 사용 — 별도 그룹핑 없이 목록 그대로 노출
     const myTasks = (leaf.tasks || []).filter(t => t.owner === selectedWorker.name);
-    const regularTasks = myTasks.filter(t => isRegularTask(t.title));
-    const irregularTasks = myTasks.filter(t => !isRegularTask(t.title));
 
-    function renderTaskRow(t) {
-      const tr = document.createElement("div");
-      tr.className = "task-row" + (openTask === t ? " selected" : "");
-      tr.innerHTML = `
-        <span class="dot status-${t.status}"></span>
-        <div class="task-info">
-          <div class="t-name">${escapeHtml(t.title)}</div>
-          <div class="t-due">${STATUS_LABEL[t.status]} · 마감 ${fmtDue(t.end)}</div>
-        </div>
-      `;
-      tr.onclick = () => {
-        openTask = t;
-        flowZoom = 1; flowPanX = 40; flowPanY = 30;
-        flowViewMode = "node";
-        ganttUnit = "day";
-        render();
-      };
-      return tr;
+    if (!myTasks.length) {
+      const empty = document.createElement("div");
+      empty.className = "task-empty";
+      empty.textContent = "등록된 업무가 없습니다.";
+      taskRowsEl.appendChild(empty);
+    } else {
+      myTasks.forEach(t => {
+        const tr = document.createElement("div");
+        tr.className = "task-row";
+        tr.innerHTML = `
+          <span class="dot status-${t.status}"></span>
+          <div class="task-info">
+            <div class="t-name">${escapeHtml(t.title)}</div>
+            <div class="t-due">${STATUS_LABEL[t.status]} · 마감 ${fmtDue(t.end)}</div>
+          </div>
+        `;
+        // 업무 테이블과 동일하게, 클릭하면 바로 업무 상세 페이지로 이동
+        tr.onclick = () => {
+          sessionStorage.setItem("krds_selected_task", JSON.stringify(t));
+          window.location.href = "/resources/pages/operating-detail.html";
+        };
+        taskRowsEl.appendChild(tr);
+      });
     }
-
-    function renderTaskGroup(key, label, tasks) {
-      const isOpen = taskGroupOpen[key];
-      const group = document.createElement("div");
-      group.className = "task-group" + (isOpen ? "" : " collapsed");
-      const labelEl = document.createElement("div");
-      labelEl.className = "task-group__label";
-      labelEl.innerHTML = `
-        <span class="task-group__caret">${isOpen ? "▾" : "▸"}</span>
-        <span class="task-group__text">${label}</span>
-        <span class="task-group__count">${tasks.length}</span>
-      `;
-      labelEl.onclick = () => {
-        taskGroupOpen[key] = !taskGroupOpen[key];
-        render();
-      };
-      group.appendChild(labelEl);
-
-      if (isOpen) {
-        if (!tasks.length) {
-          const empty = document.createElement("div");
-          empty.className = "task-empty";
-          empty.textContent = "등록된 업무가 없습니다.";
-          group.appendChild(empty);
-        } else {
-          tasks.forEach(t => group.appendChild(renderTaskRow(t)));
-        }
-      }
-      taskRowsEl.appendChild(group);
-    }
-
-    renderTaskGroup("regular", "정기 업무", regularTasks);
-    renderTaskGroup("irregular", "비정기 업무", irregularTasks);
   }
-
-  renderMain();
-}
-
-function renderMain() {
-  mainEl.innerHTML = "";
-  if (!selectedWorker) {
-    const ph = document.createElement("div");
-    ph.className = "placeholder";
-    ph.innerHTML = `
-      <div class="line1">조직을 클릭해 탐색을 시작하세요</div>
-      <div class="line2">하위 조직 → 근무자 → 담당 업무 → 워크플로우 순서로 펼쳐집니다.</div>
-    `;
-    mainEl.appendChild(ph);
-    return;
-  }
-  if (!openTask) {
-    const ph = document.createElement("div");
-    ph.className = "placeholder";
-    ph.innerHTML = `
-      <div class="line1">${selectedWorker.name}님의 업무를 선택하세요</div>
-      <div class="line2">왼쪽 업무 목록에서 항목을 클릭하면 처리 워크플로우가 전체 화면에 표시됩니다.</div>
-    `;
-    mainEl.appendChild(ph);
-    return;
-  }
-  renderFlow(selectedWorker, openTask);
 }
 
 /* ===================== 워크플로우(React Flow 스타일) ===================== */
@@ -264,8 +288,6 @@ function edgePath(nodes, edge) {
   return `M ${p1.x} ${p1.y} C ${p1.x + dx} ${p1.y}, ${p2.x - dx} ${p2.y}, ${p2.x} ${p2.y}`;
 }
 
-let flowViewMode = "node"; // "node" | "gantt"
-
 function parseISODate(iso) {
   // "2026-07-15" -> local Date, avoids UTC off-by-one
   const [y, m, d] = iso.split("-").map(Number);
@@ -275,386 +297,8 @@ function fmtDue(iso) {
   const d = parseISODate(iso);
   return `${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
 }
-function addDays(date, n) {
-  const d = new Date(date);
-  d.setDate(d.getDate() + n);
-  return d;
-}
-function isSameDay(a, b) { return a.toDateString() === b.toDateString(); }
-function isWeekend(d) { const w = d.getDay(); return w === 0 || w === 6; }
-function fmtMD(date) { return `${date.getMonth() + 1}/${date.getDate()}`; }
-function fmtMDW(date) { const w = ["일","월","화","수","목","금","토"][date.getDay()]; return `${date.getDate()} (${w})`; }
 
-function diffDays(a, b) { return Math.round((b - a) / 86400000); }
-function fmtMonthShort(date) { return `${date.getMonth() + 1}월`; }
-function fmtYear(date) { return `${date.getFullYear()}년`; }
-
-function buildGanttRows(nodes, task) {
-  // 메인 경로 단계의 실제 날짜(마감일 기준 2주 타임라인)를 한 번만 계산 — 뷰 단위와 무관하게 고정
-  const order = ["n1", "n2", "n3", "n4", "n5", "n7", "n8"];
-  const ranges = {
-    n1: [0, 1], n2: [1, 4], n3: [4, 6], n4: [4, 6],
-    n5: [6, 7], n7: [7, 8], n8: [8, 9],
-  };
-  const TOTAL_UNITS = 9;
-  const TASK_SPAN_DAYS = 14; // 업무 자체의 실제 소요 기간(고정)
-  const dueDate = parseISODate(task.end);
-  const taskStart = addDays(dueDate, -(TASK_SPAN_DAYS - 1));
-  const today = new Date();
-
-  const rows = order.map(id => {
-    const n = nodes.find(x => x.id === id);
-    const [su, eu] = ranges[id];
-    const startOff = Math.round((su / TOTAL_UNITS) * (TASK_SPAN_DAYS - 1));
-    const endOff = Math.max(startOff + 1, Math.round((eu / TOTAL_UNITS) * (TASK_SPAN_DAYS - 1)));
-    const stepStart = addDays(taskStart, startOff);
-    const stepEnd = addDays(taskStart, Math.min(endOff, TASK_SPAN_DAYS - 1));
-
-    let progress = 0, statusClass = "bar-gray", statusLabel = STATUS_LABEL.wait;
-    if (task.status === "done") { progress = 100; statusClass = "bar-green"; statusLabel = STATUS_LABEL.done; }
-    else if (task.status === "wait") { progress = 0; statusClass = "bar-gray"; statusLabel = STATUS_LABEL.wait; }
-    else { // progress
-      if (today > stepEnd) { progress = 100; statusClass = "bar-green"; statusLabel = STATUS_LABEL.done; }
-      else if (today >= stepStart && today <= stepEnd) { progress = 50; statusClass = "bar-blue"; statusLabel = STATUS_LABEL.progress; }
-      else { progress = 0; statusClass = "bar-gray"; statusLabel = STATUS_LABEL.wait; }
-    }
-
-    return { ...n, startDate: stepStart, endDate: stepEnd, progress, statusClass, statusLabel };
-  });
-
-  return { rows, dueDate, taskStart, today };
-}
-
-/* 일/주/월 선택에 따른 표시 윈도우(범위) 계산 */
-function getGanttWindow(unit, dueDate) {
-  if (unit === "day") {
-    const windowEnd = addDays(dueDate, 3);
-    return { windowStart: addDays(windowEnd, -20), windowEnd };
-  }
-  if (unit === "week") {
-    const windowEnd = addDays(dueDate, 14);
-    return { windowStart: addDays(windowEnd, -69), windowEnd };
-  }
-  // month
-  const windowEnd = addDays(dueDate, 30);
-  return { windowStart: addDays(windowEnd, -209), windowEnd };
-}
-
-function buildHeaderRows(unit, days, today) {
-  if (unit === "day") {
-    const weekGroups = [];
-    for (let i = 0; i < days.length; i += 7) {
-      const s = days[i], e = days[Math.min(i + 6, days.length - 1)];
-      weekGroups.push({ span: Math.min(7, days.length - i), label: `${fmtMD(s)} - ${fmtMD(e)}` });
-    }
-    const topHTML = weekGroups.map(g => `<div class="gantt-weekcell" style="grid-column: span ${g.span};">${g.label}</div>`).join("");
-    const bottomHTML = days.map(d => {
-      const cls = ["gantt-daycell"];
-      if (isWeekend(d)) cls.push("weekend");
-      if (isSameDay(d, today)) cls.push("today-col");
-      return `<div class="${cls.join(" ")}">${fmtMDW(d)}</div>`;
-    }).join("");
-    return { topHTML, bottomHTML };
-  }
-
-  if (unit === "week") {
-    // 상단: 월 그룹 / 하단: 7일 단위 구간
-    const monthGroups = [];
-    days.forEach(d => {
-      const key = `${d.getFullYear()}-${d.getMonth()}`;
-      const last = monthGroups[monthGroups.length - 1];
-      if (last && last.key === key) last.span += 1;
-      else monthGroups.push({ key, label: `${d.getFullYear()}년 ${d.getMonth() + 1}월`, span: 1 });
-    });
-    const topHTML = monthGroups.map(g => `<div class="gantt-weekcell month-cell" style="grid-column: span ${g.span};">${g.label}</div>`).join("");
-
-    const weekChunks = [];
-    for (let i = 0; i < days.length; i += 7) {
-      const s = days[i], e = days[Math.min(i + 6, days.length - 1)];
-      const isTodayChunk = today >= s && today <= e;
-      weekChunks.push({ span: Math.min(7, days.length - i), label: `${fmtMD(s)}-${fmtMD(e)}`, isToday: isTodayChunk });
-    }
-    const bottomHTML = weekChunks.map(g => `<div class="gantt-daycell${g.isToday ? " today-col" : ""}" style="grid-column: span ${g.span};">${g.label}</div>`).join("");
-    return { topHTML, bottomHTML };
-  }
-
-  // month
-  const yearGroups = [];
-  days.forEach(d => {
-    const key = d.getFullYear();
-    const last = yearGroups[yearGroups.length - 1];
-    if (last && last.key === key) last.span += 1;
-    else yearGroups.push({ key, span: 1 });
-  });
-  const topHTML = yearGroups.map(g => `<div class="gantt-weekcell month-cell" style="grid-column: span ${g.span};">${g.key}년</div>`).join("");
-
-  const monthChunks = [];
-  days.forEach(d => {
-    const key = `${d.getFullYear()}-${d.getMonth()}`;
-    const last = monthChunks[monthChunks.length - 1];
-    if (last && last.key === key) last.span += 1;
-    else monthChunks.push({ key, label: fmtMonthShort(d), span: 1, isToday: isSameDay(d, today) });
-    if (isSameDay(d, today)) monthChunks[monthChunks.length - 1].isToday = true;
-  });
-  const bottomHTML = monthChunks.map(g => `<div class="gantt-daycell${g.isToday ? " today-col" : ""}" style="grid-column: span ${g.span};">${g.label}</div>`).join("");
-  return { topHTML, bottomHTML };
-}
-
-function renderGanttChart(host, worker, task, nodes) {
-  const { rows, dueDate, today } = buildGanttRows(nodes, task);
-  const { windowStart, windowEnd } = getGanttWindow(ganttUnit, dueDate);
-  const totalDays = diffDays(windowStart, windowEnd) + 1;
-  const days = Array.from({ length: totalDays }, (_, i) => addDays(windowStart, i));
-  const avClass = ownerColorClass(worker.name);
-  const avAbbr = worker.name.slice(0, 1);
-
-  const { topHTML, bottomHTML } = buildHeaderRows(ganttUnit, days, today);
-
-  const colPx = { day: 54, week: 20, month: 8 }[ganttUnit];
-  const trackCols = `repeat(${totalDays}, ${colPx}px)`;
-
-  host.innerHTML = `
-    <div class="gantt-legend">
-      <span class="legend-item"><span class="legend-dot legend-dot--progress"></span> 진행중</span>
-      <span class="legend-item"><span class="legend-dot legend-dot--done"></span> 종결</span>
-      <span class="legend-item"><span class="legend-dot legend-dot--wait"></span> 대기</span>
-      <span class="legend-item"><span class="legend-today-line"></span> 오늘</span>
-      <span class="legend-hint">← 좌우로 스크롤해서 전체 기간을 확인하세요</span>
-    </div>
-    <div class="gantt-viewport" id="gantt-viewport">
-      <div class="gantt-row gantt-head gantt-head-top">
-        <div class="gantt-label">단계</div>
-        <div class="gantt-track" style="grid-template-columns: ${trackCols};">${topHTML}</div>
-      </div>
-      <div class="gantt-row gantt-head gantt-head-bottom">
-        <div class="gantt-label"></div>
-        <div class="gantt-track" style="grid-template-columns: ${trackCols};">${bottomHTML}</div>
-      </div>
-      <div class="gantt-rows" id="gantt-rows"></div>
-    </div>
-    <div class="gantt-foot">기준: 마감일 ${fmtDue(task.end)} · ${ganttUnit === "day" ? "일" : ganttUnit === "week" ? "주" : "월"} 단위 보기 · 각 단계는 실제 달력에 대응된 절대 일정입니다</div>
-  `;
-
-  const rowsEl = host.querySelector("#gantt-rows");
-  rows.forEach(r => {
-    const startIdx = Math.max(0, diffDays(windowStart, r.startDate));
-    const endIdx = Math.min(totalDays, diffDays(windowStart, r.endDate) + 1);
-    const row = document.createElement("div");
-    row.className = "gantt-row";
-    const barStyle = `grid-column: ${startIdx + 1} / ${Math.max(startIdx + 2, endIdx + 1)};`;
-    row.innerHTML = `
-      <div class="gantt-label">
-        <span>${r.tag} · ${r.title}</span>
-      </div>
-      <div class="gantt-track" style="grid-template-columns: ${trackCols};">
-        <div class="gantt-bar ${r.statusClass}" style="${barStyle}">
-          <span class="bar-avatar ${avClass}">${avAbbr}</span>
-          <span class="bar-name">${r.title}</span>
-          <span class="bar-progress">${r.progress}%</span>
-        </div>
-      </div>
-    `;
-    const bar = row.querySelector(".gantt-bar");
-    bar.addEventListener("mouseenter", (e) => showGanttPopup(e, r, worker));
-    bar.addEventListener("mousemove", moveGanttPopup);
-    bar.addEventListener("mouseleave", hideGanttPopup);
-    rowsEl.appendChild(row);
-  });
-
-  // 오늘 세로선
-  const viewport = host.querySelector("#gantt-viewport");
-  const todayIdx = days.findIndex(d => isSameDay(d, today));
-  if (todayIdx >= 0) {
-    const headEl = viewport.querySelector(".gantt-head-bottom");
-    const headerH = viewport.querySelector(".gantt-head-top").offsetHeight + headEl.offsetHeight;
-    const line = document.createElement("div");
-    line.className = "gantt-today-line";
-    line.style.top = headerH + "px";
-    line.style.left = `${210 + (todayIdx + 0.5) * colPx}px`;
-    viewport.appendChild(line);
-  }
-}
-
-/* 간트 바 툴팁 팝업 */
-let ganttPopupEl = null;
-function ensureGanttPopup() {
-  if (ganttPopupEl) return ganttPopupEl;
-  ganttPopupEl = document.createElement("div");
-  ganttPopupEl.className = "gantt-popup";
-  document.getElementById("orgBoard").appendChild(ganttPopupEl);
-  return ganttPopupEl;
-}
-function showGanttPopup(e, r, worker) {
-  const popup = ensureGanttPopup();
-  popup.innerHTML = `
-    <div class="popup-title">${r.tag} · ${r.title}</div>
-    <div class="popup-row"><span class="popup-label">담당자</span><span class="popup-value">${worker.name} (${worker.role})</span></div>
-    <div class="popup-row"><span class="popup-label">기간</span><span class="popup-value">${fmtMD(r.startDate)} ~ ${fmtMD(r.endDate)}</span></div>
-    <div class="popup-row"><span class="popup-label">진행률</span><span class="popup-value">${r.progress}% · ${r.statusLabel}</span></div>
-  `;
-  popup.classList.add("visible");
-  moveGanttPopup(e);
-}
-function moveGanttPopup(e) {
-  if (!ganttPopupEl) return;
-  ganttPopupEl.style.left = (e.clientX + 14) + "px";
-  ganttPopupEl.style.top = (e.clientY - 20) + "px";
-}
-function hideGanttPopup() {
-  if (ganttPopupEl) ganttPopupEl.classList.remove("visible");
-}
-
-let ganttUnit = "day"; // "day" | "week" | "month" — 노드 뷰에서는 줌 프리셋으로 사용
-const NODE_ZOOM_PRESET = { day: 1.3, week: 1, month: 0.6 };
-
-/* ===================== 목표 대비 진척률 분석 ===================== */
-function computeGoalAnalysis(task) {
-  const start = parseISODate(task.start);
-  const end = parseISODate(task.end);
-  const today = new Date();
-  const totalSpan = Math.max(1, diffDays(start, end));
-  const elapsed = Math.min(totalSpan, Math.max(0, diffDays(start, today)));
-  const targetPct = Math.round((elapsed / totalSpan) * 100);
-
-  let actualPct;
-  if (task.status === "done") {
-    actualPct = 100;
-  } else if (task.status === "wait") {
-    actualPct = 0;
-  } else {
-    // 업무명을 시드로 한 결정적 의사난수 — 같은 업무는 항상 같은 편차
-    let h = 0;
-    for (let i = 0; i < task.title.length; i++) h = (Math.imul(31, h) + task.title.charCodeAt(i)) | 0;
-    const offset = (Math.abs(h) % 31) - 15; // -15 ~ +15
-    actualPct = Math.min(96, Math.max(4, targetPct + offset));
-  }
-
-  const diff = actualPct - targetPct;
-  let statusLabel, statusClass;
-  if (task.status === "done") { statusLabel = "목표 달성"; statusClass = "goal-ok"; }
-  else if (diff <= -8) { statusLabel = "목표 대비 지연"; statusClass = "goal-behind"; }
-  else if (diff >= 8) { statusLabel = "목표 초과 달성"; statusClass = "goal-ahead"; }
-  else { statusLabel = "목표대로 진행중"; statusClass = "goal-ok"; }
-
-  // 매출이익 목표/실제 (억원 단위) — 업무명을 시드로 한 결정적 의사난수
-  let h2 = 0;
-  for (let i = 0; i < task.title.length; i++) h2 = (Math.imul(37, h2) + task.title.charCodeAt(i)) | 0;
-  const profitTarget = Math.round((1.5 + (Math.abs(h2) % 350) / 100) * 10) / 10; // 1.5 ~ 5.0억원
-  const profitOffset = (Math.abs(h2 >> 3) % 41) - 20; // -20 ~ +20%p
-  const profitAchievePct = task.status === "wait" ? 0 : Math.max(0, 100 + profitOffset);
-  const profitActual = Math.round(profitTarget * profitAchievePct / 100 * 10) / 10;
-
-  return { targetPct, actualPct, diff, statusLabel, statusClass, profitTarget, profitActual, profitAchievePct };
-}
-
-function renderGoalAnalysis(task) {
-  const g = computeGoalAnalysis(task);
-  const diffText = g.diff === 0
-    ? "실제 진척률이 목표와 동일합니다."
-    : g.diff > 0
-      ? `실제 진척률이 목표보다 ${g.diff}%p 앞서 있습니다.`
-      : `실제 진척률이 목표보다 ${Math.abs(g.diff)}%p 뒤처져 있습니다.`;
-  return `
-    <div class="goal-analysis">
-      <div class="goal-analysis__head">
-        <span class="goal-analysis__title">목표 대비 진척률 분석</span>
-        <span class="goal-analysis__badge ${g.statusClass}">${g.statusLabel}</span>
-      </div>
-      <div class="goal-analysis__metrics">
-        <div class="goal-metric-group">
-          <div class="goal-metric">
-            <div class="goal-metric__label">목표 진척률 <span class="goal-metric__hint">(마감 ${fmtDue(task.end)} 기준 경과율)</span></div>
-            <div class="goal-metric__bar"><div class="goal-metric__fill goal-metric__fill--target" style="width:${g.targetPct}%"></div></div>
-            <div class="goal-metric__value">${g.targetPct}%</div>
-          </div>
-          <div class="goal-metric">
-            <div class="goal-metric__label">실제 진척률</div>
-            <div class="goal-metric__bar"><div class="goal-metric__fill goal-metric__fill--actual" style="width:${g.actualPct}%"></div></div>
-            <div class="goal-metric__value">${g.actualPct}%</div>
-          </div>
-        </div>
-        <div class="goal-metric-divider"></div>
-        <div class="goal-metric-group goal-metric-group--profit">
-          <div class="goal-metric">
-            <div class="goal-metric__label">매출이익 목표</div>
-            <div class="goal-metric__bar"><div class="goal-metric__fill goal-metric__fill--profit-target" style="width:100%"></div></div>
-            <div class="goal-metric__value">${g.profitTarget}억원</div>
-          </div>
-          <div class="goal-metric">
-            <div class="goal-metric__label">매출이익 실제</div>
-            <div class="goal-metric__bar"><div class="goal-metric__fill goal-metric__fill--profit-actual" style="width:${Math.min(100, g.profitAchievePct)}%"></div></div>
-            <div class="goal-metric__value">${g.profitActual}억원</div>
-          </div>
-        </div>
-      </div>
-      <div class="goal-analysis__note">${diffText}</div>
-    </div>
-  `;
-}
-
-function renderFlow(worker, task) {
-  const { nodes, edges } = buildWorkflow(worker, task);
-
-  const wrap = document.createElement("div");
-  wrap.className = "flow-wrap";
-  wrap.innerHTML = `
-    <div class="flow-header">
-      <button class="back-btn" id="flow-back">← 업무 목록</button>
-      <span class="flow-title">${escapeHtml(task.title)}</span>
-      <span class="${STATUS_CLASS[task.status]}">${STATUS_LABEL[task.status]}</span>
-      <div class="flow-toolbars">
-        <div class="view-toggle">
-          <button class="vt-btn" data-mode="node">노드</button>
-          <button class="vt-btn" data-mode="gantt">간트 차트</button>
-        </div>
-        <div class="unit-toggle">
-          <button class="vt-btn" data-unit="day">일</button>
-          <button class="vt-btn" data-unit="week">주</button>
-          <button class="vt-btn" data-unit="month">월</button>
-        </div>
-      </div>
-    </div>
-    <div class="flow-sub">${worker.name} · ${worker.role} 담당 · 처리 워크플로우</div>
-    <div class="flow-body" id="flow-body"></div>
-    ${renderGoalAnalysis(task)}
-  `;
-  mainEl.appendChild(wrap);
-
-  wrap.querySelector("#flow-back").onclick = () => { openTask = null; render(); };
-
-  wrap.querySelectorAll(".vt-btn[data-mode]").forEach(btn => {
-    btn.onclick = () => {
-      flowViewMode = btn.dataset.mode;
-      renderFlowBody();
-    };
-  });
-  wrap.querySelectorAll(".vt-btn[data-unit]").forEach(btn => {
-    btn.onclick = () => {
-      ganttUnit = btn.dataset.unit;
-      if (flowViewMode === "node") {
-        flowZoom = NODE_ZOOM_PRESET[ganttUnit];
-        flowPanX = 40; flowPanY = 30;
-      }
-      renderFlowBody();
-    };
-  });
-
-  const body = wrap.querySelector("#flow-body");
-
-  function renderFlowBody() {
-    wrap.querySelectorAll(".vt-btn[data-mode]").forEach(b => b.classList.toggle("active", b.dataset.mode === flowViewMode));
-    wrap.querySelectorAll(".vt-btn[data-unit]").forEach(b => b.classList.toggle("active", b.dataset.unit === ganttUnit));
-    body.innerHTML = "";
-    if (flowViewMode === "node") {
-      renderNodeCanvas(body, nodes, edges);
-    } else {
-      renderGanttChart(body, worker, task, nodes);
-    }
-  }
-
-  renderFlowBody();
-}
-
+/* renderNodeCanvas/buildWorkflow는 사업 관리 > 업무 차트의 프로세싱 뷰 미리보기 모달에서만 사용 */
 function renderNodeCanvas(host, nodes, edges) {
   host.innerHTML = `
     <div class="flow-viewport" id="flow-viewport">
@@ -735,6 +379,774 @@ function renderNodeCanvas(host, nodes, edges) {
 render();
 </script>
 
+<script>
+/* ===================== 사업 관리 > 업무 차트: 전체 조직 간트 차트 =====================
+   /resources/pages/operating-gantt.html의 로직을 그대로 이식 (DOM id는 biz- 접두사로 분리) */
+(function () {
+  /* ── 설정 ── */
+  const START_DATE = new Date(2026, 0, 1);   // 2026-01-01
+  const DATA_DAYS  = 365;                    // 전체 데이터 범위 (2026년)
+  const ROW_H      = 36;
+
+  /* ── 날짜 ↔ 오프셋 ── */
+  function dateToOffset(str) {
+    return Math.round((new Date(str) - START_DATE) / 86400000);
+  }
+  function dateFromOffset(off) {
+    const d = new Date(START_DATE);
+    d.setDate(d.getDate() + off);
+    return d;
+  }
+  function formatDate(d) { return (d.getMonth() + 1) + '/' + d.getDate(); }
+  function isWeekend(off) { const day = dateFromOffset(off).getDay(); return day === 0 || day === 6; }
+  function isToday(off)   { return dateFromOffset(off).toDateString() === new Date().toDateString(); }
+
+  const todayOffset = Math.round((new Date() - START_DATE) / 86400000);
+
+  /* ── 뷰 단위 상태 ── */
+  let viewUnit = 'week'; // 'day' | 'week' | 'month'
+
+  /* ── 뷰별 설정 ── */
+  function buildGroupHdrs(cols, dtFn) {
+    const groups = [];
+    let cur = '', start = 0;
+    for (let i = 0; i < cols; i++) {
+      const dt  = dtFn(i);
+      const lbl = dt.getFullYear() + '년 ' + (dt.getMonth() + 1) + '월';
+      if (lbl !== cur) {
+        if (cur) groups.push({ label: cur, start, end: i - 1 });
+        cur = lbl; start = i;
+      }
+      if (i === cols - 1) groups.push({ label: cur, start, end: i });
+    }
+    return groups;
+  }
+
+  function getViewConfig() {
+    const dayStart = Math.max(0, todayOffset - 14);
+
+    switch (viewUnit) {
+      case 'day': return {
+        cols: 90,
+        colW: 32,
+        unitOf:   d => d - dayStart,
+        colClass: i => {
+          const off = dayStart + i;
+          return (isWeekend(off) ? ' weekend' : '') + (isToday(off) ? ' today-col' : '');
+        },
+        colTxt:   i => dateFromOffset(dayStart + i).getDate(),
+        todayCol: todayOffset - dayStart,
+        groupHdrs: buildGroupHdrs(90, i => dateFromOffset(dayStart + i))
+      };
+
+      case 'week': return {
+        cols: 26,
+        colW: 80,
+        unitOf:   d => Math.floor(d / 7),
+        colClass: i => (todayOffset >= i * 7 && todayOffset <= i * 7 + 6) ? ' today-col' : '',
+        colTxt:   i => { const d = dateFromOffset(i * 7); return (d.getMonth() + 1) + '/' + d.getDate(); },
+        todayCol: Math.floor(todayOffset / 7),
+        groupHdrs: buildGroupHdrs(26, i => dateFromOffset(i * 7))
+      };
+
+      case 'month': return {
+        cols: 12,
+        colW: 140,
+        unitOf:   d => { const dt = dateFromOffset(d); return (dt.getFullYear() - 2026) * 12 + dt.getMonth(); },
+        colClass: i => {
+          const now = new Date();
+          return (now.getFullYear() === 2026 && now.getMonth() === i) ? ' today-col' : '';
+        },
+        colTxt:   i => (i + 1) + '월',
+        todayCol: new Date().getFullYear() === 2026 ? new Date().getMonth() : -1,
+        groupHdrs: [{ label: '2026년', start: 0, end: 11 }]
+      };
+    }
+  }
+
+  /* ── 뷰 전환 ── */
+  function setViewUnit(unit) {
+    viewUnit = unit;
+    ['day', 'week', 'month'].forEach(u => {
+      const btn = document.getElementById('biz-btn-' + u);
+      if (btn) btn.classList.toggle('active', u === unit);
+    });
+    renderHeader();
+    renderAll();
+  }
+
+  /* ── 색상 팔레트 ── */
+  const GROUP_COLORS = [
+    '#3b82f6','#10b981','#8b5cf6','#f59e0b','#ef4444',
+    '#06b6d4','#84cc16','#f97316','#ec4899','#6366f1','#14b8a6','#f43f5e'
+  ];
+  const AVATAR_PALETTE = [
+    '#3b82f6','#10b981','#8b5cf6','#f59e0b','#ef4444',
+    '#06b6d4','#84cc16','#f97316','#ec4899','#6366f1'
+  ];
+
+  const STATUS_BAR = { progress: 'bar-blue', done: 'bar-green', wait: 'bar-gray' };
+  const STATUS_PCT = { progress: 50, done: 100, wait: 0 };
+
+  /* ── ORG → AVATARS ── */
+  const AVATARS = {};
+  let _aci = 0;
+  ORG.forEach(sil => getAllLeaves(sil).forEach(leaf =>
+    (leaf.tasks || []).forEach(t => {
+      if (!AVATARS[t.owner]) {
+        AVATARS[t.owner] = {
+          color: AVATAR_PALETTE[_aci++ % AVATAR_PALETTE.length],
+          abbr:  t.owner.slice(0, 1)
+        };
+      }
+    })
+  ));
+
+  /* ── ORG → TASKS (2026년 전체 기준) ── */
+  function buildAllTasks() {
+    const tasks = [];
+    let tid = 0;
+
+    ORG.forEach((sil, si) => {
+      const silId     = 'g' + si;
+      const silColor  = GROUP_COLORS[si % GROUP_COLORS.length];
+      const silLeaves = getAllLeaves(sil).filter(leaf =>
+        (leaf.tasks || []).some(t => dateToOffset(t.end) >= 0)
+      );
+      if (!silLeaves.length) return;
+
+      let silCount = 0;
+      const subBlocks = [];
+
+      silLeaves.forEach((leaf, li) => {
+        const subId    = silId + '-' + li;
+        const subColor = GROUP_COLORS[(si * 3 + li + 1) % GROUP_COLORS.length];
+        const leafTasks = (leaf.tasks || []).filter(t =>
+          dateToOffset(t.end) >= 0 && dateToOffset(t.start) < DATA_DAYS
+        );
+        if (!leafTasks.length) return;
+
+        const taskItems = leafTasks.map(t => {
+          tid++;
+          return {
+            id:       't' + tid,
+            type:     'task',
+            name:     t.title,
+            parent:   subId,
+            assignee: t.owner,
+            start:    Math.max(0, dateToOffset(t.start)),
+            end:      Math.min(DATA_DAYS - 1, Math.max(0, dateToOffset(t.end))),
+            color:    STATUS_BAR[t.status] || 'bar-blue',
+            progress: STATUS_PCT[t.status] || 0,
+            _silName: sil.name,
+            _orgTask: t,
+          };
+        });
+
+        silCount += taskItems.length;
+        subBlocks.push({ subId, subColor, leaf, taskItems });
+      });
+
+      if (!silCount) return;
+
+      tasks.push({ id: silId, type: 'group', name: sil.name, count: silCount, color: silColor, open: true });
+      subBlocks.forEach(({ subId, subColor, leaf, taskItems }) => {
+        tasks.push({ id: subId, type: 'group', name: leaf.name, count: taskItems.length, color: subColor, parent: silId, open: true, _silName: sil.name });
+        taskItems.forEach(item => tasks.push(item));
+      });
+    });
+
+    return tasks;
+  }
+
+  const TASKS = buildAllTasks();
+
+  /* ── 협업/연계 관계 링크 정의 ── */
+  const COLLAB_LINKS = [
+    { from: "디지털 예산관리 시스템 구축 기본계획",    to: "AI 기반 민원처리 시스템 구축 계획",       color: '#6366f1', label: '디지털 협업' },
+    { from: "클라우드 전환 기본계획 수립",              to: "망분리 고도화 사업 추진",                 color: '#6366f1', label: '인프라 연계' },
+    { from: "행정정보시스템 고도화 사업",               to: "정보시스템 통합 보안점검",                color: '#f97316', label: '시스템→보안' },
+    { from: "국제기구 연계 협력과제 발굴",              to: "2026년 통상환경 분석 보고서 작성",        color: '#f97316', label: '국제→통상' },
+    { from: "2026년도 예산안 사전 기획 및 지침 수립",  to: "2025 회계연도 결산 최종 보고",           color: '#14b8a6', label: '예산→결산' },
+    { from: "스마트 행정 혁신방안 수립",                to: "디지털 예산관리 시스템 구축 기본계획",    color: '#14b8a6', label: '혁신→디지털' },
+    { from: "하반기 공개채용 계획 수립",                to: "직급별 역량교육 체계 개편",               color: '#8b5cf6', label: '채용→교육' },
+  ];
+
+  /* ── 필터 상태 ── */
+  let currentTeam   = null;
+  let currentMember = null;
+
+  /* ── 드롭다운 초기화 ── */
+  const teamDd   = document.getElementById('biz-team-dd');
+  const memberDd = document.getElementById('biz-member-dd');
+
+  ORG.forEach(sil => {
+    if (!getAllLeaves(sil).some(l => (l.tasks || []).some(t => dateToOffset(t.end) >= 0))) return;
+    const div = document.createElement('div');
+    div.className = 'dropdown-item';
+    div.textContent = sil.name;
+    div.onclick = () => selectTeam(div, sil.name);
+    teamDd.appendChild(div);
+  });
+
+  const ownersMap = ORG.flatMap(sil => getAllLeaves(sil).flatMap(leaf =>
+    (leaf.tasks || [])
+      .filter(t => dateToOffset(t.end) >= 0 && dateToOffset(t.start) < DATA_DAYS)
+      .map(t => ({ name: t.owner, sil: sil.name }))
+  )).reduce((map, { name, sil }) => {
+    if (!map.has(name)) map.set(name, sil);
+    return map;
+  }, new Map());
+  const owners = [...ownersMap.entries()].sort((a, b) => a[0].localeCompare(b[0], 'ko'));
+
+  owners.forEach(([name, silName]) => {
+    const div = document.createElement('div');
+    div.className = 'dropdown-item';
+    div.innerHTML = `<span class="avatar-sm" style="background:${AVATARS[name]?.color || '#94a3b8'}">${AVATARS[name]?.abbr || name.slice(0,1)}</span>${name} <small style="color:#9ca3af;font-size:10px">${silName}</small>`;
+    div.onclick = () => selectMember(div, name);
+    memberDd.appendChild(div);
+  });
+
+  document.getElementById('biz-team-btn').addEventListener('click', function () { toggleDropdown('biz-team-dd', this); });
+  document.getElementById('biz-member-btn').addEventListener('click', function () { toggleDropdown('biz-member-dd', this); });
+  teamDd.querySelector('.dropdown-item[data-team]').addEventListener('click', function () { selectTeam(this, null); });
+  memberDd.querySelector('.dropdown-item[data-member]').addEventListener('click', function () { selectMember(this, null); });
+  document.getElementById('biz-btn-day').addEventListener('click', () => setViewUnit('day'));
+  document.getElementById('biz-btn-week').addEventListener('click', () => setViewUnit('week'));
+  document.getElementById('biz-btn-month').addEventListener('click', () => setViewUnit('month'));
+
+  /* ── 과부하 계산 ── */
+  function calcWorkload() {
+    const map = new Map();
+    TASKS.filter(t => t.type === 'task').forEach(t => {
+      if (!map.has(t.assignee)) map.set(t.assignee, new Map());
+      const dmap = map.get(t.assignee);
+      for (let d = t.start; d <= t.end; d++) dmap.set(d, (dmap.get(d) || 0) + 1);
+    });
+    return map;
+  }
+  function getMaxLoad(task, wlMap) {
+    const dmap = wlMap.get(task.assignee);
+    if (!dmap) return 0;
+    let max = 0;
+    for (let d = task.start; d <= task.end; d++) max = Math.max(max, dmap.get(d) || 0);
+    return max;
+  }
+  const WORKLOAD = calcWorkload();
+
+  /* ── 표시 업무 목록 ── */
+  function getVisibleTasks() {
+    const openGroups = new Set(TASKS.filter(t => t.type === 'group' && t.open).map(t => t.id));
+
+    let memberGroups = null;
+    if (currentMember) {
+      memberGroups = new Set();
+      TASKS.forEach(t => {
+        if (t.type === 'task' && t.assignee === currentMember) {
+          memberGroups.add(t.parent);
+          const sub = TASKS.find(g => g.id === t.parent);
+          if (sub && sub.parent) memberGroups.add(sub.parent);
+        }
+      });
+    }
+
+    return TASKS.filter(t => {
+      if (currentTeam) {
+        const silName = t._silName || (t.type === 'group' && !t.parent ? t.name : null);
+        if (silName && silName !== currentTeam) return false;
+        if (!silName && t.type !== 'group' && t._silName !== currentTeam) return false;
+      }
+      if (memberGroups) {
+        if (t.type === 'task' && t.assignee !== currentMember) return false;
+        if (t.type === 'group' && !memberGroups.has(t.id)) return false;
+      }
+      if (t.type === 'group' && !t.parent) return true;
+      if (t.type === 'group' && t.parent)  return openGroups.has(t.parent);
+      const par = TASKS.find(g => g.id === t.parent);
+      if (!par) return true;
+      if (!openGroups.has(t.parent)) return false;
+      if (par.parent) return openGroups.has(par.parent);
+      return true;
+    });
+  }
+
+  /* ── 헤더 렌더 (뷰 전환 시 재렌더) ── */
+  function renderHeader() {
+    const weeksEl = document.getElementById('biz-gantt-weeks');
+    const daysEl  = document.getElementById('biz-gantt-days');
+    weeksEl.innerHTML = '';
+    daysEl.innerHTML  = '';
+
+    const vc = getViewConfig();
+
+    vc.groupHdrs.forEach(w => {
+      const el = document.createElement('div');
+      el.className   = 'gantt-week-label';
+      el.style.width = ((w.end - w.start + 1) * vc.colW) + 'px';
+      el.textContent = w.label;
+      weeksEl.appendChild(el);
+    });
+
+    for (let i = 0; i < vc.cols; i++) {
+      const el = document.createElement('div');
+      el.className   = 'gantt-day-cell' + vc.colClass(i);
+      el.style.width = vc.colW + 'px';
+      el.textContent = vc.colTxt(i);
+      daysEl.appendChild(el);
+    }
+  }
+
+  /* ── 업무 목록 (왼쪽 패널) 렌더 ── */
+  function renderTaskList() {
+    const body = document.getElementById('biz-task-list-body');
+    body.innerHTML = '';
+    getVisibleTasks().forEach(task => {
+      const isGroup    = task.type === 'group';
+      const isSubGroup = isGroup && !!task.parent;
+      const row = document.createElement('div');
+      row.className  = 'tl-row' + (isGroup ? ' group' : '');
+      row.dataset.id = task.id;
+
+      if (!isGroup) {
+        const maxLoad = getMaxLoad(task, WORKLOAD);
+        if (maxLoad >= 3) row.classList.add('overload-row');
+        else if (maxLoad >= 2) row.classList.add('warning-row');
+      }
+
+      const toggle = document.createElement('span');
+      toggle.className = 'tl-toggle' + (task.open ? ' open' : '');
+      toggle.innerHTML = isGroup ? '▶' : '';
+      row.appendChild(toggle);
+
+      if (task.parent) {
+        const indent = document.createElement('span');
+        indent.className = 'tl-indent';
+        indent.style.width = isSubGroup ? '8px' : '16px';
+        row.appendChild(indent);
+      }
+
+      if (!isGroup) {
+        const av = AVATARS[task.assignee];
+        if (av) {
+          const maxLoad = getMaxLoad(task, WORKLOAD);
+          const dot = document.createElement('span');
+          dot.className        = 'tl-avatar';
+          dot.style.background = maxLoad >= 3 ? '#ef4444' : maxLoad >= 2 ? '#f59e0b' : av.color;
+          dot.textContent      = av.abbr;
+          row.appendChild(dot);
+        }
+      } else {
+        const dot = document.createElement('span');
+        dot.className        = 'tl-dot';
+        dot.style.background = task.color || '#94a3b8';
+        row.appendChild(dot);
+      }
+
+      const name = document.createElement('span');
+      name.className   = 'tl-name';
+      name.textContent = task.name;
+      row.appendChild(name);
+
+      const count = document.createElement('span');
+      count.className   = 'tl-count';
+      count.textContent = task.count || '';
+      row.appendChild(count);
+
+      if (isGroup) {
+        row.addEventListener('click', () => {
+          const t = TASKS.find(x => x.id === task.id);
+          if (t) t.open = !t.open;
+          renderAll();
+        });
+      }
+      body.appendChild(row);
+    });
+  }
+
+  /* ── 그룹 범위 계산 ── */
+  function getGroupSpan(groupId) {
+    const childIds = new Set();
+    function collect(pid) {
+      TASKS.forEach(t => {
+        if (t.parent === pid) {
+          if (t.type === 'group') { childIds.add(t.id); collect(t.id); }
+          else childIds.add(t.id);
+        }
+      });
+    }
+    collect(groupId);
+    const children = TASKS.filter(t => childIds.has(t.id) && t.type === 'task');
+    if (!children.length) return null;
+    return { start: Math.min(...children.map(t => t.start)), end: Math.max(...children.map(t => t.end)) };
+  }
+
+  /* ── 간트 행 렌더 (뷰 인식) ── */
+  function renderGanttRows() {
+    const vc        = getViewConfig();
+    const container = document.getElementById('biz-gantt-rows');
+    container.innerHTML = '';
+    container.style.width = (vc.cols * vc.colW) + 'px';
+
+    const todayCol = vc.todayCol;
+    if (todayCol >= 0 && todayCol < vc.cols) {
+      const line = document.createElement('div');
+      line.className = 'today-line';
+      line.style.left = (todayCol * vc.colW + vc.colW / 2) + 'px';
+      container.appendChild(line);
+    }
+
+    getVisibleTasks().forEach(task => {
+      const row = document.createElement('div');
+      row.className   = 'gantt-row' + (task.type === 'group' ? ' group-row' : '');
+      row.dataset.id  = task.id;
+      row.style.width = '100%';
+
+      for (let i = 0; i < vc.cols; i++) {
+        const col = document.createElement('div');
+        col.className   = 'gantt-col' + vc.colClass(i);
+        col.style.width = vc.colW + 'px';
+        row.appendChild(col);
+      }
+
+      if (task.type === 'group') {
+        const span = getGroupSpan(task.id);
+        if (span) {
+          const rawS = vc.unitOf(span.start);
+          const rawE = vc.unitOf(span.end);
+          if (rawE >= 0 && rawS < vc.cols) {
+            const sc    = Math.max(0, rawS);
+            const ec    = Math.min(vc.cols - 1, rawE);
+            const isTop = !task.parent;
+            const bw    = document.createElement('div');
+            bw.className    = 'gantt-bar-wrap';
+            bw.style.left   = (sc * vc.colW + 1) + 'px';
+            bw.style.width  = ((ec - sc + 1) * vc.colW - 2) + 'px';
+            bw.style.height = isTop ? '10px' : '8px';
+
+            const bar = document.createElement('div');
+            bar.style.cssText = [
+              'width:100%', 'height:100%',
+              'border-radius:' + (isTop ? '5px' : '4px'),
+              'background:' + (task.color || '#94a3b8'),
+              'opacity:' + (isTop ? '0.2' : '0.13'),
+              'position:relative'
+            ].join(';');
+
+            ['left', 'right'].forEach(side => {
+              const cap = document.createElement('div');
+              cap.style.cssText = [
+                'position:absolute', side + ':0', 'top:0',
+                'width:0', 'height:0',
+                'border-top:' + (isTop ? '10px' : '8px') + ' solid ' + (task.color || '#94a3b8'),
+                'border-' + (side === 'left' ? 'right' : 'left') + ':' + (isTop ? '10px' : '8px') + ' solid transparent',
+                'opacity:' + (isTop ? '0.6' : '0.45')
+              ].join(';');
+              bar.appendChild(cap);
+            });
+
+            bw.appendChild(bar);
+            row.appendChild(bw);
+          }
+        }
+      }
+
+      if (task.type === 'task') {
+        const rawS = vc.unitOf(task.start);
+        const rawE = vc.unitOf(task.end);
+        if (rawE >= 0 && rawS < vc.cols) {
+          const sc      = Math.max(0, rawS);
+          const ec      = Math.min(vc.cols - 1, rawE);
+          const maxLoad = getMaxLoad(task, WORKLOAD);
+
+          const bw = document.createElement('div');
+          bw.className   = 'gantt-bar-wrap';
+          bw.style.left  = (sc * vc.colW + 1) + 'px';
+          bw.style.width = ((ec - sc + 1) * vc.colW - 2) + 'px';
+
+          const bar = document.createElement('div');
+          bar.className   = 'gantt-bar ' + (task.color || 'bar-blue');
+          bar.style.width = '100%';
+          if (maxLoad >= 3) bar.classList.add('bar-overload');
+          else if (maxLoad >= 2) bar.classList.add('bar-warning');
+
+          if (task._orgTask) {
+            const previewBtn = document.createElement('span');
+            previewBtn.className = 'gantt-bar-preview';
+            previewBtn.title = '프로세싱 뷰 미리보기';
+            previewBtn.textContent = '⤢';
+            previewBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              openBizPvModal(task);
+            });
+            bar.appendChild(previewBtn);
+          }
+
+          const av = AVATARS[task.assignee];
+          if (av) {
+            const avEl = document.createElement('span');
+            avEl.className   = 'bar-avatar';
+            avEl.textContent = av.abbr;
+            bar.appendChild(avEl);
+          }
+
+          const nameEl = document.createElement('span');
+          nameEl.style.cssText = 'overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0';
+          nameEl.textContent   = task.name;
+          bar.appendChild(nameEl);
+
+          if (task.progress) {
+            const prog = document.createElement('span');
+            prog.className   = 'bar-progress';
+            prog.textContent = task.progress + '%';
+            bar.appendChild(prog);
+          }
+
+          bar.addEventListener('mouseenter', e => showPopup(e, task, maxLoad));
+          bar.addEventListener('mouseleave', hidePopup);
+          bar.addEventListener('mousemove',  movePopup);
+          if (task._orgTask) {
+            bar.style.cursor = 'pointer';
+            bar.addEventListener('click', () => {
+              sessionStorage.setItem('krds_selected_task', JSON.stringify(task._orgTask));
+              window.location.href = '/resources/pages/operating-detail.html';
+            });
+          }
+
+          bw.appendChild(bar);
+          row.appendChild(bw);
+        }
+      }
+
+      container.appendChild(row);
+    });
+  }
+
+  /* ── 팝업 (툴팁) ── */
+  const popup = document.getElementById('biz-bar-popup');
+
+  function showPopup(e, task, maxLoad) {
+    document.getElementById('biz-popup-title').textContent    = task.name;
+    document.getElementById('biz-popup-assignee').textContent = task.assignee || '-';
+    document.getElementById('biz-popup-dates').textContent    =
+      formatDate(dateFromOffset(task.start)) + ' ~ ' + formatDate(dateFromOffset(task.end));
+    document.getElementById('biz-popup-progress').textContent = task.progress + '%';
+
+    const loadEl  = document.getElementById('biz-popup-load');
+    const loadRow = document.getElementById('biz-popup-load-row');
+    if (maxLoad > 1) {
+      loadEl.textContent = maxLoad >= 3 ? '⚠ 과부하 (동시 ' + maxLoad + '건)' : '주의 (동시 ' + maxLoad + '건)';
+      loadEl.className = 'popup-value ' + (maxLoad >= 3 ? 'popup-danger' : 'popup-warning');
+      loadRow.style.display = 'flex';
+    } else {
+      loadRow.style.display = 'none';
+    }
+    popup.classList.add('visible');
+    movePopup(e);
+  }
+  function hidePopup() { popup.classList.remove('visible'); }
+  function movePopup(e) {
+    popup.style.left = (e.clientX + 14) + 'px';
+    popup.style.top  = (e.clientY - 20) + 'px';
+  }
+
+  /* ── 드롭다운 토글 ── */
+  function toggleDropdown(id, btn) {
+    const dd = document.getElementById(id);
+    document.querySelectorAll('.gantt-dropdown').forEach(d => { if (d.id !== id) d.classList.remove('visible'); });
+    dd.classList.toggle('visible');
+    if (dd.classList.contains('visible')) {
+      const r = btn.getBoundingClientRect();
+      dd.style.left = r.left + 'px';
+      dd.style.top  = (r.bottom + 4) + 'px';
+    }
+  }
+
+  function selectTeam(el, name) {
+    document.querySelectorAll('#biz-team-dd .dropdown-item').forEach(i => i.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('biz-team-btn').textContent = name || '전체 팀';
+    document.getElementById('biz-team-dd').classList.remove('visible');
+    currentTeam = name;
+    renderAll();
+  }
+
+  function selectMember(el, name) {
+    document.querySelectorAll('#biz-member-dd .dropdown-item').forEach(i => i.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('biz-member-btn').textContent = name || '전체 팀원';
+    document.getElementById('biz-member-dd').classList.remove('visible');
+    currentMember = name;
+    renderAll();
+  }
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.gantt-dropdown') && !e.target.closest('#biz-team-btn') && !e.target.closest('#biz-member-btn'))
+      document.querySelectorAll('.gantt-dropdown').forEach(d => d.classList.remove('visible'));
+  });
+
+  /* ── 협업 연계 곡선 (SVG) ── */
+  function renderLinks() {
+    const svg = document.getElementById('biz-dep-svg');
+    svg.innerHTML = '';
+
+    const visible = getVisibleTasks();
+    const vc = getViewConfig();
+    const totalW = vc.cols * vc.colW;
+    const totalH = visible.length * ROW_H;
+    svg.style.width  = totalW + 'px';
+    svg.style.height = totalH + 'px';
+
+    // task id → row index (task rows only)
+    const rowIdx = new Map();
+    visible.forEach((t, i) => { if (t.type === 'task') rowIdx.set(t.id, i); });
+
+    // task name → task object
+    const byName = new Map();
+    TASKS.forEach(t => { if (t.type === 'task') byName.set(t.name, t); });
+
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+
+    COLLAB_LINKS.forEach(({ from, to, color, label }, li) => {
+      const ft = byName.get(from);
+      const tt = byName.get(to);
+      if (!ft || !tt) return;
+
+      const fi = rowIdx.get(ft.id);
+      const ti = rowIdx.get(tt.id);
+      if (fi === undefined || ti === undefined) return;
+
+      // 뷰 범위 체크 – 둘 다 보여야 선을 그림
+      const fRawS = vc.unitOf(ft.start);
+      const fRawE = vc.unitOf(ft.end);
+      const tRawS = vc.unitOf(tt.start);
+      const tRawE = vc.unitOf(tt.end);
+      if (fRawE < 0 || fRawS >= vc.cols) return;
+      if (tRawE < 0 || tRawS >= vc.cols) return;
+
+      const fEc = Math.min(vc.cols - 1, fRawE);
+      const tSc = Math.max(0, tRawS);
+
+      const x1 = (fEc + 1) * vc.colW - 3;
+      const x2 = tSc * vc.colW + 3;
+      const y1 = fi * ROW_H + ROW_H / 2;
+      const y2 = ti * ROW_H + ROW_H / 2;
+
+      // 큐빅 베지어 제어점
+      const dx = x2 - x1;
+      const cp = Math.max(50, Math.abs(dx) * 0.45);
+      const cx1 = x1 + cp;
+      const cx2 = x2 - cp;
+
+      // 화살표 마커
+      const mid = 'biz-mk' + li;
+      const mkr = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+      mkr.setAttribute('id', mid);
+      mkr.setAttribute('markerWidth', '8');
+      mkr.setAttribute('markerHeight', '8');
+      mkr.setAttribute('refX', '7');
+      mkr.setAttribute('refY', '4');
+      mkr.setAttribute('orient', 'auto');
+      const tri = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+      tri.setAttribute('points', '0 0, 7 4, 0 8');
+      tri.setAttribute('fill', color);
+      tri.setAttribute('opacity', '0.75');
+      mkr.appendChild(tri);
+      defs.appendChild(mkr);
+
+      // 곡선 경로
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', `M ${x1},${y1} C ${cx1},${y1} ${cx2},${y2} ${x2},${y2}`);
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke', color);
+      path.setAttribute('stroke-width', '1.5');
+      path.setAttribute('stroke-dasharray', '5 3');
+      path.setAttribute('opacity', '0.65');
+      path.setAttribute('marker-end', `url(#${mid})`);
+
+      // 라벨 (중간 지점)
+      if (label) {
+        const mx = (x1 + x2) / 2;
+        const my = (y1 + y2) / 2 - 6;
+        const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        txt.setAttribute('x', mx);
+        txt.setAttribute('y', my);
+        txt.setAttribute('text-anchor', 'middle');
+        txt.setAttribute('font-size', '9');
+        txt.setAttribute('fill', color);
+        txt.setAttribute('opacity', '0.75');
+        txt.setAttribute('font-family', 'inherit');
+        txt.textContent = label;
+        svg.appendChild(txt);
+      }
+
+      svg.appendChild(path);
+    });
+
+    svg.insertBefore(defs, svg.firstChild);
+  }
+
+  /* ── 전체 렌더 ── */
+  function renderAll() {
+    renderTaskList();
+    renderGanttRows();
+    renderLinks();
+  }
+
+  /* ── 스크롤 동기화 (최초 1회) ── */
+  (function initScroll() {
+    const taskBody  = document.getElementById('biz-task-list-body');
+    const ganttBody = document.querySelector('#bizGanttPanel .gantt-body');
+    const ganttHdr  = document.querySelector('#bizGanttPanel .gantt-header');
+    ganttBody.addEventListener('scroll', () => {
+      taskBody.scrollTop   = ganttBody.scrollTop;
+      ganttHdr.scrollLeft  = ganttBody.scrollLeft;
+    });
+    taskBody.addEventListener('scroll', () => { ganttBody.scrollTop = taskBody.scrollTop; });
+  })();
+
+  /* ── 업무 미리보기(프로세싱 뷰) 모달 ── 사업(업무) 바를 클릭하면 기존처럼
+     업무 상세 페이지로 이동하지만, 바 위의 ⤢ 버튼을 누르면 index.html 조직도 탭이
+     쓰는 것과 동일한 노드 흐름도(buildWorkflow/renderNodeCanvas)를 모달로 바로 보여준다 */
+  const pvModalBackdrop = document.getElementById('bizPvModalBackdrop');
+  const pvModalTitle    = document.getElementById('bizPvModalTitle');
+  const pvModalSub      = document.getElementById('bizPvModalSub');
+  const pvModalBody     = document.getElementById('bizPvModalBody');
+  const pvModalClose    = document.getElementById('bizPvModalClose');
+
+  function findOwnerMember(ownerName) {
+    for (const sil of ORG) {
+      for (const leaf of getAllLeaves(sil)) {
+        const m = (leaf.members || []).find(x => x.name === ownerName);
+        if (m) return m;
+      }
+    }
+    return null;
+  }
+
+  function openBizPvModal(task) {
+    const orgTask = task._orgTask;
+    if (!orgTask) return;
+    const member = findOwnerMember(orgTask.owner);
+    const worker = { name: orgTask.owner, role: member ? member.position : '' };
+    pvModalTitle.textContent = orgTask.title;
+    pvModalSub.textContent = `${worker.name}${worker.role ? ' · ' + worker.role : ''} 담당 · 처리 워크플로우`;
+    pvModalBody.innerHTML = '';
+    const { nodes, edges } = buildWorkflow(worker, orgTask);
+    renderNodeCanvas(pvModalBody, nodes, edges);
+    pvModalBackdrop.classList.add('visible');
+  }
+  function closeBizPvModal() {
+    pvModalBackdrop.classList.remove('visible');
+    pvModalBody.innerHTML = '';
+  }
+  pvModalClose.addEventListener('click', closeBizPvModal);
+  pvModalBackdrop.addEventListener('click', e => { if (e.target === pvModalBackdrop) closeBizPvModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeBizPvModal(); });
+
+  renderHeader();
+  renderAll();
+})();
+</script>
 
 </body>
 </html>
