@@ -20,9 +20,15 @@
     </div>
   </section>
 
-  <!-- 사업 관리 > 업무 차트의 전체 조직 간트 차트 (조직도와 한 화면에 함께 노출, 조직도 폭에 반응해 남은 폭을 채움) -->
+  <!-- 사업 관리 > 업무 차트/업무 캘린더를 조직도와 한 화면에 함께 노출 (조직도 폭에 반응해 남은 폭을 채움) -->
   <section class="index-split-section index-split-section--gantt">
-    <div class="index-section-head">간트 차트</div>
+    <div class="index-section-head">
+      <span>업무 현황</span>
+      <div class="view-toggle" id="bizViewToggle">
+        <button class="vt-btn active" type="button" data-view="gantt">간트차트 뷰</button>
+        <button class="vt-btn" type="button" data-view="calendar">캘린더 뷰</button>
+      </div>
+    </div>
     <div class="operating-container" id="bizGanttPanel">
     <div class="organization-container">
       <main class="main gantt-page">
@@ -83,6 +89,55 @@
 
       </main>
     </div>
+    </div>
+
+    <!-- 사업 관리 > 업무 캘린더 -->
+    <div class="operating-container" id="bizCalendarPanel" style="display:none;">
+      <div class="organization-container">
+        <main class="main">
+
+          <!-- 툴바 -->
+          <div class="oc-toolbar">
+            <div class="oc-toolbar__row">
+              <div class="oc-toolbar__nav">
+                <button class="oc-nav-btn" title="이전 달">&#8249;</button>
+                <button class="oc-nav-btn" title="다음 달">&#8250;</button>
+              </div>
+              <span class="oc-month-label">1월 2026</span>
+              <div class="oc-scope-selector">
+                <button data-scope="company" class="active">회사 캘린더</button>
+                <button data-scope="personal">개인 캘린더</button>
+              </div>
+            </div>
+            <div class="oc-toolbar__row">
+              <select class="krds-form-select small oc-person-select" id="ocPersonSelect" title="담당자 선택" hidden></select>
+              <div class="oc-view-selector">
+                <button data-view="day">일</button>
+                <button data-view="week">주</button>
+                <button data-view="month">월</button>
+                <button data-view="3month">3개월</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 달력 그리드 -->
+          <div class="oc-grid">
+
+            <!-- 요일 헤더 -->
+            <div class="oc-day-headers">
+              <div class="oc-day-header">월</div>
+              <div class="oc-day-header">화</div>
+              <div class="oc-day-header">수</div>
+              <div class="oc-day-header">목</div>
+              <div class="oc-day-header">금</div>
+              <div class="oc-day-header weekend">토</div>
+              <div class="oc-day-header weekend">일</div>
+            </div>
+
+            <div class="oc-weeks"></div>
+          </div>
+        </main>
+      </div>
     </div>
   </section>
 </div>
@@ -377,6 +432,15 @@ function renderNodeCanvas(host, nodes, edges) {
 }
 
 render();
+
+/* ===================== 사업 관리: 간트차트 뷰 / 캘린더 뷰 토글 ===================== */
+document.querySelectorAll("#bizViewToggle .vt-btn[data-view]").forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll("#bizViewToggle .vt-btn[data-view]").forEach(b => b.classList.toggle("active", b === btn));
+    document.getElementById("bizGanttPanel").style.display = btn.dataset.view === "gantt" ? "flex" : "none";
+    document.getElementById("bizCalendarPanel").style.display = btn.dataset.view === "calendar" ? "flex" : "none";
+  };
+});
 </script>
 
 <script>

@@ -54,15 +54,25 @@
 
         <!-- 툴바 -->
         <div class="oc-toolbar">
-          <div class="oc-toolbar__nav">
-            <button class="oc-nav-btn" title="이전 달">&#8249;</button>
-            <button class="oc-nav-btn" title="다음 달">&#8250;</button>
+          <div class="oc-toolbar__row">
+            <div class="oc-toolbar__nav">
+              <button class="oc-nav-btn" title="이전 달">&#8249;</button>
+              <button class="oc-nav-btn" title="다음 달">&#8250;</button>
+            </div>
+            <span class="oc-month-label">1월 2026</span>
+            <div class="oc-scope-selector">
+              <button data-scope="company" class="active">회사 캘린더</button>
+              <button data-scope="personal">개인 캘린더</button>
+            </div>
           </div>
-          <span class="oc-month-label">1월 2026</span>
-          <div class="oc-view-selector">
-            <button>일</button>
-            <button>주</button>
-            <button class="active">월</button>
+          <div class="oc-toolbar__row">
+            <select class="krds-form-select small oc-person-select" id="ocPersonSelect" title="담당자 선택" hidden></select>
+            <div class="oc-view-selector">
+              <button data-view="day">일</button>
+              <button data-view="week">주</button>
+              <button data-view="month">월</button>
+              <button data-view="3month">3개월</button>
+            </div>
           </div>
         </div>
 

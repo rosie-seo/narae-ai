@@ -1386,7 +1386,7 @@ if (ocWeeksEl) {
   const calLeaves = ORG.flatMap(sil => getAllLeaves(sil)).filter(l => l.tasks && l.tasks.length);
   const calTasks  = calLeaves.flatMap(leaf => leaf.tasks.map(t => Object.assign({}, t, { dept: leaf.name })));
 
-  const CAL_CHIP = { progress: 'chip-blue', done: 'chip-green', wait: 'chip-orange' };
+  const CAL_CHIP = { progress: 'chip-blue', done: 'chip-green', wait: 'chip-orange', recurring: 'chip-red' };
   const DAY_KO   = ['일', '월', '화', '수', '목', '금', '토'];
   const todayKey = (function() {
     const n = new Date();
@@ -1400,9 +1400,71 @@ if (ocWeeksEl) {
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   }
 
+  /* ── 개인 캘린더: 본인 정기 업무(반복 일정) ── */
+  const RECURRING_TEMPLATES = [
+    { title: '주간 업무보고 작성',     freq: 'weekly',   weekday: 1 },
+    { title: '부서 정례회의 참석',     freq: 'biweekly', weekday: 3 },
+    { title: '월간 실적 정리 및 보고', freq: 'monthly-last-weekday' },
+    { title: '분기 예산집행 점검',     freq: 'quarterly', months: [2, 5, 8, 11], day: 25 },
+  ];
+  const RECURRING_RANGE_START = new Date(2024, 0, 1);
+  const RECURRING_RANGE_END   = new Date(2027, 11, 31);
+
+  function makeRecurringInstance(title, date, person, id) {
+    const key = toKey(date);
+    return { __id: 'r' + id, title, status: 'recurring', start: key, end: key, owner: person, dept: '정기업무', recurring: true };
+  }
+
+  function generateRecurringInstances(person) {
+    const instances = [];
+    let rid = 0;
+    RECURRING_TEMPLATES.forEach(tpl => {
+      if (tpl.freq === 'weekly' || tpl.freq === 'biweekly') {
+        const step = tpl.freq === 'weekly' ? 7 : 14;
+        const d = new Date(RECURRING_RANGE_START);
+        while (d.getDay() !== tpl.weekday) d.setDate(d.getDate() + 1);
+        for (; d <= RECURRING_RANGE_END; d.setDate(d.getDate() + step)) {
+          instances.push(makeRecurringInstance(tpl.title, d, person, rid++));
+        }
+      } else if (tpl.freq === 'monthly-last-weekday') {
+        for (let y = RECURRING_RANGE_START.getFullYear(); y <= RECURRING_RANGE_END.getFullYear(); y++) {
+          for (let m = 0; m < 12; m++) {
+            const d = new Date(y, m + 1, 0);
+            while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() - 1);
+            if (d >= RECURRING_RANGE_START && d <= RECURRING_RANGE_END) instances.push(makeRecurringInstance(tpl.title, d, person, rid++));
+          }
+        }
+      } else if (tpl.freq === 'quarterly') {
+        for (let y = RECURRING_RANGE_START.getFullYear(); y <= RECURRING_RANGE_END.getFullYear(); y++) {
+          tpl.months.forEach(m => {
+            const d = new Date(y, m, tpl.day);
+            if (d >= RECURRING_RANGE_START && d <= RECURRING_RANGE_END) instances.push(makeRecurringInstance(tpl.title, d, person, rid++));
+          });
+        }
+      }
+    });
+    return instances;
+  }
+
+  const recurringCache = {};
+  function getRecurringFor(person) {
+    if (!recurringCache[person]) recurringCache[person] = generateRecurringInstances(person);
+    return recurringCache[person];
+  }
+
+  let calScope = 'company';
+  let calPerson = null;
+  let activeTasks = calTasks;
+
+  function rebuildActiveTasks() {
+    activeTasks = (calScope === 'personal' && calPerson)
+      ? calTasks.filter(t => t.owner === calPerson).concat(getRecurringFor(calPerson))
+      : calTasks;
+  }
+
   function buildTaskMap() {
     const map = {};
-    calTasks.forEach(t => { if (!map[t.end]) map[t.end] = []; map[t.end].push(t); });
+    activeTasks.forEach(t => { if (!map[t.end]) map[t.end] = []; map[t.end].push(t); });
     return map;
   }
 
@@ -1413,8 +1475,8 @@ if (ocWeeksEl) {
   }
 
   function makeChip(t, extraClass) {
-    const idx = calTasks.indexOf(t);
-    return `<div class="oc-chip ${CAL_CHIP[t.status] || 'chip-blue'}${extraClass ? ' ' + extraClass : ''}" data-task-i="${idx}" title="${escapeHtml(t.dept + ' · ' + t.owner)}">` +
+    const idx = activeTasks.indexOf(t);
+    return `<div class="oc-chip ${CAL_CHIP[t.status] || 'chip-blue'}${t.recurring ? ' oc-chip--recurring' : ''}${extraClass ? ' ' + extraClass : ''}" data-task-i="${idx}" title="${escapeHtml(t.dept + ' · ' + t.owner)}">` +
       `<span class="chip-dot"></span><span class="chip-name">${escapeHtml(t.title)}</span></div>`;
   }
 
@@ -1490,12 +1552,58 @@ if (ocWeeksEl) {
     ocWeeksEl.innerHTML = html + '</div>';
   }
 
+  /* ── 3 Month (더보기 없이 모든 업무를 다 표시) ── */
+  function renderCal3Month() {
+    const taskMap = buildTaskMap();
+    const y0 = calDate.getFullYear(), m0 = calDate.getMonth();
+    let html = '<div class="oc-view-3month">';
+
+    for (let mi = 0; mi < 3; mi++) {
+      const first = new Date(y0, m0 + mi, 1);
+      const y = first.getFullYear(), m = first.getMonth();
+      const cells = [];
+      for (let i = (first.getDay() + 6) % 7; i > 0; i--)
+        cells.push({ d: new Date(y, m, 1 - i), other: true });
+      const days = new Date(y, m + 1, 0).getDate();
+      for (let i = 1; i <= days; i++)
+        cells.push({ d: new Date(y, m, i), other: false });
+      const tail = (7 - (cells.length % 7)) % 7;
+      for (let i = 1; i <= tail; i++)
+        cells.push({ d: new Date(y, m + 1, i), other: true });
+
+      html += `<div class="oc-3month-block"><div class="oc-3month-title">${y}년 ${m + 1}월</div>`;
+      for (let r = 0; r < cells.length; r += 7) {
+        html += '<div class="oc-week-row--compact">';
+        for (let c = 0; c < 7; c++) {
+          const { d, other } = cells[r + c];
+          const key = toKey(d), isToday = key === todayKey;
+          const ts = taskMap[key] || [];
+          html += `<div class="oc-cell--compact${other ? ' other-month' : ''}${isToday ? ' today' : ''}">` +
+            `<div class="oc-date-num${isToday ? ' today-circle' : ''}">${d.getDate()}</div>` +
+            (ts.length ? `<div class="oc-events">${ts.map(t => makeChip(t, 'oc-chip--compact')).join('')}</div>` : '') +
+            `</div>`;
+        }
+        html += '</div>';
+      }
+      html += '</div>';
+    }
+
+    html += '</div>';
+    ocWeeksEl.innerHTML = html;
+  }
+
   /* ── Label ── */
   function updateLabel() {
     const el = document.querySelector('.oc-month-label');
     if (!el) return;
     if (calView === 'month') {
       el.textContent = calDate.getFullYear() + '년 ' + (calDate.getMonth() + 1) + '월';
+    } else if (calView === '3month') {
+      const y1 = calDate.getFullYear(), m1 = calDate.getMonth();
+      const end = new Date(y1, m1 + 2, 1);
+      el.textContent = y1 === end.getFullYear()
+        ? `${y1}년 ${m1 + 1}월 – ${end.getMonth() + 1}월`
+        : `${y1}년 ${m1 + 1}월 – ${end.getFullYear()}년 ${end.getMonth() + 1}월`;
     } else if (calView === 'week') {
       const mon = getWeekMonday(calDate);
       const sun = new Date(mon); sun.setDate(sun.getDate() + 6);
@@ -1512,9 +1620,10 @@ if (ocWeeksEl) {
   /* ── Render dispatcher ── */
   function render() {
     updateLabel();
-    if (calView === 'week')      renderCalWeek();
-    else if (calView === 'day')  renderCalDay();
-    else                         renderCalMonth();
+    if (calView === 'week')        renderCalWeek();
+    else if (calView === 'day')    renderCalDay();
+    else if (calView === '3month') renderCal3Month();
+    else                           renderCalMonth();
   }
 
   /* ── Navigation ── */
@@ -1523,6 +1632,8 @@ if (ocWeeksEl) {
       const dir = i === 0 ? -1 : 1;
       if (calView === 'month') {
         calDate = new Date(calDate.getFullYear(), calDate.getMonth() + dir, 1);
+      } else if (calView === '3month') {
+        calDate = new Date(calDate.getFullYear(), calDate.getMonth() + dir * 3, 1);
       } else if (calView === 'week') {
         calDate = new Date(calDate); calDate.setDate(calDate.getDate() + dir * 7);
       } else {
@@ -1533,12 +1644,39 @@ if (ocWeeksEl) {
   });
 
   /* ── View selector ── */
+  function setCalViewBtnActive(activeBtn) {
+    document.querySelectorAll('.oc-view-selector button').forEach(b => {
+      b.classList.toggle('active', b === activeBtn);
+    });
+  }
   document.querySelectorAll('.oc-view-selector button').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.oc-view-selector button').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const txt = btn.textContent.trim().toLowerCase();
-      calView = txt === 'day' ? 'day' : txt === 'week' ? 'week' : 'month';
+      setCalViewBtnActive(btn);
+      calView = btn.dataset.view || 'month';
+      render();
+    });
+  });
+  setCalViewBtnActive(document.querySelector('.oc-view-selector button[data-view="month"]'));
+
+  /* ── Scope selector (회사 캘린더 / 개인 캘린더) ── */
+  const personSelectEl = document.getElementById('ocPersonSelect');
+  if (personSelectEl) {
+    const allOwners = Array.from(new Set(calTasks.map(t => t.owner))).sort((a, b) => a.localeCompare(b, 'ko'));
+    personSelectEl.innerHTML = allOwners.map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join('');
+    calPerson = allOwners[0] || null;
+    if (calPerson) personSelectEl.value = calPerson;
+    personSelectEl.addEventListener('change', () => {
+      calPerson = personSelectEl.value;
+      rebuildActiveTasks();
+      render();
+    });
+  }
+  document.querySelectorAll('.oc-scope-selector button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      calScope = btn.dataset.scope;
+      document.querySelectorAll('.oc-scope-selector button').forEach(b => b.classList.toggle('active', b === btn));
+      if (personSelectEl) personSelectEl.hidden = calScope !== 'personal';
+      rebuildActiveTasks();
       render();
     });
   });
@@ -1580,12 +1718,14 @@ if (ocWeeksEl) {
 
     document.getElementById('oc-popup-body').innerHTML = tasks.map(t => {
       const chipCls = CAL_CHIP[t.status] || 'chip-blue';
-      const idx = calTasks.indexOf(t);
-      return `<li class="oc-popup-task" data-task-i="${idx}" style="cursor:pointer">
+      const idx = activeTasks.indexOf(t);
+      const statusLabel = t.recurring ? '정기' : STATUS_LABEL[t.status];
+      const statusClass = t.recurring ? 'krds-badge bg-light-primary' : STATUS_CLASS[t.status];
+      return `<li class="oc-popup-task${t.recurring ? ' oc-popup-task--recurring' : ''}" data-task-i="${idx}">
         <span class="oc-popup-task__dot ${chipCls}"></span>
         <div class="oc-popup-task__info">
           <div class="oc-popup-task__head">
-            <span class="${STATUS_CLASS[t.status]}">${STATUS_LABEL[t.status]}</span>
+            <span class="${statusClass}">${statusLabel}</span>
             <span class="oc-popup-task__title">${escapeHtml(t.title)}</span>
           </div>
           <div class="oc-popup-task__meta">
@@ -1610,6 +1750,7 @@ if (ocWeeksEl) {
   }
 
   function goToDetail(t) {
+    if (t.recurring) return;
     sessionStorage.setItem('krds_selected_task', JSON.stringify(t));
     window.location.href = '/resources/pages/operating-detail.html';
   }
@@ -1618,13 +1759,13 @@ if (ocWeeksEl) {
   popupOverlay.addEventListener('click', e => {
     if (e.target === popupOverlay) { closeDayPopup(); return; }
     const li = e.target.closest('.oc-popup-task[data-task-i]');
-    if (li) { closeDayPopup(); goToDetail(calTasks[+li.dataset.taskI]); }
+    if (li) { closeDayPopup(); goToDetail(activeTasks[+li.dataset.taskI]); }
   });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !popupOverlay.hidden) closeDayPopup(); });
 
   ocWeeksEl.addEventListener('click', e => {
     const chip = e.target.closest('.oc-chip[data-task-i]');
-    if (chip) { goToDetail(calTasks[+chip.dataset.taskI]); return; }
+    if (chip) { goToDetail(activeTasks[+chip.dataset.taskI]); return; }
     const btn = e.target.closest('.oc-more');
     if (btn?.dataset.key) openDayPopup(btn.dataset.key);
   });
@@ -1658,6 +1799,7 @@ function setGnbActive() {
     const match =
       (href.includes('organization')   && path.includes('organization')) ||
       (href.includes('operating')      && path.includes('operating')) ||
+      (href.includes('goals')          && path.includes('goals')) ||
       (href.includes('policy')         && path.includes('policy')) ||
       (href.includes('weekly-report')  && path.includes('weekly-report')) ||
       (href.includes('monitoring')     && path.includes('monitoring'));

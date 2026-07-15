@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>목표 관리</title>
+    <link rel="stylesheet" href="/resources/css/custom.css">
+    <link href="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.css" type="text/css" rel="stylesheet" />
+    <script src="/resources/js/component/ui-include.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.js"></script>
+</head>
+<body>
+
+<div class="operating-container">
+
+  <div data-include="/html/code/header.html"></div>
+
+  <main class="main" style="overflow:auto;">
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <div class="page-title-group">
+        <div class="page-title">목표 관리</div>
+        <div class="page-desc">부서별 · 개인별 목표와 진척률을 한눈에 확인하고 새 목표를 등록합니다</div>
+      </div>
+      <div class="page-header__actions">
+        <button type="button" class="krds-btn primary" id="goalAddBtn">+ 목표 등록</button>
+      </div>
+    </div>
+
+    <!-- 요약 -->
+    <div class="goal-summary-row" id="goalSummary"></div>
+
+    <!-- CATEGORY TABS -->
+    <div class="category-tabs" id="goalTabs">
+      <button class="cat-tab active" data-scope="dept">부서별 목표</button>
+      <button class="cat-tab" data-scope="person">개인별 목표</button>
+    </div>
+
+    <!-- 부서별 목표 -->
+    <div id="goalDeptPanel">
+      <div class="goal-dept-grid" id="goalDeptGrid"></div>
+    </div>
+
+    <!-- 개인별 목표 -->
+    <div id="goalPersonPanel" hidden>
+      <div class="goal-filter-bar">
+        <select class="krds-form-select small" id="goalPersonDeptFilter" title="부서 필터">
+          <option value="">전체 부서</option>
+        </select>
+        <input type="text" class="krds-input small" id="goalPersonSearch" placeholder="담당자 이름 검색" style="width:200px" title="담당자 이름 검색">
+      </div>
+      <table class="task-table">
+        <thead>
+          <tr>
+            <th>담당자</th>
+            <th>부서</th>
+            <th>목표</th>
+            <th>진척률</th>
+            <th>마감일</th>
+            <th>상태</th>
+          </tr>
+        </thead>
+        <tbody id="goalPersonTbody"></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<!-- 목표 입력 모달 -->
+<div class="goal-modal-overlay" id="goalModalOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="goalModalTitle">
+  <div class="goal-modal">
+    <div class="goal-modal__head">
+      <h2 class="goal-modal__title" id="goalModalTitle">목표 등록</h2>
+      <button type="button" class="goal-modal__close" id="goalModalClose" aria-label="닫기">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+    <div class="goal-modal__body">
+      <div class="fieldset admin-fieldset">
+        <div class="form-group">
+          <div class="form-tit"><label for="goalFormScope">구분</label></div>
+          <div class="form-conts">
+            <select id="goalFormScope" class="krds-form-select" title="목표 구분 선택">
+              <option value="dept">부서 목표</option>
+              <option value="person">개인 목표</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="form-tit"><label for="goalFormTarget">대상</label></div>
+          <div class="form-conts">
+            <select id="goalFormTarget" class="krds-form-select" title="목표 대상 선택"></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="form-tit"><label for="goalFormTitle">목표 제목</label></div>
+          <div class="form-conts">
+            <input type="text" id="goalFormTitle" class="krds-input" placeholder="예: 2026년 예산 집행률 95% 달성">
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="form-tit"><label for="goalFormDesc">목표 설명</label></div>
+          <div class="form-conts">
+            <textarea id="goalFormDesc" class="krds-input" rows="3" placeholder="목표에 대한 세부 설명 (선택)"></textarea>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="form-tit"><label for="goalFormProgress">현재 진척률(%)</label></div>
+          <div class="form-conts">
+            <input type="number" id="goalFormProgress" class="krds-input" min="0" max="100" value="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="form-tit"><label for="goalFormDue">마감일</label></div>
+          <div class="form-conts">
+            <input type="date" id="goalFormDue" class="krds-input">
+          </div>
+        </div>
+      </div>
+      <p class="form-hint" id="goalFormError" style="display:none;color:var(--krds-light-color-text-danger);padding:0 var(--krds-padding-9);"></p>
+    </div>
+    <div class="goal-modal__foot">
+      <button type="button" class="krds-btn secondary" id="goalFormCancel">취소</button>
+      <button type="button" class="krds-btn primary" id="goalFormSubmit">등록</button>
+    </div>
+  </div>
+</div>
+
+<script src="/resources/js/script.js"></script>
+<script>
+(function () {
+  const DEPTS = ORG.map(o => o.name);
+  const PEOPLE = ORG.flatMap(sil =>
+    getAllLeaves(sil).flatMap(leaf =>
+      (leaf.members || []).map(m => ({ name: m.name, dept: sil.name, team: leaf.name }))
+    )
+  );
+
+  const DEPT_GOAL_TEMPLATES = {
+    "기획조정실": [
+      { title: "2026년 예산 집행률 95% 달성", due: "2026-12-31" },
+      { title: "부서 성과관리 체계 고도화",     due: "2026-09-30" },
+    ],
+    "운영지원실": [
+      { title: "행정서비스 처리기한 준수율 98% 달성", due: "2026-12-31" },
+      { title: "정보시스템 장애 대응시간 30% 단축",    due: "2026-09-30" },
+    ],
+    "감사실": [
+      { title: "정기감사 이행률 100% 달성",       due: "2026-12-31" },
+      { title: "청렴도 자체평가 우수등급 획득",   due: "2026-11-30" },
+    ],
+    "정책홍보실": [
+      { title: "대국민 홍보채널 참여율 20% 증대", due: "2026-12-31" },
+      { title: "정책 브리핑 만족도 90점 이상",     due: "2026-09-30" },
+    ],
+    "연구기획실": [
+      { title: "중장기 정책연구 과제 완료율 90% 달성", due: "2026-12-31" },
+      { title: "연구성과 활용도 제고 방안 수립",       due: "2026-09-30" },
+    ],
+  };
+
+  const PERSON_GOAL_TEMPLATES = [
+    "업무 처리 정확도 향상",
+    "담당 업무 기한 준수율 제고",
+    "전문성 강화를 위한 직무교육 이수",
+    "업무 프로세스 개선 제안 실행",
+    "협업 커뮤니케이션 역량 강화",
+  ];
+
+  let goalSeq = 0;
+  function seedGoal(scope, target, dept, title, due) {
+    const progress = hashSeed(target + ':' + title) % 101;
+    return {
+      id: 'g' + (goalSeq++),
+      scope, target, dept, title,
+      desc: '',
+      progress,
+      startDate: '2026-01-01',
+      dueDate: due,
+    };
+  }
+
+  const GOALS = [];
+  DEPTS.forEach(dept => {
+    (DEPT_GOAL_TEMPLATES[dept] || []).forEach(tpl => {
+      GOALS.push(seedGoal('dept', dept, dept, tpl.title, tpl.due));
+    });
+  });
+  PEOPLE.forEach(p => {
+    const tpl = PERSON_GOAL_TEMPLATES[hashSeed(p.name) % PERSON_GOAL_TEMPLATES.length];
+    const due = (hashSeed(p.name + ':due') % 2 === 0) ? '2026-09-30' : '2026-12-31';
+    GOALS.push(seedGoal('person', p.name, p.dept, tpl, due));
+  });
+
+  function goalStatus(g) {
+    const now = new Date();
+    const start = new Date(g.startDate);
+    const due = new Date(g.dueDate);
+    if (g.progress >= 100) return { label: '달성', cls: 'krds-badge bg-light-success', color: 'var(--krds-light-color-icon-success)' };
+    if (now > due) return { label: '지연', cls: 'krds-badge bg-light-danger', color: 'var(--krds-light-color-icon-danger)' };
+    const total = due - start;
+    const elapsed = now - start;
+    const expected = total > 0 ? Math.max(0, Math.min(100, (elapsed / total) * 100)) : 0;
+    if (g.progress < expected - 15) return { label: '주의', cls: 'krds-badge bg-light-warning', color: 'var(--krds-light-color-icon-warning)' };
+    return { label: '진행중', cls: 'krds-badge bg-light-secondary', color: 'var(--krds-light-color-icon-information)' };
+  }
+
+  function goalRowHTML(g, tableStyle) {
+    const st = goalStatus(g);
+    return `
+      <div class="goal-row${tableStyle ? ' goal-row--table' : ''}">
+        <div class="goal-row__top">
+          <span class="goal-row__title">${escapeHtml(g.title)}</span>
+          <span class="${st.cls}">${st.label}</span>
+        </div>
+        <div class="goal-row__bar">
+          <div class="goal-row__bar-track"><div class="goal-row__bar-fill" style="width:${g.progress}%;background:${st.color}"></div></div>
+          <span class="goal-row__pct">${g.progress}%</span>
+        </div>
+        <div class="goal-row__meta">마감 ${escapeHtml(g.dueDate)}</div>
+      </div>
+    `;
+  }
+
+  /* ── 요약 ── */
+  function renderSummary() {
+    const total = GOALS.length;
+    const achieved = GOALS.filter(g => g.progress >= 100).length;
+    const atRisk = GOALS.filter(g => { const s = goalStatus(g); return s.label === '주의' || s.label === '지연'; }).length;
+    const avg = Math.round(GOALS.reduce((s, g) => s + g.progress, 0) / (total || 1));
+    document.getElementById('goalSummary').innerHTML = `
+      <div class="goal-summary-card"><div class="goal-summary-card__label">전체 목표</div><div class="goal-summary-card__value">${total}<span class="unit">건</span></div></div>
+      <div class="goal-summary-card"><div class="goal-summary-card__label">평균 진척률</div><div class="goal-summary-card__value">${avg}<span class="unit">%</span></div></div>
+      <div class="goal-summary-card"><div class="goal-summary-card__label">달성</div><div class="goal-summary-card__value">${achieved}<span class="unit">건</span></div></div>
+      <div class="goal-summary-card"><div class="goal-summary-card__label">주의 · 지연</div><div class="goal-summary-card__value">${atRisk}<span class="unit">건</span></div></div>
+    `;
+  }
+
+  /* ── 부서별 ── */
+  function renderDeptView() {
+    const grid = document.getElementById('goalDeptGrid');
+    grid.innerHTML = DEPTS.map(dept => {
+      const goals = GOALS.filter(g => g.scope === 'dept' && g.target === dept);
+      const memberCount = PEOPLE.filter(p => p.dept === dept).length;
+      return `
+        <section class="goal-dept-card">
+          <div class="goal-dept-card__head">
+            <h2>${escapeHtml(dept)}</h2>
+            <span class="goal-dept-card__hint">${memberCount}명 · 목표 ${goals.length}건</span>
+          </div>
+          <div class="goal-dept-card__list">
+            ${goals.length ? goals.map(g => goalRowHTML(g)).join('') : '<div class="goal-row__meta">등록된 목표가 없습니다.</div>'}
+          </div>
+        </section>
+      `;
+    }).join('');
+  }
+
+  /* ── 개인별 ── */
+  const deptFilterEl = document.getElementById('goalPersonDeptFilter');
+  deptFilterEl.innerHTML += DEPTS.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
+
+  function renderPersonView() {
+    const deptFilter = deptFilterEl.value;
+    const search = document.getElementById('goalPersonSearch').value.trim();
+    const tbody = document.getElementById('goalPersonTbody');
+    const rows = GOALS.filter(g => g.scope === 'person')
+      .filter(g => !deptFilter || g.dept === deptFilter)
+      .filter(g => !search || g.target.includes(search));
+
+    tbody.innerHTML = rows.length ? rows.map(g => {
+      const st = goalStatus(g);
+      return `
+        <tr>
+          <td><span class="col-assignee"><span class="avatar ${ownerColorClass(g.target)}">${escapeHtml(g.target.slice(0, 1))}</span>${escapeHtml(g.target)}</span></td>
+          <td>${escapeHtml(g.dept)}</td>
+          <td>${escapeHtml(g.title)}</td>
+          <td>
+            <div class="goal-row__bar goal-row--table">
+              <div class="goal-row__bar-track"><div class="goal-row__bar-fill" style="width:${g.progress}%;background:${st.color}"></div></div>
+              <span class="goal-row__pct">${g.progress}%</span>
+            </div>
+          </td>
+          <td>${escapeHtml(g.dueDate)}</td>
+          <td><span class="${st.cls}">${st.label}</span></td>
+        </tr>
+      `;
+    }).join('') : '<tr><td colspan="6" style="text-align:center;color:var(--krds-light-color-text-subtle)">조건에 맞는 목표가 없습니다.</td></tr>';
+  }
+
+  deptFilterEl.addEventListener('change', renderPersonView);
+  document.getElementById('goalPersonSearch').addEventListener('input', renderPersonView);
+
+  /* ── 탭 전환 ── */
+  document.querySelectorAll('#goalTabs .cat-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#goalTabs .cat-tab').forEach(b => b.classList.toggle('active', b === btn));
+      const scope = btn.dataset.scope;
+      document.getElementById('goalDeptPanel').hidden = scope !== 'dept';
+      document.getElementById('goalPersonPanel').hidden = scope !== 'person';
+    });
+  });
+
+  /* ── 목표 입력 모달 ── */
+  const modalOverlay = document.getElementById('goalModalOverlay');
+  const scopeEl = document.getElementById('goalFormScope');
+  const targetEl = document.getElementById('goalFormTarget');
+  const errorEl = document.getElementById('goalFormError');
+
+  function populateTargetOptions() {
+    if (scopeEl.value === 'dept') {
+      targetEl.innerHTML = DEPTS.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
+    } else {
+      targetEl.innerHTML = PEOPLE.map(p => `<option value="${escapeHtml(p.name)}">${escapeHtml(p.name)} · ${escapeHtml(p.dept)}</option>`).join('');
+    }
+  }
+  scopeEl.addEventListener('change', populateTargetOptions);
+
+  function openGoalModal(defaultScope) {
+    scopeEl.value = defaultScope || 'dept';
+    populateTargetOptions();
+    document.getElementById('goalFormTitle').value = '';
+    document.getElementById('goalFormDesc').value = '';
+    document.getElementById('goalFormProgress').value = 0;
+    document.getElementById('goalFormDue').value = '';
+    errorEl.style.display = 'none';
+    modalOverlay.hidden = false;
+    document.body.style.overflow = 'hidden';
+    document.getElementById('goalFormTitle').focus();
+  }
+  function closeGoalModal() {
+    modalOverlay.hidden = true;
+    document.body.style.overflow = '';
+  }
+
+  document.getElementById('goalAddBtn').addEventListener('click', () => {
+    const activeScope = document.querySelector('#goalTabs .cat-tab.active').dataset.scope;
+    openGoalModal(activeScope);
+  });
+  document.getElementById('goalModalClose').addEventListener('click', closeGoalModal);
+  document.getElementById('goalFormCancel').addEventListener('click', closeGoalModal);
+  modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeGoalModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modalOverlay.hidden) closeGoalModal(); });
+
+  document.getElementById('goalFormSubmit').addEventListener('click', () => {
+    const scope = scopeEl.value;
+    const target = targetEl.value;
+    const title = document.getElementById('goalFormTitle').value.trim();
+    const desc = document.getElementById('goalFormDesc').value.trim();
+    const progress = Math.max(0, Math.min(100, parseInt(document.getElementById('goalFormProgress').value, 10) || 0));
+    const due = document.getElementById('goalFormDue').value;
+
+    if (!title || !target || !due) {
+      errorEl.textContent = '대상, 목표 제목, 마감일은 필수 입력 항목입니다.';
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    const dept = scope === 'dept' ? target : (PEOPLE.find(p => p.name === target) || {}).dept || '';
+    GOALS.unshift({
+      id: 'g' + (goalSeq++),
+      scope, target, dept, title, desc, progress,
+      startDate: new Date().toISOString().slice(0, 10),
+      dueDate: due,
+    });
+
+    closeGoalModal();
+    renderSummary();
+    renderDeptView();
+    renderPersonView();
+    document.querySelector(`#goalTabs .cat-tab[data-scope="${scope}"]`).click();
+  });
+
+  renderSummary();
+  renderDeptView();
+  renderPersonView();
+})();
+</script>
+
+</body>
+</html>
