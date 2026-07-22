@@ -194,17 +194,39 @@
     GOALS.push(seedGoal('person', p.name, p.dept, tpl, due));
   });
 
+  // 상태 판정과 함께, 왜 그 상태로 판단했는지(reason)를 함께 반환한다 —
+  // 목표 카드/테이블의 뱃지에 근거를 그대로 노출하기 위함.
   function goalStatus(g) {
     const now = new Date();
     const start = new Date(g.startDate);
     const due = new Date(g.dueDate);
-    if (g.progress >= 100) return { label: '달성', cls: 'krds-badge bg-light-success', color: 'var(--krds-light-color-icon-success)' };
-    if (now > due) return { label: '지연', cls: 'krds-badge bg-light-danger', color: 'var(--krds-light-color-icon-danger)' };
     const total = due - start;
     const elapsed = now - start;
     const expected = total > 0 ? Math.max(0, Math.min(100, (elapsed / total) * 100)) : 0;
-    if (g.progress < expected - 15) return { label: '주의', cls: 'krds-badge bg-light-warning', color: 'var(--krds-light-color-icon-warning)' };
-    return { label: '진행중', cls: 'krds-badge bg-light-secondary', color: 'var(--krds-light-color-icon-information)' };
+    const expectedR = Math.round(expected);
+
+    if (g.progress >= 100) {
+      return {
+        label: '달성', cls: 'krds-badge bg-light-success', color: 'var(--krds-light-color-icon-success)',
+        reason: `진척률 ${g.progress}%로 목표치(100%)에 도달해 달성으로 판단했습니다.`
+      };
+    }
+    if (now > due) {
+      return {
+        label: '지연', cls: 'krds-badge bg-light-danger', color: 'var(--krds-light-color-icon-danger)',
+        reason: `마감일(${g.dueDate})이 지났는데 진척률이 ${g.progress}%에 머물러 있어 지연으로 판단했습니다.`
+      };
+    }
+    if (g.progress < expected - 15) {
+      return {
+        label: '주의', cls: 'krds-badge bg-light-warning', color: 'var(--krds-light-color-icon-warning)',
+        reason: `경과 기간 기준 예상 진척률은 약 ${expectedR}%인데 실제 진척률은 ${g.progress}%로 ${expectedR - g.progress}%p 뒤처져 있어 주의로 판단했습니다.`
+      };
+    }
+    return {
+      label: '진행중', cls: 'krds-badge bg-light-secondary', color: 'var(--krds-light-color-icon-information)',
+      reason: `경과 기간 기준 예상 진척률(약 ${expectedR}%) 대비 15%p 이내 정상 범위에서 진행 중입니다.`
+    };
   }
 
   function goalRowHTML(g, tableStyle) {
@@ -213,13 +235,14 @@
       <div class="goal-row${tableStyle ? ' goal-row--table' : ''}">
         <div class="goal-row__top">
           <span class="goal-row__title">${escapeHtml(g.title)}</span>
-          <span class="${st.cls}">${st.label}</span>
+          <span class="${st.cls}" title="${escapeHtml(st.reason)}">${st.label}</span>
         </div>
         <div class="goal-row__bar">
           <div class="goal-row__bar-track"><div class="goal-row__bar-fill" style="width:${g.progress}%;background:${st.color}"></div></div>
           <span class="goal-row__pct">${g.progress}%</span>
         </div>
         <div class="goal-row__meta">마감 ${escapeHtml(g.dueDate)}</div>
+        <div class="goal-row__reason">AI 판단 근거 · ${escapeHtml(st.reason)}</div>
       </div>
     `;
   }
@@ -232,9 +255,18 @@
     const avg = Math.round(GOALS.reduce((s, g) => s + g.progress, 0) / (total || 1));
     document.getElementById('goalSummary').innerHTML = `
       <div class="goal-summary-card"><div class="goal-summary-card__label">전체 목표</div><div class="goal-summary-card__value">${total}<span class="unit">건</span></div></div>
-      <div class="goal-summary-card"><div class="goal-summary-card__label">평균 진척률</div><div class="goal-summary-card__value">${avg}<span class="unit">%</span></div></div>
-      <div class="goal-summary-card"><div class="goal-summary-card__label">달성</div><div class="goal-summary-card__value">${achieved}<span class="unit">건</span></div></div>
-      <div class="goal-summary-card"><div class="goal-summary-card__label">주의 · 지연</div><div class="goal-summary-card__value">${atRisk}<span class="unit">건</span></div></div>
+      <div class="goal-summary-card">
+        <div class="goal-summary-card__label">평균 진척률<span class="goal-summary-card__info" title="전체 ${total}건 목표의 진척률(%)을 산술평균한 값입니다.">ⓘ</span></div>
+        <div class="goal-summary-card__value">${avg}<span class="unit">%</span></div>
+      </div>
+      <div class="goal-summary-card">
+        <div class="goal-summary-card__label">달성<span class="goal-summary-card__info" title="진척률이 100% 이상인 목표 수입니다.">ⓘ</span></div>
+        <div class="goal-summary-card__value">${achieved}<span class="unit">건</span></div>
+      </div>
+      <div class="goal-summary-card">
+        <div class="goal-summary-card__label">주의 · 지연<span class="goal-summary-card__info" title="마감일이 지났거나(지연), 경과 기간 대비 예상 진척률보다 15%p 이상 뒤처진(주의) 목표 수입니다.">ⓘ</span></div>
+        <div class="goal-summary-card__value">${atRisk}<span class="unit">건</span></div>
+      </div>
     `;
   }
 
@@ -284,7 +316,7 @@
             </div>
           </td>
           <td>${escapeHtml(g.dueDate)}</td>
-          <td><span class="${st.cls}">${st.label}</span></td>
+          <td><span class="${st.cls}" title="${escapeHtml(st.reason)}">${st.label}</span></td>
         </tr>
       `;
     }).join('') : '<tr><td colspan="6" style="text-align:center;color:var(--krds-light-color-text-subtle)">조건에 맞는 목표가 없습니다.</td></tr>';

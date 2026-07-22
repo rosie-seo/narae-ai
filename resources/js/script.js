@@ -1193,6 +1193,14 @@ function getAllLeaves(node) {
   return node.children.flatMap(c => getAllLeaves(c));
 }
 
+// 조직도 노드(실/관/담당관) 아래에 속한 모든 근무자 이름을 재귀적으로 모은다.
+// index.html의 업무 현황(간트)·업무 캘린더가 조직도 선택 범위와 데이터를 맞출 때 공용으로 사용.
+function collectMemberNames(node) {
+  if (node.members) return node.members.map(m => m.name);
+  if (node.children) return node.children.flatMap(collectMemberNames);
+  return [];
+}
+
 function findNodeById(id) {
   function search(nodes) {
     for (const n of nodes) {
@@ -2189,10 +2197,11 @@ if (ocWeeksEl) {
   ];
   const RECURRING_RANGE_START = new Date(2024, 0, 1);
   const RECURRING_RANGE_END   = new Date(2027, 11, 31);
+  const FREQ_LABEL = { weekly: '매주', biweekly: '격주', 'monthly-last-weekday': '매월', quarterly: '분기' };
 
-  function makeRecurringInstance(title, date, person, id) {
+  function makeRecurringInstance(title, date, person, id, freq) {
     const key = toKey(date);
-    return { __id: 'r' + id, title, status: 'recurring', start: key, end: key, owner: person, dept: '정기업무', recurring: true };
+    return { __id: 'r' + id, title, status: 'recurring', start: key, end: key, owner: person, dept: '정기업무', recurring: true, freq, cycleLabel: FREQ_LABEL[freq] };
   }
 
   function generateRecurringInstances(person) {
@@ -2204,21 +2213,21 @@ if (ocWeeksEl) {
         const d = new Date(RECURRING_RANGE_START);
         while (d.getDay() !== tpl.weekday) d.setDate(d.getDate() + 1);
         for (; d <= RECURRING_RANGE_END; d.setDate(d.getDate() + step)) {
-          instances.push(makeRecurringInstance(tpl.title, d, person, rid++));
+          instances.push(makeRecurringInstance(tpl.title, d, person, rid++, tpl.freq));
         }
       } else if (tpl.freq === 'monthly-last-weekday') {
         for (let y = RECURRING_RANGE_START.getFullYear(); y <= RECURRING_RANGE_END.getFullYear(); y++) {
           for (let m = 0; m < 12; m++) {
             const d = new Date(y, m + 1, 0);
             while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() - 1);
-            if (d >= RECURRING_RANGE_START && d <= RECURRING_RANGE_END) instances.push(makeRecurringInstance(tpl.title, d, person, rid++));
+            if (d >= RECURRING_RANGE_START && d <= RECURRING_RANGE_END) instances.push(makeRecurringInstance(tpl.title, d, person, rid++, tpl.freq));
           }
         }
       } else if (tpl.freq === 'quarterly') {
         for (let y = RECURRING_RANGE_START.getFullYear(); y <= RECURRING_RANGE_END.getFullYear(); y++) {
           tpl.months.forEach(m => {
             const d = new Date(y, m, tpl.day);
-            if (d >= RECURRING_RANGE_START && d <= RECURRING_RANGE_END) instances.push(makeRecurringInstance(tpl.title, d, person, rid++));
+            if (d >= RECURRING_RANGE_START && d <= RECURRING_RANGE_END) instances.push(makeRecurringInstance(tpl.title, d, person, rid++, tpl.freq));
           });
         }
       }
@@ -2236,7 +2245,20 @@ if (ocWeeksEl) {
   let calPerson = null;
   let activeTasks = calTasks;
 
+  // index.html에서는 회사/개인 캘린더 토글 대신 왼쪽 조직도 선택이 범위를 정한다
+  // (applyOrgSelectionToCalendar 참고). operating-calendar.html처럼 조직도가 없는
+  // 페이지에서는 이 모드가 켜지지 않으므로 기존 회사/개인 토글 방식 그대로 동작한다.
+  let orgChartMode       = false;
+  let orgScopeOwnerNames = null; // Set<string> | null
+  let orgScopeIndividual = null; // 근무자 한 명으로 좁혀졌을 때 그 이름 (개인 정기 업무 포함용)
+
   function rebuildActiveTasks() {
+    if (orgChartMode) {
+      if (!orgScopeOwnerNames) { activeTasks = []; return; }
+      const base = calTasks.filter(t => orgScopeOwnerNames.has(t.owner));
+      activeTasks = orgScopeIndividual ? base.concat(getRecurringFor(orgScopeIndividual)) : base;
+      return;
+    }
     activeTasks = (calScope === 'personal' && calPerson)
       ? calTasks.filter(t => t.owner === calPerson).concat(getRecurringFor(calPerson))
       : calTasks;
@@ -2256,8 +2278,10 @@ if (ocWeeksEl) {
 
   function makeChip(t, extraClass) {
     const idx = activeTasks.indexOf(t);
-    return `<div class="oc-chip ${CAL_CHIP[t.status] || 'chip-blue'}${t.recurring ? ' oc-chip--recurring' : ''}${extraClass ? ' ' + extraClass : ''}" data-task-i="${idx}" title="${escapeHtml(t.dept + ' · ' + t.owner)}">` +
-      `<span class="chip-dot"></span><span class="chip-name">${escapeHtml(t.title)}</span></div>`;
+    const tooltip = t.recurring ? `${t.dept} · ${t.owner} · ${t.cycleLabel} 반복` : `${t.dept} · ${t.owner}`;
+    const cycleTag = t.recurring ? `<span class="chip-cycle">${t.cycleLabel}</span>` : '';
+    return `<div class="oc-chip ${CAL_CHIP[t.status] || 'chip-blue'}${t.recurring ? ' oc-chip--recurring' : ''}${extraClass ? ' ' + extraClass : ''}" data-task-i="${idx}" title="${escapeHtml(tooltip)}">` +
+      `<span class="chip-dot"></span>${cycleTag}<span class="chip-name">${escapeHtml(t.title)}</span></div>`;
   }
 
   /* ── Month ── */
@@ -2322,7 +2346,7 @@ if (ocWeeksEl) {
         `<div class="oc-day-task ${CAL_CHIP[t.status] || 'chip-blue'}">` +
           `<span class="chip-dot oc-day-dot"></span>` +
           `<div class="oc-day-task__info">` +
-            `<span class="oc-day-task__title">${escapeHtml(t.title)}</span>` +
+            `<span class="oc-day-task__title">${t.recurring ? `<span class="krds-badge outline-primary oc-day-task__cycle">${t.cycleLabel} 반복</span>` : ''}${escapeHtml(t.title)}</span>` +
             `<span class="oc-day-task__meta">${escapeHtml(t.dept)} · ${escapeHtml(t.owner)}</span>` +
           `</div></div>`
       ).join('');
@@ -2463,6 +2487,43 @@ if (ocWeeksEl) {
 
   render();
 
+  /* ── 조직도(index.html 좌측) 선택과 업무 캘린더 연동 ──
+     업무 현황(간트차트)과 동일하게, 조직도에서 고른 노드/근무자를 그대로
+     캘린더의 표시 범위로 사용한다. 근무자 한 명까지 좁혀지면 그 사람의
+     개인 정기 업무(반복 일정)도 함께 보여준다. */
+  const calScopeEl     = document.getElementById('biz-cal-scope');
+  const calScopeTextEl = document.getElementById('biz-cal-scope-text');
+  const calEmptyEl     = document.getElementById('biz-cal-empty');
+  const calGridEl      = document.getElementById('biz-cal-grid');
+
+  if (calScopeEl && calEmptyEl && calGridEl) {
+    window.applyOrgSelectionToCalendar = function (path, selectedWorker) {
+      orgChartMode = true;
+
+      if (selectedWorker) {
+        orgScopeOwnerNames = new Set([selectedWorker.name]);
+        orgScopeIndividual = selectedWorker.name;
+        calScopeTextEl.textContent = [...path.map(p => p.name), selectedWorker.name].join(' › ');
+      } else if (path.length) {
+        orgScopeOwnerNames = new Set(collectMemberNames(path[path.length - 1]));
+        orgScopeIndividual = null;
+        calScopeTextEl.textContent = path.map(p => p.name).join(' › ');
+      } else {
+        orgScopeOwnerNames = null;
+        orgScopeIndividual = null;
+        calScopeTextEl.textContent = '조직도에서 팀 또는 근무자를 선택해주세요.';
+      }
+
+      const hasSelection = !!orgScopeOwnerNames;
+      calEmptyEl.style.display = hasSelection ? 'none' : 'flex';
+      calGridEl.style.display  = hasSelection ? ''     : 'none';
+      calScopeEl.classList.toggle('is-empty', !hasSelection);
+
+      rebuildActiveTasks();
+      render();
+    };
+  }
+
   /* ── 더보기 팝업 ── */
   const DAY_KO_POPUP = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -2501,11 +2562,13 @@ if (ocWeeksEl) {
       const idx = activeTasks.indexOf(t);
       const statusLabel = t.recurring ? '정기' : STATUS_LABEL[t.status];
       const statusClass = t.recurring ? 'krds-badge bg-light-primary' : STATUS_CLASS[t.status];
+      const cycleBadge = t.recurring ? `<span class="krds-badge outline-primary oc-popup-task__cycle">${t.cycleLabel} 반복</span>` : '';
       return `<li class="oc-popup-task${t.recurring ? ' oc-popup-task--recurring' : ''}" data-task-i="${idx}">
         <span class="oc-popup-task__dot ${chipCls}"></span>
         <div class="oc-popup-task__info">
           <div class="oc-popup-task__head">
             <span class="${statusClass}">${statusLabel}</span>
+            ${cycleBadge}
             <span class="oc-popup-task__title">${escapeHtml(t.title)}</span>
           </div>
           <div class="oc-popup-task__meta">
