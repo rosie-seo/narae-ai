@@ -116,7 +116,7 @@
   const STAGES = ["기안", "검토", "합의", "결재", "시행"];
   const DEPT_COLORS = ["#518bf6", "#3c93d5", "#4e9f60", "#d29d33", "#de646e"];
   const REASON_COLORS = ["#518bf6", "#4e9f60", "#d29d33", "#de646e"];
-  const HEAT_SCALE = ["#fdf2f0", "#fde5e1", "#f9bfb4", "#f69f8d", "#f37f68", "#e55d41", "#ca563f"];
+  const HEAT_SCALE = ["#d8eedd", "#a9dab4", "#ffe0a3", "#ffc95c", "#fcdfd9", "#f7afa1", "#f48771"];
 
   let refreshNonce = 0;
   function pick(seed, min, max) { return min + (hashSeed(refreshNonce + ":" + seed) % (max - min + 1)); }
@@ -165,7 +165,7 @@
     STAGES.forEach(stage => {
       const severity = pick(dept + ":" + stage, 8, 96);
       const colorIdx = Math.min(HEAT_SCALE.length - 1, Math.floor(severity / 100 * HEAT_SCALE.length));
-      const textColor = colorIdx >= 5 ? "#fff" : "#1e2124";
+      const textColor = "#1e2124";
       heatHtml += `<div class="mon-heatmap__cell" style="background:${HEAT_SCALE[colorIdx]};color:${textColor}" title="${dept} · ${stage} 단계 병목도 ${severity}%">${severity}%</div>`;
     });
   });

@@ -780,6 +780,7 @@ document.querySelectorAll("#bizViewToggle .vt-btn[data-view]").forEach(btn => {
 
       if (!isGroup) {
         const maxLoad = getMaxLoad(task, WORKLOAD);
+        row.classList.add(task.color || 'bar-blue');
         if (maxLoad >= 3) row.classList.add('overload-row');
         else if (maxLoad >= 2) row.classList.add('warning-row');
       }
@@ -799,11 +800,9 @@ document.querySelectorAll("#bizViewToggle .vt-btn[data-view]").forEach(btn => {
       if (!isGroup) {
         const av = AVATARS[task.assignee];
         if (av) {
-          const maxLoad = getMaxLoad(task, WORKLOAD);
           const dot = document.createElement('span');
-          dot.className        = 'tl-avatar';
-          dot.style.background = maxLoad >= 3 ? '#ef4444' : maxLoad >= 2 ? '#f59e0b' : av.color;
-          dot.textContent      = av.abbr;
+          dot.className   = 'tl-avatar ' + (task.color || 'bar-blue');
+          dot.textContent = av.abbr;
           row.appendChild(dot);
         }
       } else {

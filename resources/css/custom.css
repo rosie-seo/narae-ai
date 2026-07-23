@@ -2746,10 +2746,15 @@ body {
 
 .gantt-bar:hover { opacity: 0.85; }
 
-.bar-blue  { background: var(--krds-light-color-action-secondary-active); }
-.bar-green { background: var(--krds-light-color-icon-success); }
-.bar-teal  { background: var(--krds-light-color-icon-information); }
-.bar-gray  { background: var(--krds-light-color-text-disabled); }
+.bar-blue  { --status-ring: var(--krds-light-color-action-secondary-active); --status-tint: var(--krds-light-color-surface-information-subtler); }
+.bar-green { --status-ring: var(--krds-light-color-icon-success);            --status-tint: var(--krds-light-color-surface-success-subtler); }
+.bar-teal  { --status-ring: var(--krds-light-color-icon-information);        --status-tint: var(--krds-light-color-surface-information-subtler); }
+.bar-gray  { --status-ring: var(--krds-light-color-text-disabled);           --status-tint: var(--krds-light-color-surface-gray-subtler); }
+
+.gantt-bar.bar-blue,  .tl-avatar.bar-blue  { background: var(--status-ring); }
+.gantt-bar.bar-green, .tl-avatar.bar-green { background: var(--status-ring); }
+.gantt-bar.bar-teal,  .tl-avatar.bar-teal  { background: var(--status-ring); }
+.gantt-bar.bar-gray,  .tl-avatar.bar-gray  { background: var(--status-ring); }
 
 /* Avatar labels on bars */
 .bar-avatar {
@@ -2966,20 +2971,35 @@ body {
 /* ===========================
    OVERLOAD & WARNING
    =========================== */
+/* 상태색(진행중/종결/대기)은 그대로 유지하고, 과부하 여부는 그 상태색 자체의
+   테두리·블러(글로우)·아이콘으로만 덧표시한다. 별도의 빨강/주황을 덮어쓰면
+   실제 업무 상태색과 어긋나 보이므로, 항상 해당 막대의 --status-ring을 쓴다. */
 .bar-overload {
-  background: var(--krds-light-color-icon-danger) !important;
-  box-shadow: 0 0 0 2px var(--krds-light-color-surface-danger-subtler);
-  animation: pulse-red 1.8s ease-in-out infinite;
+  box-shadow: 0 0 0 2px var(--status-ring, var(--krds-light-color-icon-danger));
+  animation: pulse-ring 1.8s ease-in-out infinite;
+}
+.bar-overload::after {
+  content: '⚠';
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/* 진행률(%) 배지가 같이 떠 있으면 경고 아이콘과 같은 자리(오른쪽 끝)를 다투므로
+   진행률 배지를 왼쪽으로 밀어 겹치지 않게 한다. */
+.bar-overload .bar-progress {
+  right: 22px;
 }
 
 .bar-warning {
-  background: var(--krds-light-color-icon-warning) !important;
-  box-shadow: 0 0 0 2px var(--krds-light-color-surface-warning-subtler);
+  box-shadow: 0 0 0 2px var(--status-ring, var(--krds-light-color-icon-warning));
 }
 
-@keyframes pulse-red {
-  0%, 100% { box-shadow: 0 0 0 2px var(--krds-light-color-surface-danger-subtler); }
-  50%       { box-shadow: 0 0 0 6px rgba(239,68,68,0.12); }
+@keyframes pulse-ring {
+  0%, 100% { box-shadow: 0 0 0 2px var(--status-ring, var(--krds-light-color-icon-danger)); }
+  50%       { box-shadow: 0 0 0 6px color-mix(in srgb, var(--status-ring, var(--krds-light-color-icon-danger)) 22%, transparent); }
 }
 
 .bar-warn-icon {
@@ -2989,10 +3009,10 @@ body {
   opacity: 0.9;
 }
 
-.overload-row       { background: var(--krds-light-color-surface-danger-subtler) !important; }
-.overload-row:hover { background: var(--krds-light-color-surface-danger-subtler) !important; }
-.warning-row        { background: var(--krds-light-color-surface-warning-subtler) !important; }
-.warning-row:hover  { background: var(--krds-light-color-surface-warning-subtler) !important; }
+/* 업무 목록 행 배경도 과부하 전용 빨강/주황 대신, 해당 업무 상태색 계열의
+   옅은 톤(--status-tint)을 쓴다 — 간트 막대·아바타와 같은 색 축으로 맞춘다. */
+.tl-row.overload-row,        .tl-row.warning-row       { background: var(--status-tint, var(--krds-light-color-surface-danger-subtler)) !important; }
+.tl-row.overload-row:hover,  .tl-row.warning-row:hover  { background: var(--status-tint, var(--krds-light-color-surface-danger-subtler)) !important; }
 
 /* ===========================
    LEGEND
