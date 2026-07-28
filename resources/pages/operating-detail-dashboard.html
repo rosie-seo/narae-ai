@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>업무 상세 · 대시보드</title>
+    <link rel="stylesheet" href="/resources/css/custom.css">
+    <link href="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.css" type="text/css" rel="stylesheet" />
+    <script src="/resources/js/component/ui-include.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.js"></script>
+</head>
+<body>
+
+  <!-- 드로어 (왼쪽 슬라이드 패널) -->
+  <div class="drawer-backdrop" id="drawer-backdrop">
+    <iframe class="drawer-iframe" id="drawer-frame" src=""></iframe>
+  </div>
+
+  <div class="operating-container">
+
+    <div data-include="/html/code/header.html"></div>
+
+    <div class="organization-container">
+
+      <!-- 사이드 네비게이션 -->
+      <nav class="side-nav" aria-label="업무 상세 네비게이션">
+        <ul class="nav-tree" role="list">
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <span class="nav-node__row is-selected" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">대시보드</span>
+            </span>
+          </li>
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <a href="/resources/pages/operating-detail.html" class="nav-node__row" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">과업 리스트 뷰</span>
+            </a>
+          </li>
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <a href="/resources/pages/operating-detail-node.html" class="nav-node__row" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">프로세싱 뷰</span>
+            </a>
+          </li>
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <a href="/resources/pages/operating-detail-policy.html" class="nav-node__row" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">규정</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- 메인 콘텐츠 -->
+      <main class="main" style="padding:0; overflow:auto;">
+
+        <!-- 과제 정보 헤더 -->
+        <header class="gnb-sub">
+          <div class="task-id">
+            <span class="krds-badge bg-light-gray" id="detail-badge">종결</span>
+            <div class="task-titles">
+              <strong class="task-name" id="detail-task-name">과제 이름 들어가는 곳</strong>
+              <span class="task-meta" id="detail-task-meta">담당자명 / 담당 부서</span>
+            </div>
+            <span class="chevron" aria-hidden="true">&rsaquo;</span>
+          </div>
+          <button type="button" class="btn-log" onclick="history.back()">
+            <span class="ico" aria-hidden="true">&#8592;</span> 목록으로
+          </button>
+        </header>
+
+        <!-- 대시보드 본문 -->
+        <div class="dash-body" id="dash-body">
+
+          <!-- 상단 요약: 담당 / History / 규정 / 주기 / 소요시간 -->
+          <div class="dash-stat-row" id="dash-stat-row"></div>
+
+          <!-- 중앙(프로세싱 뷰) + 우측(타부서 연계 / 인사 / 양식) -->
+          <div class="dash-main">
+
+            <section class="dash-center">
+              <div class="dash-center-head">
+                <span class="dash-center-title">프로세싱 뷰</span>
+                <a href="/resources/pages/operating-detail-node.html" class="section-action" id="dash-flow-link">전체 화면으로 보기 &rarr;</a>
+              </div>
+
+              <div class="flow-canvas-wrap dash-flow-canvas" id="pvNodeView">
+                <div class="flow-viewport" id="flow-viewport">
+                  <div class="flow-world" id="flow-world">
+                    <svg class="flow-edges" id="flow-edges"></svg>
+                  </div>
+                  <div class="flow-controls">
+                    <button id="fz-in" type="button">+</button>
+                    <button id="fz-out" type="button">&minus;</button>
+                    <button id="fz-fit" type="button">&#10530;</button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <aside class="dash-side" id="dash-side"></aside>
+
+          </div>
+
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="/resources/js/script.js"></script>
+  <script>
+  /* ── 드로어 열기/닫기 (iframe 기반 왼쪽 슬라이드) ── */
+  (function () {
+    const back  = document.getElementById('drawer-backdrop');
+    const frame = document.getElementById('drawer-frame');
+
+    window.openDrawer = function () {
+      frame.src = '/resources/pages/operating-detail-page.html';
+      back.classList.add('drawer-open');
+    };
+
+    window.closeDrawer = function () {
+      back.classList.remove('drawer-open');
+    };
+
+    back.addEventListener('click', e => {
+      if (e.target === back) closeDrawer();
+    });
+  })();
+
+  (function () {
+    const raw = sessionStorage.getItem('krds_selected_task');
+    const statRow = document.getElementById('dash-stat-row');
+    const side    = document.getElementById('dash-side');
+
+    if (!raw) {
+      document.getElementById('dash-body').innerHTML =
+        '<p style="padding:24px;color:var(--krds-light-color-text-disabled)">업무 정보가 없습니다.</p>';
+      return;
+    }
+
+    const task = JSON.parse(raw);
+
+    /* ── 헤더 채우기 ── */
+    const badge = document.getElementById('detail-badge');
+    badge.textContent = STATUS_LABEL[task.status] || task.status;
+    badge.className   = STATUS_CLASS[task.status] || 'krds-badge bg-light-gray';
+    document.getElementById('detail-task-name').textContent = task.title;
+    document.title = task.title + ' · 대시보드';
+
+    let teamLeaf = null;
+    for (const sil of ORG) {
+      for (const leaf of getAllLeaves(sil)) {
+        if ((leaf.tasks || []).some(t => t.title === task.title && t.owner === task.owner)) {
+          teamLeaf = leaf; break;
+        }
+      }
+      if (teamLeaf) break;
+    }
+    const teamName    = teamLeaf ? teamLeaf.name : '';
+    const ownerMember = teamLeaf ? (teamLeaf.members || []).find(m => m.name === task.owner) : null;
+
+    document.getElementById('detail-task-meta').textContent =
+      task.owner + (teamName ? ' / ' + teamName : '') + ' / ' + task.start + ' ~ ' + task.end;
+
+    /* ── 업무 제목 기반 결정론적 의사난수 (같은 업무는 항상 같은 대시보드 값) ── */
+    function seedRand(seedStr) {
+      let h = 0;
+      for (let i = 0; i < seedStr.length; i++) h = (Math.imul(31, h) + seedStr.charCodeAt(i)) | 0;
+      return function () {
+        h = (Math.imul(h ^ (h >>> 16), 0x45d9f3b)) | 0;
+        return (h >>> 0) / 0x100000000;
+      };
+    }
+    const rand = seedRand(task.title + '::' + task.owner);
+
+    /* ── 과제 히스토리 (담당 부서의 이전 연도 유사 사업 이력) ── */
+    const HIST_STOPWORDS = ['수립','검토','보고','편성','개선','개정','점검','분석','제출','관리','운영','계획','기획',
+      '지침','방안','대책','체계','사업','시행','추진','조사','실시','작성','확정','대응','현황','종합',
+      '및','등','상반기','하반기','1차','2차','3차','4차'];
+    function coreTokens(title) {
+      return title.replace(/^\d{4}(년도?)?\s*/, '').split(/\s+/)
+        .filter(w => w && !HIST_STOPWORDS.includes(w) && !/^\d+$/.test(w));
+    }
+    function taskYear(t) {
+      const m = t.title.match(/(\d{4})년도?/);
+      return m ? parseInt(m[1], 10) : new Date(t.start).getFullYear();
+    }
+    const currentYear   = taskYear(task);
+    const currentTokens = coreTokens(task.title);
+    const similarPast = (teamLeaf ? (teamLeaf.tasks || []) : [])
+      .filter(t => !(t.title === task.title && t.start === task.start && t.owner === task.owner))
+      .filter(t => taskYear(t) < currentYear)
+      .map(t => ({ t, overlap: coreTokens(t.title).filter(w => currentTokens.includes(w)).length }))
+      .filter(x => x.overlap > 0)
+      .sort((a, b) => b.t.start.localeCompare(a.t.start))
+      .map(x => x.t);
+
+    /* ── 소요시간 ── */
+    function parseYMD(s) { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); }
+    const startD = parseYMD(task.start), endD = parseYMD(task.end), today = new Date();
+    const totalDays     = Math.max(1, Math.round((endD - startD) / 86400000));
+    const elapsedDays   = Math.min(totalDays, Math.max(0, Math.round((today - startD) / 86400000)));
+    const remainingDays = Math.max(0, totalDays - elapsedDays);
+    const elapsedPct    = Math.min(100, Math.max(0, Math.round((elapsedDays / totalDays) * 100)));
+
+    /* ── 업무 주기 ── */
+    const CYCLES = ['수시 (1회성)', '매주', '격주', '매월', '분기', '반기', '연 1회'];
+    const cycleLabel = task.status === 'wait' && rand() < 0.35 ? '수시 (1회성)' : CYCLES[Math.floor(rand() * CYCLES.length)];
+
+    /* ── 관련 규정 건수 (규정 탭과 동일한 전체 10개 풀 기준) ── */
+    const regCount = 2 + Math.floor(rand() * 4);
+
+    /* ── 상단 요약 카드 ── */
+    function statCardHTML(label, value, sub, href) {
+      const inner = `
+        <span class="dash-stat-card__label">${escapeHtml(label)}</span>
+        <span class="dash-stat-card__value">${value}</span>
+        ${sub ? `<span class="dash-stat-card__sub">${sub}</span>` : ''}
+      `;
+      return href
+        ? `<a class="dash-stat-card" href="${href}">${inner}</a>`
+        : `<div class="dash-stat-card">${inner}</div>`;
+    }
+
+    statRow.innerHTML = [
+      statCardHTML('담당',
+        `<span class="avatar-sm ${ownerColorClass(task.owner)}" style="width:20px;height:20px;font-size:9px;">${escapeHtml(task.owner.slice(0,1))}</span> ${escapeHtml(task.owner)}`,
+        escapeHtml((ownerMember ? ownerMember.position + ' · ' : '') + (teamName || '-'))
+      ),
+      statCardHTML('History', `${similarPast.length}건`,
+        similarPast.length ? `최근 ${taskYear(similarPast[0])}년 유사 사업` : '이전 유사 사업 없음'
+      ),
+      statCardHTML('규정', `${regCount}개`, '관련 법령·서식 문서', '/resources/pages/operating-detail-policy.html'),
+      statCardHTML('주기', cycleLabel, escapeHtml(task.start + ' ~ ' + task.end)),
+      statCardHTML('소요시간', `${elapsedPct}%`, `경과 ${elapsedDays}일 · 잔여 ${remainingDays}일`),
+    ].join('');
+
+    /* ── 타부서 연계 ── */
+    const DEPT_STATUS = [
+      { label: '회신완료', cls: 'krds-badge small bg-light-success' },
+      { label: '검토중',   cls: 'krds-badge small bg-light-secondary' },
+      { label: '요청 대기', cls: 'krds-badge small bg-light-gray' },
+    ];
+    const otherDepts = ORG.map(o => o.name).filter(n => n !== (teamLeaf ? getBreadcrumbPath(teamLeaf)[0] : ''));
+    const linkCount = 2 + Math.floor(rand() * 2);
+    const linkedDepts = [];
+    const pool = otherDepts.slice();
+    for (let i = 0; i < linkCount && pool.length; i++) {
+      const idx = Math.floor(rand() * pool.length);
+      linkedDepts.push(pool.splice(idx, 1)[0]);
+    }
+    function deptRowHTML(name) {
+      const st = DEPT_STATUS[Math.floor(rand() * DEPT_STATUS.length)];
+      return `<div class="info-row">
+        <span class="info-label">${escapeHtml(name)}</span>
+        <span class="info-val"><span class="${st.cls}">${st.label}</span></span>
+      </div>`;
+    }
+
+    /* ── 인사(참여 인원) ── */
+    const teamMembers = teamLeaf ? (teamLeaf.members || []) : [];
+    const participantCount = Math.min(teamMembers.length || 1, 3 + Math.floor(rand() * 4));
+    const participants = [];
+    const memberPool = teamMembers.slice();
+    if (ownerMember) {
+      const oi = memberPool.findIndex(m => m.name === ownerMember.name);
+      if (oi > -1) participants.push(memberPool.splice(oi, 1)[0]);
+    }
+    while (participants.length < participantCount && memberPool.length) {
+      const idx = Math.floor(rand() * memberPool.length);
+      participants.push(memberPool.splice(idx, 1)[0]);
+    }
+    function participantRowHTML(m) {
+      return `<div class="info-row">
+        <span class="info-val" style="flex:1;">
+          <span class="avatar-sm ${ownerColorClass(m.name)}">${escapeHtml(m.name.slice(0,1))}</span>
+          ${escapeHtml(m.name)}
+        </span>
+        <span class="info-label" style="width:auto;font-weight:500;">${escapeHtml(m.position)}</span>
+      </div>`;
+    }
+
+    /* ── 양식 ── */
+    const FORM_POOL = [
+      { name: '업무매뉴얼_표준서식.hwp', size: '128KB' },
+      { name: '추진계획_보고서식.docx', size: '46KB' },
+      { name: '예산편성_서식.xlsx', size: '32KB' },
+      { name: '결과보고서_양식.hwp', size: '98KB' },
+      { name: '현황조사표.xlsx', size: '54KB' },
+      { name: '회의록_서식.docx', size: '21KB' },
+      { name: '승인신청서_서식.hwp', size: '38KB' },
+    ];
+    const formCount = 2 + Math.floor(rand() * 2);
+    const forms = [];
+    const formPool = FORM_POOL.slice();
+    for (let i = 0; i < formCount && formPool.length; i++) {
+      const idx = Math.floor(rand() * formPool.length);
+      forms.push(formPool.splice(idx, 1)[0]);
+    }
+    function formRowHTML(f) {
+      return `<div class="file-row">
+        <span class="file-name">${escapeHtml(f.name)} <span style="color:var(--krds-light-color-text-disabled)">[${f.size}]</span></span>
+        <div class="file-actions">
+          <a href="#" class="file-action-btn" onclick="return false">다운로드</a>
+        </div>
+      </div>`;
+    }
+
+    /* ── 우측 사이드 렌더링 ── */
+    side.innerHTML = `
+      <div class="card" style="margin:0 0 16px;">
+        <div class="section-header"><span class="section-title">타부서 연계</span></div>
+        ${linkedDepts.length ? linkedDepts.map(deptRowHTML).join('') : `<div class="info-row"><span class="info-val" style="color:var(--krds-light-color-text-disabled)">연계된 타부서가 없습니다.</span></div>`}
+      </div>
+
+      <div class="card" style="margin:0 0 16px;">
+        <div class="section-header"><span class="section-title">인사</span><span class="progress-num" style="color:var(--krds-light-color-text-basic);font-size:13px;">${participants.length}명</span></div>
+        ${participants.length ? participants.map(participantRowHTML).join('') : `<div class="info-row"><span class="info-val" style="color:var(--krds-light-color-text-disabled)">참여 인원 정보가 없습니다.</span></div>`}
+      </div>
+
+      <div class="card" style="margin:0;">
+        <div class="section-header"><span class="section-title">양식</span></div>
+        <div class="file-list" style="padding:0 var(--krds-padding-9) var(--krds-padding-7);">
+          ${forms.map(formRowHTML).join('')}
+        </div>
+      </div>
+    `;
+
+    /* ── 프로세싱 뷰 (operating-detail-node.html과 동일한 8단계 고정 노드 워크플로우) ── */
+    function findOwnerMember(ownerName) {
+      for (const sil of ORG) {
+        for (const leaf of getAllLeaves(sil)) {
+          const m = (leaf.members || []).find(x => x.name === ownerName);
+          if (m) return m;
+        }
+      }
+      return null;
+    }
+    const om = findOwnerMember(task.owner);
+    const worker = { name: task.owner, role: om ? om.position : '' };
+
+    function buildWorkflow(worker, task) {
+      const doneChain = task.status === 'done';
+      const nodes = [
+        { id: 'n1', x: 20,  y: 150, type: 'node-start',   tag: '시작', title: task.title, sub: '업무 등록' },
+        { id: 'n2', x: 250, y: 150, type: 'node-normal',  tag: '처리', title: `${worker.name} (${worker.role})`, sub: '담당자 처리' },
+        { id: 'n3', x: 500, y: 40,  type: 'node-normal',  tag: '협의', title: '팀장 협의', sub: '내부 검토' },
+        { id: 'n4', x: 500, y: 260, type: 'node-branch',  tag: '협조', title: '관계부서 협조', sub: '타 부서 의견조회' },
+        { id: 'n5', x: 750, y: 150, type: 'node-branch',  tag: '상신', title: '결재 상신', sub: '전자결재 시스템' },
+        { id: 'n6', x: 1000,y: 40,  type: 'node-reject',  tag: '반려', title: '반려', sub: '보완 후 재상신' },
+        { id: 'n7', x: 1000,y: 260, type: 'node-approve', tag: '승인', title: '결재 완료', sub: '최종 승인' },
+        { id: 'n8', x: 1220,y: 150, type: doneChain ? 'node-end' : 'node-normal', tag: doneChain ? '완료' : '예정', title: '시행', sub: doneChain ? '업무 종료' : '시행 대기' },
+      ];
+      const edges = [
+        { from: 'n1', to: 'n2' },
+        { from: 'n2', to: 'n3' },
+        { from: 'n2', to: 'n4' },
+        { from: 'n3', to: 'n5' },
+        { from: 'n4', to: 'n5' },
+        { from: 'n5', to: 'n6', dashed: true, color: '#e0432b' },
+        { from: 'n5', to: 'n7', color: '#2fa84f' },
+        { from: 'n6', to: 'n2', dashed: true, color: '#e0432b', loop: true },
+        { from: 'n7', to: 'n8' },
+      ];
+      return { nodes, edges };
+    }
+
+    const NODE_W = 170, NODE_H = 54;
+    const { nodes, edges } = buildWorkflow(worker, task);
+    const totalW = 1220 + NODE_W + 40;
+    const totalH = 260 + NODE_H + 60;
+
+    function nodePort(n, side) {
+      return side === 'right' ? { x: n.x + NODE_W, y: n.y + NODE_H / 2 } : { x: n.x, y: n.y + NODE_H / 2 };
+    }
+    function edgePath(edge) {
+      const from = nodes.find(n => n.id === edge.from);
+      const to   = nodes.find(n => n.id === edge.to);
+      const p1 = nodePort(from, 'right');
+      const p2 = edge.loop ? nodePort(to, 'left') : nodePort(to, to.x >= from.x ? 'left' : 'right');
+      if (edge.loop) {
+        const midY = Math.min(p1.y, p2.y) - 140;
+        return `M ${p1.x} ${p1.y} C ${p1.x} ${midY}, ${p2.x} ${midY}, ${p2.x} ${p2.y}`;
+      }
+      const dx = Math.max(Math.abs(p2.x - p1.x) * 0.5, 40);
+      return `M ${p1.x} ${p1.y} C ${p1.x + dx} ${p1.y}, ${p2.x - dx} ${p2.y}, ${p2.x} ${p2.y}`;
+    }
+
+    const world = document.getElementById('flow-world');
+    const svg   = document.getElementById('flow-edges');
+    world.style.width  = totalW + 'px';
+    world.style.height = totalH + 'px';
+
+    svg.innerHTML = `
+      <defs>
+        <marker id="node-arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 z" fill="#8b98ac" />
+        </marker>
+      </defs>
+      ${edges.map(e => `<path d="${edgePath(e)}" fill="none"
+          stroke="${e.color || '#b7c0cf'}" stroke-width="1.8"
+          stroke-dasharray="${e.dashed ? '5,4' : 'none'}"
+          marker-end="url(#node-arrow)" />`).join('')}
+    `;
+
+    nodes.forEach((n) => {
+      const el = document.createElement('div');
+      el.className = `flow-node ${n.type}`;
+      el.style.left = n.x + 'px';
+      el.style.top  = n.y + 'px';
+      el.innerHTML = `
+        <div class="handle left"></div>
+        <div class="fn-tag">${escapeHtml(n.tag)}</div>
+        <div class="fn-title">${escapeHtml(n.title)}</div>
+        <div class="fn-sub">${escapeHtml(n.sub)}</div>
+        <div class="handle right"></div>
+      `;
+      world.appendChild(el);
+    });
+
+    /* ── 팬(드래그) & 줌 ── */
+    const viewport = document.getElementById('flow-viewport');
+    let zoom = 0.7, panX = 20, panY = 20;
+    function applyTransform() {
+      world.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+    }
+    applyTransform();
+
+    let dragging = false, lastX = 0, lastY = 0;
+    viewport.addEventListener('mousedown', (e) => {
+      dragging = true; lastX = e.clientX; lastY = e.clientY;
+      viewport.classList.add('grabbing');
+    });
+    window.addEventListener('mousemove', (e) => {
+      if (!dragging) return;
+      panX += (e.clientX - lastX);
+      panY += (e.clientY - lastY);
+      lastX = e.clientX; lastY = e.clientY;
+      applyTransform();
+    });
+    window.addEventListener('mouseup', () => { dragging = false; viewport.classList.remove('grabbing'); });
+
+    viewport.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.08 : 0.08;
+      zoom = Math.min(1.6, Math.max(0.3, zoom + delta));
+      applyTransform();
+    }, { passive: false });
+
+    document.getElementById('fz-in').onclick  = () => { zoom = Math.min(1.6, zoom + 0.15); applyTransform(); };
+    document.getElementById('fz-out').onclick = () => { zoom = Math.max(0.3, zoom - 0.15); applyTransform(); };
+    document.getElementById('fz-fit').onclick = () => { zoom = 0.7; panX = 20; panY = 20; applyTransform(); };
+  })();
+  </script>
+
+</body>
+</html>
