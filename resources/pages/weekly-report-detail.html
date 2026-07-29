@@ -124,7 +124,7 @@
       taskListEl.querySelectorAll('.task-card').forEach((card, i) => {
         card.addEventListener('click', () => {
           sessionStorage.setItem('krds_selected_task', JSON.stringify(report.tasks[i]));
-          window.location.href = '/resources/pages/operating-detail.html';
+          window.location.href = '/resources/pages/operating-detail-dashboard.html';
         });
       });
     } else {

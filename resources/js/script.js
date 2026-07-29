@@ -1546,7 +1546,7 @@ function attachTaskNav(containerEl, flatTasks) {
     if (!t) return;
     card.addEventListener('click', () => {
       sessionStorage.setItem('krds_selected_task', JSON.stringify(t));
-      window.location.href = '/resources/pages/operating-detail.html';
+      window.location.href = '/resources/pages/operating-detail-dashboard.html';
     });
   });
 }
@@ -1762,7 +1762,7 @@ if (operatingTaskList) {
       operatingTaskList.querySelectorAll('.task-card').forEach((card, i) => {
         card.addEventListener('click', () => {
           sessionStorage.setItem('krds_selected_task', JSON.stringify(slice[i]));
-          window.location.href = '/resources/pages/operating-detail.html';
+          window.location.href = '/resources/pages/operating-detail-dashboard.html';
         });
       });
     }
@@ -2595,7 +2595,7 @@ if (ocWeeksEl) {
   function goToDetail(t) {
     if (t.recurring) return;
     sessionStorage.setItem('krds_selected_task', JSON.stringify(t));
-    window.location.href = '/resources/pages/operating-detail.html';
+    window.location.href = '/resources/pages/operating-detail-dashboard.html';
   }
 
   popupOverlay.querySelector('.oc-popup__close').addEventListener('click', closeDayPopup);
