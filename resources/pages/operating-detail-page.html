@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>업무 상세</title>
+  <link rel="stylesheet" href="/resources/css/custom.css">
+  <link href="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.css" type="text/css" rel="stylesheet" />
+  <script src="/resources/js/component/ui-include.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.js"></script>
+</head>
+<body style="margin:0;padding:0;overflow:hidden">
+
+<aside class="panel">
+
+  <!-- ① TOP BAR -->
+  <header class="topbar">
+      <button class="topbar-icon-btn" title="편집">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+          <path d="M9.5 1.5l3 3-8 8H1.5v-3l8-8z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <button class="topbar-icon-btn" title="닫기" onclick="window.parent !== window ? window.parent.closeDrawer() : history.back()">
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+          <path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ② SUBNAV (KRDS tab line) -->
+  <div class="panel-tab-wrap">
+    <div class="tab line full">
+      <ul role="tablist">
+        <li id="ptab-info" role="tab" aria-selected="true" aria-controls="section-info" class="active">
+          <button type="button" class="btn-tab">업무</button>
+        </li>
+        <li id="ptab-tasks" role="tab" aria-selected="false" aria-controls="section-tasks">
+          <button type="button" class="btn-tab">하위 업무 <span class="tab-count">3</span></button>
+        </li>
+        <li id="ptab-milestones" role="tab" aria-selected="false" aria-controls="section-milestones">
+          <button type="button" class="btn-tab">마일스톤 <span class="tab-count">3</span></button>
+        </li>
+        <li id="ptab-members" role="tab" aria-selected="false" aria-controls="section-members">
+          <button type="button" class="btn-tab">담당자&amp;참여자 <span class="tab-count">3</span></button>
+        </li>
+        <li id="ptab-comments" role="tab" aria-selected="false" aria-controls="section-comments">
+          <button type="button" class="btn-tab">댓글 <span class="tab-count">5</span></button>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ③ PANEL BODY (scroll container) -->
+  <div class="panel-body">
+
+    <!-- 섹션 1: 업무 개요 -->
+    <div class="title-section" id="section-info">
+      <h1 class="title-text">급여 지급 프로세스 정비</h1>
+      <div class="title-badges">
+        <span class="krds-badge small outline-primary">진행 중</span>
+        <span class="krds-badge small outline-secondary">기품 관리팀</span>
+        <span class="krds-badge small outline-success">우선순위 높음</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">진행 현황</span>
+        <span class="progress-num">34%</span>
+      </div>
+      <div style="padding:0 var(--krds-padding-9) var(--krds-padding-6)">
+        <div class="progress-track">
+          <div class="progress-fill" style="width:0;transition:width 0.6s ease"></div>
+        </div>
+      </div>
+
+      <div class="info-row">
+        <span class="info-label">담당자</span>
+        <span class="info-val">
+          <span class="avatar-sm" style="background:var(--krds-light-color-text-point)">강</span>
+          강민다
+        </span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">기간</span>
+        <span class="info-val">2026/01/06 ~ 2026/01/14</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">팀</span>
+        <span class="info-val">기품 관리팀</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">관련 목표</span>
+        <span class="info-val" style="color:var(--krds-light-color-text-primary)">[목표] 효율성 25% 향상</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">생성일</span>
+        <span class="info-val">2026/01/02</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">참여자</span>
+        <span class="info-val">
+          <div class="avatar-group">
+            <span class="avatar-sm" style="background:var(--krds-light-color-button-primary-fill)">이</span>
+            <span class="avatar-sm" style="background:var(--krds-light-color-text-success)">서</span>
+            <span class="avatar-sm" style="background:var(--krds-light-color-icon-warning)">이</span>
+          </div>
+          <span style="font-size:var(--krds-pc-font-size-body-xsmall);color:var(--krds-light-color-text-subtle)">+2명</span>
+        </span>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- 섹션 2: 하위 업무 -->
+    <div class="section" id="section-tasks">
+      <div class="section-header">
+        <span class="section-title">하위 업무</span>
+        <button class="section-action">+ 추가</button>
+      </div>
+
+      <div class="task-group">
+        <div class="task-group-label">진행 중</div>
+        <div class="task-row selected">
+          <span class="krds-badge small bg-primary">진행</span>
+          <span class="task-name">급여 명세서 양식 검토</span>
+          <span class="task-due">~01/08</span>
+          <span class="task-assignee">
+            <span class="avatar-sm" style="background:var(--krds-light-color-text-point)">강</span>
+          </span>
+        </div>
+        <div class="task-row">
+          <span class="krds-badge small bg-primary">진행</span>
+          <span class="task-name">세전·세후 금액 검증</span>
+          <span class="task-due">~01/10</span>
+          <span class="task-assignee">
+            <span class="avatar-sm" style="background:var(--krds-light-color-button-primary-fill)">이</span>
+          </span>
+        </div>
+
+        <div class="task-group-label" style="margin-top:var(--krds-gap-5)">완료</div>
+        <div class="task-row">
+          <span class="krds-badge small bg-success">완료</span>
+          <span class="task-name" style="color:var(--krds-light-color-text-subtle);text-decoration:line-through">급여 데이터 수집</span>
+          <span class="task-due">01/06</span>
+          <span class="task-assignee">
+            <span class="avatar-sm" style="background:var(--krds-light-color-text-success)">서</span>
+          </span>
+        </div>
+
+        <div class="task-group-label" style="margin-top:var(--krds-gap-5)">예정</div>
+        <div class="task-row">
+          <span class="krds-badge small bg-gray">예정</span>
+          <span class="task-name">지급 이체 실행</span>
+          <span class="task-due">~01/14</span>
+          <span class="task-assignee">
+            <span class="avatar-sm" style="background:var(--krds-light-color-icon-warning)">이</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- 섹션 3: 마일스톤 -->
+    <div class="section" id="section-milestones">
+      <div class="section-header">
+        <span class="section-title">마일스톤</span>
+        <button class="section-action">전체 보기</button>
+      </div>
+
+      <div class="milestone-line">
+        <div class="ms-item">
+          <div class="ms-dot ms-dot-done">
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+              <path d="M2 6l3 3 5-5" stroke="var(--krds-light-color-text-success)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="ms-body">
+            <div class="ms-name">1차 급여 지급 완료</div>
+            <div class="ms-meta">목표일: 2026/01/10 · 담당 이진아</div>
+          </div>
+          <span class="krds-badge small bg-light-primary">완료</span>
+        </div>
+        <div class="ms-item">
+          <div class="ms-dot ms-dot-prog">
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+              <circle cx="6" cy="6" r="3" stroke="var(--krds-light-color-button-primary-fill)" stroke-width="1.6"/>
+            </svg>
+          </div>
+          <div class="ms-body">
+            <div class="ms-name">세금 납부 기한 준수 확인</div>
+            <div class="ms-meta">목표일: 2026/01/18 · 담당 이윤법</div>
+          </div>
+          <span class="krds-badge small bg-light-success">진행 중</span>
+        </div>
+        <div class="ms-item">
+          <div class="ms-dot ms-dot-todo">
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+              <circle cx="6" cy="6" r="3" stroke="var(--krds-light-color-text-subtle)" stroke-width="1.4" stroke-dasharray="2 2"/>
+            </svg>
+          </div>
+          <div class="ms-body">
+            <div class="ms-name">최종 정산 보고서 제출</div>
+            <div class="ms-meta">목표일: 2026/01/22 · 담당 강민다</div>
+          </div>
+          <span class="krds-badge small bg-light-gray">예정</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- 섹션 4: 담당자 & 참여자 -->
+    <div class="section" id="section-members">
+      <div class="section-header">
+        <span class="section-title">담당자 &amp; 참여자</span>
+        <button class="section-action">+ 초대</button>
+      </div>
+
+      <div class="member-list">
+        <div class="member-row">
+          <span class="avatar-sm" style="background:var(--krds-light-color-text-point);width:32px;height:32px;font-size:13px">강</span>
+          <div class="member-info">
+            <div class="member-name">강민다</div>
+            <div class="member-role">담당자 · 기품 관리팀</div>
+          </div>
+          <div class="member-actions">
+            <button class="icon-btn" title="전화">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M10.7 8.3v1.4a.9.9 0 01-1 .9A9 9 0 011.4 2.3a.9.9 0 01.9-1h1.4c.5 0 .9.3 1 .8.1.5.3 1 .5 1.5.1.3 0 .6-.2.8L4.3 5a7.2 7.2 0 002.7 2.7l.6-.7c.2-.2.5-.3.8-.2.5.2 1 .4 1.5.5.5.1.8.6.8 1z" stroke="currentColor" stroke-width="1.2"/>
+              </svg>
+            </button>
+            <button class="icon-btn" title="메시지">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M10.5 2H1.5a.5.5 0 00-.5.5v6a.5.5 0 00.5.5H3v2l3-2h4.5a.5.5 0 00.5-.5v-6a.5.5 0 00-.5-.5z" stroke="currentColor" stroke-width="1.2"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="member-row">
+          <span class="avatar-sm" style="background:var(--krds-light-color-button-primary-fill);width:32px;height:32px;font-size:13px">이</span>
+          <div class="member-info">
+            <div class="member-name">이희영</div>
+            <div class="member-role">참여자 · 재무팀</div>
+          </div>
+          <div class="member-actions">
+            <button class="icon-btn" title="전화">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M10.7 8.3v1.4a.9.9 0 01-1 .9A9 9 0 011.4 2.3a.9.9 0 01.9-1h1.4c.5 0 .9.3 1 .8.1.5.3 1 .5 1.5.1.3 0 .6-.2.8L4.3 5a7.2 7.2 0 002.7 2.7l.6-.7c.2-.2.5-.3.8-.2.5.2 1 .4 1.5.5.5.1.8.6.8 1z" stroke="currentColor" stroke-width="1.2"/>
+              </svg>
+            </button>
+            <button class="icon-btn" title="메시지">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M10.5 2H1.5a.5.5 0 00-.5.5v6a.5.5 0 00.5.5H3v2l3-2h4.5a.5.5 0 00.5-.5v-6a.5.5 0 00-.5-.5z" stroke="currentColor" stroke-width="1.2"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="member-row">
+          <span class="avatar-sm" style="background:var(--krds-light-color-text-success);width:32px;height:32px;font-size:13px">서</span>
+          <div class="member-info">
+            <div class="member-name">서재희</div>
+            <div class="member-role">참여자 · 경영지원팀</div>
+          </div>
+          <div class="member-actions">
+            <button class="icon-btn" title="전화">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M10.7 8.3v1.4a.9.9 0 01-1 .9A9 9 0 011.4 2.3a.9.9 0 01.9-1h1.4c.5 0 .9.3 1 .8.1.5.3 1 .5 1.5.1.3 0 .6-.2.8L4.3 5a7.2 7.2 0 002.7 2.7l.6-.7c.2-.2.5-.3.8-.2.5.2 1 .4 1.5.5.5.1.8.6.8 1z" stroke="currentColor" stroke-width="1.2"/>
+              </svg>
+            </button>
+            <button class="icon-btn" title="메시지">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M10.5 2H1.5a.5.5 0 00-.5.5v6a.5.5 0 00.5.5H3v2l3-2h4.5a.5.5 0 00.5-.5v-6a.5.5 0 00-.5-.5z" stroke="currentColor" stroke-width="1.2"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- 섹션 5: 댓글 -->
+    <div class="section" id="section-comments">
+      <div class="section-header">
+        <span class="section-title">댓글</span>
+        <span class="badge badge-purple">5</span>
+      </div>
+
+      <div class="comment-area">
+        <div class="comment-row">
+          <span class="avatar-sm" style="background:var(--krds-light-color-text-point);width:28px;height:28px;flex-shrink:0">강</span>
+          <div class="comment-body">
+            <div class="comment-header">
+              <span class="comment-author">강민다</span>
+              <span class="comment-time">오늘 09:12</span>
+            </div>
+            <div class="comment-bubble comment-text">급여 명세서 양식은 인사팀과 공유 필요합니다. 확인 부탁드립니다.</div>
+          </div>
+        </div>
+        <div class="comment-row">
+          <span class="avatar-sm" style="background:var(--krds-light-color-button-primary-fill);width:28px;height:28px;flex-shrink:0">이</span>
+          <div class="comment-body">
+            <div class="comment-header">
+              <span class="comment-author">이희영</span>
+              <span class="comment-time">오늘 09:45</span>
+            </div>
+            <div class="comment-bubble comment-text">확인했습니다. 세전 금액 기준으로 수정해서 올릴게요.</div>
+          </div>
+        </div>
+        <div class="comment-row">
+          <span class="avatar-sm" style="background:var(--krds-light-color-text-success);width:28px;height:28px;flex-shrink:0">서</span>
+          <div class="comment-body">
+            <div class="comment-header">
+              <span class="comment-author">서재희</span>
+              <span class="comment-time">오늘 11:20</span>
+            </div>
+            <div class="comment-bubble comment-text">데이터 수집 완료했습니다. 폴더에 업로드해두었으니 확인해주세요.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="comment-input-wrap">
+        <div class="send-wrap">
+          <textarea rows="1" placeholder="댓글을 입력하세요..."></textarea>
+          <button class="send-btn">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+              <path d="M11.5 1.5L1 6l4 1.5L6.5 12l5-10.5z" fill="white"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- SUBMIT BAR -->
+    <div class="submit-bar">
+      <div class="submit-info">
+        <div class="submit-title">진행 보고 제출</div>
+        <div class="submit-sub">담당자 보고 기한: 2026/01/14 · 미제출</div>
+      </div>
+      <button class="submit-btn">보고서 작성</button>
+    </div>
+
+  </div><!-- /panel-body -->
+</aside>
+
+<script>
+/* ── 세부과업 정보 반영 ── */
+(function () {
+  const st = JSON.parse(sessionStorage.getItem('krds_selected_subtask') || 'null');
+  if (!st) return;
+  const titleEl = document.querySelector('.title-text');
+  if (titleEl) titleEl.textContent = st.name;
+  document.title = st.name + ' · 업무 상세';
+  const assigneeVal = document.querySelector('.info-row .info-val');
+  if (assigneeVal && st.assignee) {
+    const av = assigneeVal.querySelector('.avatar-sm');
+    if (av) av.textContent = st.assignee.slice(0, 1);
+    const nameNode = assigneeVal.lastChild;
+    if (nameNode) nameNode.textContent = ' ' + st.assignee;
+  }
+  const deadlineVal = document.querySelectorAll('.info-row .info-val')[1];
+  if (deadlineVal && st.deadline) deadlineVal.textContent = st.deadline;
+})();
+
+/* ── 탭 클릭 → 섹션 스크롤 ── */
+const TAB_SECTION_MAP = {
+  'ptab-info':       'section-info',
+  'ptab-tasks':      'section-tasks',
+  'ptab-milestones': 'section-milestones',
+  'ptab-members':    'section-members',
+  'ptab-comments':   'section-comments',
+};
+const panelBody = document.querySelector('.panel-body');
+const tabs      = document.querySelectorAll('.panel-tab-wrap li[role="tab"]');
+
+tabs.forEach(tab => {
+  tab.querySelector('.btn-tab').addEventListener('click', () => {
+    tabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
+    tab.classList.add('active');
+    tab.setAttribute('aria-selected', 'true');
+    const sectionId = TAB_SECTION_MAP[tab.id];
+    if (sectionId) {
+      const el = document.getElementById(sectionId);
+      if (el) panelBody.scrollTo({ top: el.offsetTop - panelBody.offsetTop, behavior: 'smooth' });
+    }
+  });
+});
+
+/* ── 진행 바 애니메이션 ── */
+window.addEventListener('load', () => {
+  const fill = document.querySelector('.progress-fill');
+  if (fill) setTimeout(() => { fill.style.width = '34%'; }, 200);
+});
+
+/* ── 댓글 전송 ── */
+document.querySelector('.send-btn').addEventListener('click', () => {
+  const ta   = document.querySelector('.send-wrap textarea');
+  const text = ta.value.trim();
+  if (!text) return;
+  const area = document.querySelector('.comment-area');
+  const row  = document.createElement('div');
+  row.className = 'comment-row';
+  row.innerHTML = `
+    <span class="avatar-sm" style="background:var(--krds-light-color-button-primary-fill);width:28px;height:28px;flex-shrink:0">나</span>
+    <div class="comment-body">
+      <div class="comment-header">
+        <span class="comment-author">나</span>
+        <span class="comment-time">방금</span>
+      </div>
+      <div class="comment-bubble comment-text">${text.replace(/</g, '&lt;')}</div>
+    </div>`;
+  area.appendChild(row);
+  ta.value = '';
+  row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+});
+</script>
+
+</body>
+</html>

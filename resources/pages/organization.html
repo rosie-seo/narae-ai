@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+     <link rel="stylesheet" href="/resources/css/custom.css">
+    <link href="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.css" type="text/css" rel="stylesheet" />
+    <script src="/resources/js/component/ui-include.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.js"></script>
+</head>
+<body>
+    <div data-include="/html/code/header.html"></div>
+
+
+<div class="organization-container">
+
+<!-- side navigation -->
+<nav class="side-nav" aria-label="조직 네비게이션">
+  <div class="nav-view-toggle">
+    <button class="view-btn view-btn--list is-active" id="btnListView" type="button" aria-label="리스트뷰">
+      <svg viewBox="0 0 20 20" width="16" height="16" fill="none" aria-hidden="true">
+        <rect x="3" y="4.5" width="14" height="2" rx="1" fill="currentColor"/>
+        <rect x="3" y="9" width="14" height="2" rx="1" fill="currentColor"/>
+        <rect x="3" y="13.5" width="14" height="2" rx="1" fill="currentColor"/>
+      </svg>
+      <span>리스트뷰</span>
+    </button>
+    <button class="view-btn view-btn--org" id="btnOrgView" type="button" aria-label="조직도뷰">
+      <svg viewBox="0 0 20 20" width="16" height="16" fill="none" aria-hidden="true">
+        <rect x="7" y="1.5" width="6" height="4" rx="1" stroke="currentColor" stroke-width="1.4"/>
+        <rect x="1" y="14.5" width="6" height="4" rx="1" stroke="currentColor" stroke-width="1.4"/>
+        <rect x="13" y="14.5" width="6" height="4" rx="1" stroke="currentColor" stroke-width="1.4"/>
+        <line x1="10" y1="5.5" x2="10" y2="10" stroke="currentColor" stroke-width="1.4"/>
+        <line x1="4" y1="10" x2="16" y2="10" stroke="currentColor" stroke-width="1.4"/>
+        <line x1="4" y1="10" x2="4" y2="14.5" stroke="currentColor" stroke-width="1.4"/>
+        <line x1="16" y1="10" x2="16" y2="14.5" stroke="currentColor" stroke-width="1.4"/>
+      </svg>
+      <span>조직도뷰</span>
+    </button>
+  </div>
+  <div class="nav-search">
+    <div class="nav-search__field">
+      <svg class="nav-search__icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.6"/>
+        <path d="M14 14L17.5 17.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      <input id="navSearch" type="text" placeholder="실 · 관 · 과 검색" aria-label="조직 검색" autocomplete="off" />
+      <button id="navClear" class="nav-search__clear" type="button" aria-label="검색어 지우기">
+        <svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true">
+          <path d="M4 4L12 12M12 4L4 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="nav-summary" id="navSummary"></div>
+
+  <ul class="nav-tree" id="navTree" role="tree"></ul>
+  <div class="nav-empty" id="navEmpty">검색 결과가 없습니다.</div>
+</nav>
+
+<!-- //side navigation -->
+<div class="organization-contents">
+
+  <!-- 리스트뷰 콘텐츠 -->
+  <div id="listViewContent">
+    <div class="krds-badge small bg-light-gray">ERP 읽기 전용</div>
+    <div class="organization-title">해당 실/국/과 이름 들어가는 곳</div>
+
+    <nav class="krds-breadcrumb-wrap" aria-label="현재 경로" id="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="#"><a href="#" class="txt">실이름</a></li>
+        <li><a href="#" class="txt">관이름</a></li>
+        <li><a href="#" class="txt">과이름</a></li>
+      </ol>
+    </nav>
+
+    <!-- tab -->
+    <div class="krds-tab-area layer">
+      <!-- tab list -->
+      <div class="tab line full">
+        <ul role="tablist">
+          <li id="tab_login_01" role="tab" aria-selected="true" aria-controls="panel_login_01" class="active">
+            <button type="button" class="btn-tab">팀원 구성 <i class="sr-only created"> 선택됨</i></button>
+          </li>
+          <li id="tab_login_02" role="tab" aria-selected="false" aria-controls="panel_login_02">
+            <button type="button" class="btn-tab">연계 과제</button>
+          </li>
+        </ul>
+      </div>
+      <!-- //tab list -->
+
+      <!-- tab contents -->
+      <div class="tab-conts-wrap">
+        <section id="panel_login_01" aria-labelledby="tab_login_01" class="tab-conts active" data-quick-nav="false">
+          <h3 class="sr-only">탭 영역 타이틀</h3>
+          <div class="member-section">
+            <div class="member-group">
+              <div class="member-group__head">
+                <span class="krds-badge outline-primary">과장</span>
+              </div>
+              <ul class="member-list">
+                <li class="member-card">
+                  <span class="member-card__avatar"></span>
+                  <div class="member-card__info">
+                    <p class="member-card__name">이름</p>
+                    <p class="member-card__position">직책·직급</p>
+                    <p class="member-card__contact">example@email.com<span class="member-card__sep">|</span>010-0000-0000</p>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="member-group">
+              <div class="member-group__head">
+                <span class="krds-badge outline-secondary">담당자</span>
+                <span class="member-group__count">(n명)</span>
+              </div>
+              <ul class="member-list">
+                <li class="member-card">
+                  <span class="member-card__avatar"></span>
+                  <div class="member-card__info">
+                    <p class="member-card__name">이름</p>
+                    <p class="member-card__position">직책·직급</p>
+                    <p class="member-card__contact">example@email.com<span class="member-card__sep">|</span>010-0000-0000</p>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section id="panel_login_02" aria-labelledby="tab_login_02" class="tab-conts" data-quick-nav="false">
+          <h3 class="sr-only">탭 영역 타이틀</h3>
+          <div class="task-panel">
+            <ul class="task-list" id="taskList"></ul>
+          </div>
+        </section>
+      </div>
+      <!-- //tab contents -->
+    </div>
+    <!-- //tab -->
+  </div>
+
+  <!-- 조직도뷰 콘텐츠 -->
+  <div id="orgChartPanel" style="display:none;">
+    <div class="oc-wrapper" id="ocWrapper">
+      <div class="oc-canvas" id="ocCanvas">
+        <svg class="oc-lines" id="ocLines" aria-hidden="true"></svg>
+        <div id="ocGrid"></div>
+      </div>
+      <!-- 줌 컨트롤 -->
+      <div class="oc-controls">
+        <button class="oc-ctrl-btn" id="ocZoomOut" title="축소">
+          <svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true">
+            <line x1="3" y1="8" x2="13" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <span class="oc-zoom-level" id="ocZoomLevel">100%</span>
+        <button class="oc-ctrl-btn" id="ocZoomIn" title="확대">
+          <svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true">
+            <line x1="8" y1="3" x2="8" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <line x1="3" y1="8" x2="13" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <div class="oc-ctrl-sep"></div>
+        <button class="oc-ctrl-btn" id="ocFit" title="전체 보기">
+          <svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true">
+            <path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<script src="/resources/js/script.js"></script>
+
+</body>
+</html>

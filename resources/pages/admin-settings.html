@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 설정</title>
+    <link rel="stylesheet" href="/resources/css/custom.css">
+    <link href="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.css" type="text/css" rel="stylesheet" />
+    <script src="/resources/js/component/ui-include.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.js"></script>
+    <style>
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   AI 보안 관리 패널 전용 스타일 (AI 감사로그 / AI 사용 정책 / AI 응답 검사)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ===== AI 감사로그 ===== */
+.audit-log {
+  width: 100%;
+  max-width: 1180px;
+  color: var(--krds-light-color-text-basic);
+  box-sizing: border-box;
+}
+
+.audit-log * {
+  box-sizing: border-box;
+}
+
+.audit-log__header {
+  margin-bottom: 20px;
+}
+
+.audit-log__eyebrow {
+  margin-bottom: 10px;
+}
+
+.audit-log__title {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.4;
+  margin: 0 0 6px 0;
+  color: var(--krds-light-color-text-basic);
+}
+
+.audit-log__desc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--krds-light-color-text-subtle);
+  margin: 0;
+}
+
+.audit-log__stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 720px) {
+  .audit-log__stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.audit-log__stat {
+  border: 1px solid var(--krds-light-color-divider-gray-light);
+  border-radius: var(--krds-radius-medium3);
+  background: var(--krds-light-color-surface-white);
+  box-shadow: 0 1px 3px var(--krds-light-color-alpha-shadow1);
+  padding: 16px 18px;
+}
+
+.audit-log__stat-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--krds-light-color-text-disabled);
+  margin-bottom: 6px;
+}
+
+.audit-log__stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--krds-light-color-text-basic);
+}
+
+.audit-log__stat--warning .audit-log__stat-value {
+  color: var(--krds-light-color-text-warning);
+}
+
+.audit-log__stat--danger .audit-log__stat-value {
+  color: var(--krds-light-color-text-danger);
+}
+
+.audit-log__filters {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--krds-light-color-divider-gray-light);
+  border-radius: var(--krds-radius-medium3);
+  background: var(--krds-light-color-surface-gray-subtler);
+  margin-bottom: 16px;
+}
+
+.audit-log__filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.audit-log__filter-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--krds-light-color-text-subtle);
+}
+
+.audit-log__input {
+  width: 220px;
+}
+
+.audit-log__select {
+  width: 140px;
+}
+
+.audit-log__export-btn {
+  margin-left: auto;
+}
+
+.audit-log__table-wrap {
+  border: 1px solid var(--krds-light-color-divider-gray-light);
+  border-radius: var(--krds-radius-medium3);
+  overflow: hidden;
+  background: var(--krds-light-color-surface-white);
+}
+
+.audit-log__row:hover td {
+  background: var(--krds-light-color-action-secondary-hover);
+}
+
+.audit-log__td-time {
+  color: var(--krds-light-color-text-disabled);
+  font-family: "SF Mono", "Consolas", monospace;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.audit-log__empty {
+  padding: 40px 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--krds-light-color-text-disabled);
+}
+
+.audit-log__footer {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--krds-light-color-text-disabled);
+}
+
+.audit-log__modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--krds-light-color-background-dim);
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.audit-log__modal-overlay--open {
+  display: flex;
+}
+
+.audit-log__modal {
+  width: 100%;
+  max-width: 640px;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--krds-light-color-surface-white);
+  border-radius: var(--krds-radius-xlarge1);
+  box-shadow: 0 0.2rem var(--krds-light-color-alpha-shadow2), 0 1.6rem 2.4rem var(--krds-light-color-alpha-shadow3);
+}
+
+.audit-log__modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--krds-light-color-divider-gray-light);
+  position: sticky;
+  top: 0;
+  background: var(--krds-light-color-surface-white);
+  z-index: 1;
+}
+
+.audit-log__modal-header h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--krds-light-color-text-basic);
+}
+
+.audit-log__modal-body {
+  padding: 20px;
+}
+
+.audit-log__modal-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 14px;
+  background: var(--krds-light-color-surface-gray-subtler);
+  border-radius: var(--krds-radius-medium2);
+  margin-bottom: 18px;
+  font-size: 13px;
+}
+
+.audit-log__modal-meta div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.audit-log__meta-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--krds-light-color-text-disabled);
+}
+
+.audit-log__modal-section {
+  margin-bottom: 16px;
+}
+
+.audit-log__modal-section-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--krds-light-color-text-subtle);
+  margin-bottom: 6px;
+}
+
+.audit-log__modal-text {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--krds-light-color-text-basic);
+  background: var(--krds-light-color-surface-gray-subtler);
+  border: 1px solid var(--krds-light-color-divider-gray-light);
+  border-radius: var(--krds-radius-medium1);
+  padding: 12px 14px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.audit-log__detected-list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  color: var(--krds-light-color-text-danger);
+  line-height: 1.8;
+}
+
+.audit-log__no-detect {
+  font-size: 13px;
+  color: var(--krds-light-color-text-disabled);
+  margin: 0;
+}
+
+    </style>
+</head>
+<body>
+
+  <div class="operating-container">
+
+    <div data-include="/html/code/header.html"></div>
+
+    <div class="organization-container">
+
+      <!-- 사이드 네비게이션 -->
+      <nav class="side-nav" aria-label="관리자 설정 네비게이션">
+        <ul class="nav-tree" role="list">
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <button type="button" class="nav-node__row is-selected" data-panel="general" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">일반</span>
+            </button>
+          </li>
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <button type="button" class="nav-node__row" data-panel="users" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">사용자 · 권한</span>
+            </button>
+          </li>
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <button type="button" class="nav-node__row" data-panel="notifications" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">알림</span>
+            </button>
+          </li>
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <button type="button" class="nav-node__row" data-panel="security" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">보안</span>
+            </button>
+          </li>
+          <li class="admin-nav-group-label">AI 보안 관리</li>
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <button type="button" class="nav-node__row" data-panel="audit-log" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">AI 감사로그</span>
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- 메인 콘텐츠 -->
+      <main class="main">
+        <h1 class="page-title">관리자 설정</h1>
+
+        <!-- 일반 -->
+        <section class="admin-panel" id="panel-general" data-panel="general">
+          <div class="card">
+            <div class="section-header"><span class="section-title">사이트 정보</span></div>
+            <div class="fieldset admin-fieldset">
+              <div class="form-group">
+                <div class="form-tit"><label for="siteName">사이트 이름</label></div>
+                <div class="form-conts">
+                  <input type="text" id="siteName" class="krds-input" value="Narae AI">
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="form-tit"><label for="siteLang">기본 언어</label></div>
+                <div class="form-conts">
+                  <select id="siteLang" class="krds-form-select" title="기본 언어 선택">
+                    <option selected>한국어</option>
+                    <option>English</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="form-tit"><label for="siteTimezone">시간대</label></div>
+                <div class="form-conts">
+                  <select id="siteTimezone" class="krds-form-select" title="시간대 선택">
+                    <option selected>(GMT+09:00) 서울</option>
+                    <option>(GMT+00:00) UTC</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-header"><span class="section-title">업무 기본값</span></div>
+            <div class="fieldset admin-fieldset admin-fieldset--center">
+              <div class="form-group">
+                <div class="form-tit"><label for="defaultAssignPolicy">업무 배정 방식</label></div>
+                <div class="form-conts">
+                  <select id="defaultAssignPolicy" class="krds-form-select" title="업무 배정 방식 선택">
+                    <option selected>담당자 직접 지정</option>
+                    <option>부서 내 자동 분배</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="form-tit"><label for="defaultDueSoon">마감 임박 기준</label></div>
+                <div class="form-conts">
+                  <select id="defaultDueSoon" class="krds-form-select" title="마감 임박 기준 선택">
+                    <option>1일 전</option>
+                    <option selected>3일 전</option>
+                    <option>7일 전</option>
+                  </select>
+                </div>
+                <p class="form-hint">업무 차트·업무 테이블에서 마감 임박 표시 기준입니다.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-actions">
+            <button type="button" class="krds-btn primary" id="btnSaveGeneral">저장</button>
+          </div>
+        </section>
+
+        <!-- 사용자 · 권한 -->
+        <section class="admin-panel" id="panel-users" data-panel="users" hidden>
+          <div class="card">
+            <div class="section-header">
+              <span class="section-title">사용자 목록</span>
+              <button type="button" class="krds-btn small secondary" id="btnInviteUser">+ 사용자 초대</button>
+            </div>
+            <table class="task-table admin-user-table">
+              <thead>
+                <tr>
+                  <th scope="col">이름</th>
+                  <th scope="col">부서</th>
+                  <th scope="col">이메일</th>
+                  <th scope="col">권한</th>
+                  <th scope="col">상태</th>
+                </tr>
+              </thead>
+              <tbody id="adminUserRows"></tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <div class="section-header"><span class="section-title">권한 그룹</span></div>
+            <div class="admin-role-list">
+              <div class="admin-role-item">
+                <div class="admin-role-item__head">
+                  <span class="krds-badge outline-primary">관리자</span>
+                  <span class="admin-role-item__desc">모든 메뉴 접근, 사용자·권한 관리, 시스템 설정 변경 가능</span>
+                </div>
+              </div>
+              <div class="admin-role-item">
+                <div class="admin-role-item__head">
+                  <span class="krds-badge outline-secondary">팀장</span>
+                  <span class="admin-role-item__desc">소속 부서 업무·근무자 관리, 결재 승인 가능</span>
+                </div>
+              </div>
+              <div class="admin-role-item">
+                <div class="admin-role-item__head">
+                  <span class="krds-badge bg-light-gray">담당자</span>
+                  <span class="admin-role-item__desc">본인 업무 조회·등록, 주간보고 작성 가능</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 알림 -->
+        <section class="admin-panel" id="panel-notifications" data-panel="notifications" hidden>
+          <div class="card">
+            <div class="section-header"><span class="section-title">이메일 알림</span></div>
+            <div class="admin-toggle-list">
+              <div class="admin-toggle-row">
+                <div class="admin-toggle-row__text">
+                  <div class="admin-toggle-row__title">업무 마감 임박 알림</div>
+                  <div class="admin-toggle-row__desc">담당 업무의 마감일이 임박하면 이메일로 알려줍니다.</div>
+                </div>
+                <div class="krds-form-toggle-switch">
+                  <input type="checkbox" id="notifyDueSoon" checked>
+                  <label for="notifyDueSoon"><span class="switch-toggle"><i></i></span><span class="sr-only">업무 마감 임박 알림</span></label>
+                </div>
+              </div>
+              <div class="admin-toggle-row">
+                <div class="admin-toggle-row__text">
+                  <div class="admin-toggle-row__title">결재 상신 · 승인 알림</div>
+                  <div class="admin-toggle-row__desc">전자결재 상신, 반려, 승인 시 이메일로 알려줍니다.</div>
+                </div>
+                <div class="krds-form-toggle-switch">
+                  <input type="checkbox" id="notifyApproval" checked>
+                  <label for="notifyApproval"><span class="switch-toggle"><i></i></span><span class="sr-only">결재 상신 · 승인 알림</span></label>
+                </div>
+              </div>
+              <div class="admin-toggle-row">
+                <div class="admin-toggle-row__text">
+                  <div class="admin-toggle-row__title">주간보고 제출 알림</div>
+                  <div class="admin-toggle-row__desc">주간보고 제출 기한과 미제출 현황을 알려줍니다.</div>
+                </div>
+                <div class="krds-form-toggle-switch">
+                  <input type="checkbox" id="notifyWeeklyReport">
+                  <label for="notifyWeeklyReport"><span class="switch-toggle"><i></i></span><span class="sr-only">주간보고 제출 알림</span></label>
+                </div>
+              </div>
+              <div class="admin-toggle-row">
+                <div class="admin-toggle-row__text">
+                  <div class="admin-toggle-row__title">과부하 경고</div>
+                  <div class="admin-toggle-row__desc">담당자가 동시에 3건 이상의 업무를 맡으면 알려줍니다.</div>
+                </div>
+                <div class="krds-form-toggle-switch">
+                  <input type="checkbox" id="notifyOverload" checked>
+                  <label for="notifyOverload"><span class="switch-toggle"><i></i></span><span class="sr-only">과부하 경고</span></label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-header"><span class="section-title">BI 알림 주기 설정</span></div>
+            <div class="fieldset admin-fieldset admin-fieldset--center">
+              <div class="form-group">
+                <div class="form-tit"><label for="biNotifyCycle">BI 리포트 발송 주기</label></div>
+                <div class="form-conts">
+                  <select id="biNotifyCycle" class="krds-form-select" title="BI 리포트 발송 주기 선택">
+                    <option>사용 안 함</option>
+                    <option>매일</option>
+                    <option selected>매주</option>
+                    <option>매월</option>
+                  </select>
+                </div>
+                <p class="form-hint">설정한 주기로 BI(KPI) 리포트를 발송합니다.</p>
+              </div>
+              <div class="form-group">
+                <div class="form-tit"><label for="biNotifyDay">발송 요일</label></div>
+                <div class="form-conts">
+                  <select id="biNotifyDay" class="krds-form-select" title="발송 요일 선택">
+                    <option>월요일</option>
+                    <option selected>금요일</option>
+                    <option>일요일</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="form-tit"><label for="biNotifyTime">발송 시각</label></div>
+                <div class="form-conts">
+                  <select id="biNotifyTime" class="krds-form-select" title="발송 시각 선택">
+                    <option>오전 8시</option>
+                    <option selected>오전 9시</option>
+                    <option>오후 6시</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-actions">
+            <button type="button" class="krds-btn primary" id="btnSaveNotifications">저장</button>
+          </div>
+        </section>
+
+        <!-- 보안 -->
+        <section class="admin-panel" id="panel-security" data-panel="security" hidden>
+          <div class="card">
+            <div class="section-header"><span class="section-title">로그인 보안</span></div>
+            <div class="admin-toggle-list">
+              <div class="admin-toggle-row">
+                <div class="admin-toggle-row__text">
+                  <div class="admin-toggle-row__title">2단계 인증(2FA) 필수</div>
+                  <div class="admin-toggle-row__desc">모든 사용자에게 로그인 시 2단계 인증을 요구합니다.</div>
+                </div>
+                <div class="krds-form-toggle-switch">
+                  <input type="checkbox" id="securityMfa">
+                  <label for="securityMfa"><span class="switch-toggle"><i></i></span><span class="sr-only">2단계 인증 필수</span></label>
+                </div>
+              </div>
+              <div class="admin-toggle-row">
+                <div class="admin-toggle-row__text">
+                  <div class="admin-toggle-row__title">비정상 로그인 알림</div>
+                  <div class="admin-toggle-row__desc">평소와 다른 기기·위치에서 로그인하면 알려줍니다.</div>
+                </div>
+                <div class="krds-form-toggle-switch">
+                  <input type="checkbox" id="securityAlert" checked>
+                  <label for="securityAlert"><span class="switch-toggle"><i></i></span><span class="sr-only">비정상 로그인 알림</span></label>
+                </div>
+              </div>
+            </div>
+            <div class="fieldset admin-fieldset admin-fieldset--bordered">
+              <div class="form-group">
+                <div class="form-tit"><label for="sessionTimeout">세션 자동 로그아웃</label></div>
+                <div class="form-conts">
+                  <select id="sessionTimeout" class="krds-form-select" title="세션 자동 로그아웃 시간 선택">
+                    <option>15분</option>
+                    <option selected>30분</option>
+                    <option>1시간</option>
+                    <option>4시간</option>
+                  </select>
+                </div>
+                <p class="form-hint">설정한 시간 동안 활동이 없으면 자동으로 로그아웃됩니다.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-actions">
+            <button type="button" class="krds-btn primary" id="btnSaveSecurity">저장</button>
+          </div>
+        </section>
+
+        <!-- AI 감사로그 -->
+        <section class="admin-panel" id="panel-audit-log" data-panel="audit-log" hidden>
+<div class="audit-log">
+  <div class="audit-log__header">
+    <span class="krds-badge outline-primary audit-log__eyebrow">AI Security Gateway</span>
+    <h2 class="audit-log__title">AI 감사로그</h2>
+    <p class="audit-log__desc">누가, 언제, 어떤 AI로, 무엇을 요청하고 응답받았는지 모든 기록을 조회합니다. ISMS·ISO 27001 감사 대응을 위한 필수 로그입니다.</p>
+  </div>
+
+  <!-- 요약 통계 -->
+  <div class="audit-log__stats">
+    <div class="audit-log__stat">
+      <div class="audit-log__stat-label">오늘 총 요청</div>
+      <div class="audit-log__stat-value" id="statTotal">-</div>
+    </div>
+    <div class="audit-log__stat audit-log__stat--warning">
+      <div class="audit-log__stat-label">마스킹 후 허용</div>
+      <div class="audit-log__stat-value" id="statMasked">-</div>
+    </div>
+    <div class="audit-log__stat audit-log__stat--danger">
+      <div class="audit-log__stat-label">외부 전송 차단</div>
+      <div class="audit-log__stat-value" id="statBlocked">-</div>
+    </div>
+    <div class="audit-log__stat">
+      <div class="audit-log__stat-label">활성 사용자</div>
+      <div class="audit-log__stat-value" id="statUsers">-</div>
+    </div>
+  </div>
+
+  <!-- 필터 -->
+  <div class="audit-log__filters">
+    <div class="audit-log__filter-group">
+      <label class="audit-log__filter-label" for="filterSearch">검색</label>
+      <input type="text" id="filterSearch" class="krds-input small audit-log__input" placeholder="사용자명, 요청 내용 검색" />
+    </div>
+    <div class="audit-log__filter-group">
+      <label class="audit-log__filter-label" for="filterDept">부서</label>
+      <select id="filterDept" class="krds-form-select small audit-log__select">
+        <option value="">전체</option>
+        <option value="기획팀">기획팀</option>
+        <option value="재무팀">재무팀</option>
+        <option value="홍보팀">홍보팀</option>
+        <option value="연구소">연구소</option>
+        <option value="총무팀">총무팀</option>
+      </select>
+    </div>
+    <div class="audit-log__filter-group">
+      <label class="audit-log__filter-label" for="filterModel">AI 모델</label>
+      <select id="filterModel" class="krds-form-select small audit-log__select">
+        <option value="">전체</option>
+        <option value="GPT-4">GPT-4</option>
+        <option value="Claude">Claude</option>
+        <option value="Gemini">Gemini</option>
+        <option value="내부 LLM">내부 LLM</option>
+        <option value="Perplexity">Perplexity</option>
+      </select>
+    </div>
+    <div class="audit-log__filter-group">
+      <label class="audit-log__filter-label" for="filterStatus">상태</label>
+      <select id="filterStatus" class="krds-form-select small audit-log__select">
+        <option value="">전체</option>
+        <option value="allowed">허용</option>
+        <option value="masked">마스킹 후 허용</option>
+        <option value="blocked">차단</option>
+      </select>
+    </div>
+    <button class="krds-btn medium secondary audit-log__export-btn" id="exportBtn" type="button">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+        <path d="M7 1v8M7 9L4 6M7 9l3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M2 10.5v1a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+      </svg>
+      로그 내보내기
+    </button>
+  </div>
+
+  <!-- 테이블 -->
+  <div class="audit-log__table-wrap">
+    <table class="task-table audit-log__table">
+      <thead>
+        <tr>
+          <th>시간</th>
+          <th>사용자</th>
+          <th>부서</th>
+          <th>AI 모델</th>
+          <th>요청 유형</th>
+          <th>상태</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="logTableBody"></tbody>
+    </table>
+    <div class="audit-log__empty" id="tableEmpty" hidden>조건에 맞는 로그가 없습니다.</div>
+  </div>
+
+  <div class="audit-log__footer">
+    <span id="resultCount">0건</span> 표시 중
+  </div>
+
+  <!-- 상세 모달 -->
+  <div class="audit-log__modal-overlay" id="modalOverlay">
+    <div class="audit-log__modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="audit-log__modal-header">
+        <h3 id="modalTitle">로그 상세</h3>
+        <button class="krds-btn medium icon" id="modalClose" type="button">
+          <span class="sr-only">닫기</span>
+          <i class="svg-icon ico-popup-close" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="audit-log__modal-body" id="modalBody"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var LOGS = [
+      { time: '2026-07-13 09:12:04', user: '김민준', dept: '기획팀', model: 'Claude', type: '보고서 작성', status: 'allowed', prompt: '2026년 하반기 나래AI 사업 추진계획 초안을 작성해줘. 주요 마일스톤 3개만 정리해줘.', response: '2026년 하반기 나래AI 사업 추진계획 초안입니다.\n1) 8월: AI Security Gateway 1차 개발 완료\n2) 9월: 공공기관 대상 파일럿 테스트\n3) 11월: GS인증 신청 및 정식 공급 개시', detected: [], policy: '기획팀 → 외부 AI(Claude) 사용 허용 정책 적용' },
+      { time: '2026-07-13 09:04:41', user: '이서연', dept: '재무팀', model: '내부 LLM', type: '문서 분석', status: 'blocked', prompt: '첨부한 2026년도 예산안.xlsx 파일에서 부서별 예산 총액을 요약해줘.', response: '(외부 전송 차단됨 → 내부 LLM으로 자동 전환되어 처리)', detected: ['예산 데이터(기밀 등급 문서)'], policy: '재무팀 → 외부 AI 전송 전면 금지 정책 적용, 내부 LLM으로 자동 라우팅' },
+      { time: '2026-07-13 08:57:19', user: '박지훈', dept: '총무팀', model: 'GPT-4', type: '개인정보 포함 요청', status: 'masked', prompt: '담당자 홍길동, 연락처 010-2938-4471, 이메일 hong.gd@pps.go.kr 로 계약서 초안 문구 작성해줘.', response: '담당자 [MASKED], 연락처 [MASKED] 로 계약서 검토 결과를 회신 드립니다...', detected: ['전화번호 1건', '이메일 1건'], policy: 'PII 자동 마스킹 정책 적용 후 GPT-4로 전송' },
+      { time: '2026-07-13 08:41:02', user: '최수아', dept: '연구소', model: 'Perplexity', type: '검색', status: 'allowed', prompt: '최근 공공기관 AI 보안 가이드라인 관련 발표 자료 찾아줘.', response: '관련 자료 3건을 찾았습니다. 국가정보원 AI 보안 가이드라인(2026.3), NIA AI 활용 지침 등...', detected: [], policy: '연구소 → 외부 검색 AI 사용 허용 정책 적용' },
+      { time: '2026-07-13 08:33:55', user: '정태양', dept: '기획팀', model: 'Claude', type: '번역', status: 'allowed', prompt: '영문 RFP 요약본을 한국어로 번역해줘.', response: '해당 RFP는 AI 기반 업무 자동화 플랫폼 도입을 위한 제안요청서로...', detected: [], policy: '기획팀 → 외부 AI(Claude) 사용 허용 정책 적용' },
+      { time: '2026-07-13 08:20:11', user: '이서연', dept: '재무팀', model: '내부 LLM', type: '문서 분석', status: 'blocked', prompt: '국방 관련 사업 예산 자료.pdf 내용을 요약해줘.', response: '(외부 전송 차단됨 → 내부 LLM으로 자동 전환되어 처리)', detected: ['국가기밀 등급 문서'], policy: '국가기밀 등급 문서 → 전 부서 외부 전송 금지 정책 적용' },
+      { time: '2026-07-13 08:05:47', user: '김민준', dept: '기획팀', model: 'GPT-4', type: '코드 작성', status: 'allowed', prompt: 'KRDS 아코디언 컴포넌트 예시 HTML/CSS 구조 알려줘.', response: '아코디언 컴포넌트는 다음과 같은 구조로 구현할 수 있습니다...', detected: [], policy: '일반 기술 문서 → 외부 AI 사용 허용' },
+      { time: '2026-07-12 17:48:33', user: '한도윤', dept: '홍보팀', model: 'GPT-4', type: '개인정보 포함 요청', status: 'masked', prompt: '민원인 주민등록번호 901231-1234567 확인 후 처리 안내문 작성해줘.', response: '민원인 [MASKED] 확인 후 처리 절차를 아래와 같이 안내드립니다...', detected: ['주민등록번호 1건'], policy: 'PII 자동 마스킹 정책 적용 후 GPT-4로 전송' },
+      { time: '2026-07-12 16:22:09', user: '정태양', dept: '기획팀', model: 'Gemini', type: '요약', status: 'allowed', prompt: '오늘 회의록 핵심 내용 5줄 요약해줘.', response: '1) 나래AI 파일럿 일정 확정 2) 보안 인증 우선순위 재정리 3) UI 목업 검토 완료...', detected: [], policy: '기획팀 → 외부 AI(Gemini) 사용 허용 정책 적용' },
+      { time: '2026-07-12 15:59:41', user: '최수아', dept: '연구소', model: '내부 LLM', type: '문서 분석', status: 'blocked', prompt: '철도 관제 시스템 연계 설계서.docx 내용 검토해줘.', response: '(외부 전송 차단됨 → 내부 LLM으로 자동 전환되어 처리)', detected: ['대외비 등급 문서'], policy: '대외비 등급 문서 → 연구소 외부 AI 전송 금지 정책 적용' }
+    ];
+
+    var STATUS_META = {
+      allowed: { label: '허용', cls: 'success' },
+      masked: { label: '마스킹 후 허용', cls: 'warning' },
+      blocked: { label: '차단', cls: 'danger' }
+    };
+
+    var tbody = document.getElementById('logTableBody');
+    var tableEmpty = document.getElementById('tableEmpty');
+    var resultCount = document.getElementById('resultCount');
+    var searchInput = document.getElementById('filterSearch');
+    var deptSelect = document.getElementById('filterDept');
+    var modelSelect = document.getElementById('filterModel');
+    var statusSelect = document.getElementById('filterStatus');
+    var exportBtn = document.getElementById('exportBtn');
+    var modalOverlay = document.getElementById('modalOverlay');
+    var modalBody = document.getElementById('modalBody');
+    var modalClose = document.getElementById('modalClose');
+
+    function escapeHtml(str) {
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function renderStats() {
+      var total = LOGS.length;
+      var masked = LOGS.filter(function (l) { return l.status === 'masked'; }).length;
+      var blocked = LOGS.filter(function (l) { return l.status === 'blocked'; }).length;
+      var users = {};
+      LOGS.forEach(function (l) { users[l.user] = true; });
+      document.getElementById('statTotal').textContent = total + '건';
+      document.getElementById('statMasked').textContent = masked + '건';
+      document.getElementById('statBlocked').textContent = blocked + '건';
+      document.getElementById('statUsers').textContent = Object.keys(users).length + '명';
+    }
+
+    function matchesFilters(log) {
+      var q = searchInput.value.trim().toLowerCase();
+      if (q && log.user.toLowerCase().indexOf(q) === -1 && log.prompt.toLowerCase().indexOf(q) === -1) return false;
+      if (deptSelect.value && log.dept !== deptSelect.value) return false;
+      if (modelSelect.value && log.model !== modelSelect.value) return false;
+      if (statusSelect.value && log.status !== statusSelect.value) return false;
+      return true;
+    }
+
+    function renderTable() {
+      var filtered = LOGS.filter(matchesFilters);
+      resultCount.textContent = filtered.length + '건';
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '';
+        tableEmpty.hidden = false;
+        return;
+      }
+      tableEmpty.hidden = true;
+
+      tbody.innerHTML = filtered.map(function (log) {
+        var meta = STATUS_META[log.status];
+        return '<tr class="audit-log__row" data-idx="' + LOGS.indexOf(log) + '">' +
+          '<td class="audit-log__td-time">' + log.time + '</td>' +
+          '<td>' + escapeHtml(log.user) + '</td>' +
+          '<td>' + escapeHtml(log.dept) + '</td>' +
+          '<td><span class="krds-badge small outline-secondary">' + escapeHtml(log.model) + '</span></td>' +
+          '<td>' + escapeHtml(log.type) + '</td>' +
+          '<td><span class="krds-badge small bg-light-' + meta.cls + '">' + meta.label + '</span></td>' +
+          '<td><button class="krds-btn xsmall secondary" type="button" data-idx="' + LOGS.indexOf(log) + '">상세보기</button></td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    function openModal(idx) {
+      var log = LOGS[idx];
+      var meta = STATUS_META[log.status];
+      var detectedHtml = log.detected.length > 0
+        ? '<ul class="audit-log__detected-list">' + log.detected.map(function (d) { return '<li>' + escapeHtml(d) + '</li>'; }).join('') + '</ul>'
+        : '<p class="audit-log__no-detect">탐지된 민감정보 없음</p>';
+
+      modalBody.innerHTML =
+        '<div class="audit-log__modal-meta">' +
+          '<div><span class="audit-log__meta-label">시간</span><span>' + log.time + '</span></div>' +
+          '<div><span class="audit-log__meta-label">사용자</span><span>' + escapeHtml(log.user) + ' · ' + escapeHtml(log.dept) + '</span></div>' +
+          '<div><span class="audit-log__meta-label">AI 모델</span><span>' + escapeHtml(log.model) + '</span></div>' +
+          '<div><span class="audit-log__meta-label">상태</span><span class="krds-badge small bg-light-' + meta.cls + '">' + meta.label + '</span></div>' +
+        '</div>' +
+        '<div class="audit-log__modal-section">' +
+          '<div class="audit-log__modal-section-label">요청 내용</div>' +
+          '<div class="audit-log__modal-text">' + escapeHtml(log.prompt) + '</div>' +
+        '</div>' +
+        '<div class="audit-log__modal-section">' +
+          '<div class="audit-log__modal-section-label">AI 응답</div>' +
+          '<div class="audit-log__modal-text">' + escapeHtml(log.response) + '</div>' +
+        '</div>' +
+        '<div class="audit-log__modal-section">' +
+          '<div class="audit-log__modal-section-label">탐지된 민감정보</div>' +
+          detectedHtml +
+        '</div>' +
+        '<div class="audit-log__modal-section">' +
+          '<div class="audit-log__modal-section-label">적용된 정책</div>' +
+          '<div class="audit-log__modal-text">' + escapeHtml(log.policy) + '</div>' +
+        '</div>';
+
+      modalOverlay.classList.add('audit-log__modal-overlay--open');
+    }
+
+    function closeModal() {
+      modalOverlay.classList.remove('audit-log__modal-overlay--open');
+    }
+
+    tbody.addEventListener('click', function (e) {
+      var el = e.target.closest('[data-idx]');
+      if (!el) return;
+      openModal(parseInt(el.getAttribute('data-idx'), 10));
+    });
+
+    modalClose.addEventListener('click', closeModal);
+    modalOverlay.addEventListener('click', function (e) {
+      if (e.target === modalOverlay) closeModal();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    [searchInput, deptSelect, modelSelect, statusSelect].forEach(function (el) {
+      el.addEventListener('input', renderTable);
+      el.addEventListener('change', renderTable);
+    });
+
+    exportBtn.addEventListener('click', function () {
+      var header = ['시간', '사용자', '부서', 'AI모델', '요청유형', '상태'];
+      var rows = LOGS.filter(matchesFilters).map(function (l) {
+        return [l.time, l.user, l.dept, l.model, l.type, STATUS_META[l.status].label];
+      });
+      var csv = [header].concat(rows).map(function (r) { return r.join(','); }).join('\n');
+      var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = '나래AI_감사로그_' + new Date().toISOString().slice(0, 10) + '.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    renderStats();
+    renderTable();
+  })();
+</script>
+        </section>
+
+      </main>
+
+    </div>
+  </div>
+
+<script src="/resources/js/script.js"></script>
+<script>
+/* ── 사이드 네비 패널 전환 ── */
+document.querySelectorAll('.nav-node__row[data-panel]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-node__row[data-panel]').forEach(b => b.classList.toggle('is-selected', b === btn));
+    document.querySelectorAll('.admin-panel').forEach(p => p.hidden = p.dataset.panel !== btn.dataset.panel);
+  });
+});
+
+/* ── 저장 버튼: 저장 완료 안내만 표시 (데모) ── */
+document.querySelectorAll('.admin-actions .krds-btn.primary').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const original = btn.textContent;
+    btn.textContent = '저장됨';
+    btn.disabled = true;
+    setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 1200);
+  });
+});
+
+/* ── ORG 데이터 기반 사용자 목록 (조직도 · 업무 테이블과 동일한 소스) ── */
+(function renderAdminUsers() {
+  const tbody = document.getElementById('adminUserRows');
+  if (!tbody || typeof ORG === 'undefined') return;
+
+  const ROLE_BADGE = {
+    '과장': 'krds-badge outline-secondary',
+    '팀장': 'krds-badge outline-secondary',
+  };
+  function roleBadge(position) {
+    return ROLE_BADGE[position] || 'krds-badge bg-light-gray';
+  }
+  function roleLabel(position) {
+    if (position === '과장' || position === '팀장') return '팀장';
+    return '담당자';
+  }
+
+  const rows = [];
+  ORG.forEach(sil => {
+    getAllLeaves(sil).forEach(leaf => {
+      (leaf.members || []).forEach(m => {
+        rows.push({ member: m, dept: leaf.name });
+      });
+    });
+  });
+
+  tbody.innerHTML = rows.map(({ member, dept }) => `
+    <tr>
+      <td><span class="col-assignee"><span class="avatar ${ownerColorClass(member.name)}">${escapeHtml(member.name.slice(0,1))}</span>${escapeHtml(member.name)}</span></td>
+      <td>${escapeHtml(dept)}</td>
+      <td>${escapeHtml(member.email)}</td>
+      <td><span class="${roleBadge(member.position)}">${roleLabel(member.position)}</span></td>
+      <td><span class="krds-badge bg-light-success">활성</span></td>
+    </tr>
+  `).join('');
+})();
+</script>
+
+</body>
+</html>

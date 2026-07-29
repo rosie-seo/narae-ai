@@ -1,0 +1,1766 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>업무 등록</title>
+  <link rel="stylesheet" href="/resources/css/custom.css"/>
+  <link href="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.css" type="text/css" rel="stylesheet"/>
+  <script src="/resources/js/component/ui-include.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.js"></script>
+  <style>
+    /* ── 등록 폼 레이아웃 ── */
+    .reg-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: var(--krds-gap-5);
+    }
+
+    /* ── 페이지 헤더 ── */
+    .reg-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--krds-gap-4);
+      flex-wrap: wrap;
+    }
+    .reg-topbar__left {
+      display: flex;
+      align-items: baseline;
+      gap: var(--krds-gap-3);
+    }
+    .reg-topbar__title {
+      font-size: var(--krds-pc-font-size-heading-small);
+      font-weight: var(--krds-font-weight-bold);
+      color: var(--krds-light-color-text-basic);
+      margin: 0;
+    }
+    .reg-topbar__id {
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      color: var(--krds-light-color-text-subtle);
+    }
+    .reg-topbar__actions {
+      display: flex;
+      align-items: center;
+      gap: var(--krds-gap-3);
+    }
+
+    /* ── 버튼 ── */
+    .btn-ghost {
+      height: var(--krds-size-height-6);
+      padding: 0 var(--krds-padding-5);
+      border: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-gray);
+      border-radius: var(--krds-radius-medium2);
+      background: var(--krds-light-color-surface-white);
+      color: var(--krds-light-color-text-basic);
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      font-family: inherit;
+      cursor: pointer;
+      transition: background var(--krds-transition-base), border-color var(--krds-transition-base);
+    }
+    .btn-ghost:hover {
+      background: var(--krds-light-color-action-secondary-hover);
+      border-color: var(--krds-light-color-action-secondary-active);
+    }
+    .btn-solid {
+      height: var(--krds-size-height-6);
+      padding: 0 var(--krds-padding-6);
+      border: none;
+      border-radius: var(--krds-radius-medium2);
+      background: var(--krds-light-color-action-secondary-active);
+      color: var(--krds-light-color-text-basic-inverse);
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      font-weight: var(--krds-font-weight-bold);
+      font-family: inherit;
+      cursor: pointer;
+      transition: background var(--krds-transition-base);
+    }
+    .btn-solid:hover { background: var(--krds-light-color-action-secondary-pressed); }
+
+    /* ── 섹션 카드 ── */
+    .reg-section {
+      border: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-gray-light);
+      border-radius: var(--krds-radius-medium3);
+      background: var(--krds-light-color-surface-white);
+      overflow: hidden;
+    }
+    .reg-section__head {
+      display: flex;
+      align-items: center;
+      gap: var(--krds-gap-3);
+      padding: var(--krds-padding-5) var(--krds-padding-7);
+      border-bottom: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-divider-gray-light);
+      background: var(--krds-light-color-background-gray-subtler);
+    }
+    .reg-section__num {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: var(--krds-light-color-action-secondary-active);
+      color: var(--krds-light-color-text-basic-inverse);
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      font-weight: var(--krds-font-weight-bold);
+      flex-shrink: 0;
+    }
+    .reg-section__title {
+      font-size: var(--krds-pc-font-size-label-small);
+      font-weight: var(--krds-font-weight-bold);
+      color: var(--krds-light-color-text-basic);
+    }
+    .reg-section__desc {
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      color: var(--krds-light-color-text-subtle);
+    }
+    .reg-section__body {
+      padding: var(--krds-padding-7);
+      display: flex;
+      flex-direction: column;
+      gap: var(--krds-gap-5);
+    }
+
+    /* ── 폼 행 ── */
+    .form-row { display: flex; flex-direction: column; gap: var(--krds-gap-2); }
+    .form-cols {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(22rem, 1fr));
+      gap: var(--krds-gap-5);
+    }
+    .form-field { display: flex; flex-direction: column; gap: var(--krds-gap-2); }
+    .form-field[hidden] { display: none; }
+    .form-label {
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      font-weight: var(--krds-font-weight-bold);
+      color: var(--krds-light-color-text-basic);
+    }
+    .req-mark { color: var(--krds-light-color-element-danger); margin-left: 2px; }
+
+    /* ── 공통 입력 ── */
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      height: var(--krds-size-height-6);
+      padding: 0 var(--krds-padding-5);
+      border: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-gray);
+      border-radius: var(--krds-radius-medium2);
+      background: var(--krds-light-color-surface-white);
+      color: var(--krds-light-color-text-basic);
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      font-family: inherit;
+      box-sizing: border-box;
+      transition: border-color var(--krds-transition-base), box-shadow var(--krds-transition-base);
+      outline: none;
+    }
+    .form-input:focus,
+    .form-select:focus { border-color: var(--krds-light-color-action-secondary-active); box-shadow: var(--krds-box-shadow-outline); }
+    .form-input[readonly],
+    .form-input:disabled { background: var(--krds-light-color-background-gray-subtler); color: var(--krds-light-color-text-subtle); cursor: default; }
+    .form-textarea {
+      height: auto;
+      min-height: 8rem;
+      padding: var(--krds-padding-4) var(--krds-padding-5);
+      resize: vertical;
+      line-height: var(--krds-line-height-normal, 1.5);
+    }
+    .form-textarea:focus { border-color: var(--krds-light-color-action-secondary-active); box-shadow: var(--krds-box-shadow-outline); }
+
+    /* ── 담당자 칩 그룹 ── */
+    .chip-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--krds-gap-2);
+      padding: var(--krds-padding-3) var(--krds-padding-4);
+      border: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-gray);
+      border-radius: var(--krds-radius-medium2);
+      background: var(--krds-light-color-surface-white);
+      min-height: var(--krds-size-height-6);
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--krds-gap-1);
+      padding: var(--krds-padding-1) var(--krds-padding-3);
+      border-radius: var(--krds-radius-max);
+      background: var(--krds-light-color-element-secondary-lighter);
+      color: var(--krds-light-color-action-secondary-active);
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      font-weight: 500;
+    }
+    .chip-close {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      color: var(--krds-light-color-text-subtle);
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+    .chip-search {
+      flex: 1;
+      min-width: 8rem;
+      border: none;
+      outline: none;
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      color: var(--krds-light-color-text-basic);
+      background: transparent;
+    }
+
+    /* ── 결재 흐름 ── */
+    .approval-flow {
+      display: flex;
+      align-items: center;
+      gap: var(--krds-gap-3);
+      flex-wrap: wrap;
+    }
+    .approval-stage {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--krds-gap-1);
+      padding: var(--krds-padding-4) var(--krds-padding-5);
+      border: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-gray-light);
+      border-radius: var(--krds-radius-medium2);
+      background: var(--krds-light-color-surface-white);
+      min-width: 7rem;
+      text-align: center;
+    }
+    .approval-stage.active {
+      border-color: var(--krds-light-color-action-secondary-active);
+      background: var(--krds-light-color-element-secondary-lighter);
+    }
+    .approval-stage__remove {
+      position: absolute;
+      top: -0.5rem;
+      right: -0.5rem;
+      width: 1.1rem;
+      height: 1.1rem;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      border: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-gray-light);
+      background: var(--krds-light-color-surface-white);
+      color: var(--krds-light-color-text-subtle);
+      font-size: 0.7rem;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .approval-stage:hover .approval-stage__remove { display: flex; }
+    .approval-stage__remove:hover { color: var(--krds-light-color-element-danger); border-color: var(--krds-light-color-element-danger); }
+
+    .approval-add-panel {
+      display: flex;
+      align-items: center;
+      gap: var(--krds-gap-3);
+      margin-top: var(--krds-gap-3);
+      padding: var(--krds-padding-4);
+      border: var(--krds-light-border-width-static-regular) dashed var(--krds-light-color-border-gray-light);
+      border-radius: var(--krds-radius-medium2);
+    }
+    .approval-add-panel[hidden] { display: none; }
+    .approval-add-panel__type { width: 10rem; flex-shrink: 0; }
+    .approval-add-panel__person { flex: 1; position: relative; }
+    .stage-label {
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      color: var(--krds-light-color-text-subtle);
+    }
+    .stage-value {
+      font-size: var(--krds-pc-font-size-label-small);
+      font-weight: var(--krds-font-weight-bold);
+      color: var(--krds-light-color-text-basic);
+    }
+    .stage-value.active { color: var(--krds-light-color-action-secondary-active); }
+    .stage-role {
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      color: var(--krds-light-color-text-subtle);
+    }
+    .flow-arrow { color: var(--krds-light-color-text-disabled); font-size: 1.6rem; }
+
+    /* ── 토글 ── */
+    .toggle-wrap { display: flex; align-items: center; gap: var(--krds-gap-2); height: var(--krds-size-height-6); }
+    .toggle-switch { position: relative; display: inline-block; width: 3.6rem; height: 2rem; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; inset: 0;
+      background: var(--krds-light-color-border-gray);
+      border-radius: var(--krds-radius-max);
+      cursor: pointer;
+      transition: background var(--krds-transition-base);
+    }
+    .toggle-slider::before {
+      content: "";
+      position: absolute;
+      width: 1.6rem; height: 1.6rem;
+      left: 2px; top: 50%; transform: translateY(-50%);
+      background: var(--krds-light-color-surface-white);
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0,0,0,.2);
+      transition: left var(--krds-transition-base);
+    }
+    .toggle-switch input:checked + .toggle-slider { background: var(--krds-light-color-action-secondary-active); }
+    .toggle-switch input:checked + .toggle-slider::before { left: calc(100% - 1.8rem); }
+
+    /* ── 절차도 테이블 ── */
+    .proc-table { width: 100%; border-collapse: collapse; }
+    .proc-table thead th {
+      padding: var(--krds-padding-3) var(--krds-padding-5);
+      text-align: left;
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      font-weight: var(--krds-font-weight-bold);
+      color: var(--krds-light-color-text-subtle);
+      background: var(--krds-light-color-background-gray-subtler);
+      border-bottom: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-gray-light);
+    }
+    .proc-table tbody td {
+      padding: var(--krds-padding-3) var(--krds-padding-5);
+      border-bottom: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-divider-gray-light);
+      vertical-align: middle;
+    }
+    .proc-table tbody tr:last-child td { border-bottom: 0; }
+    .proc-table tbody tr:hover td { background: var(--krds-light-color-action-secondary-hover); }
+    .proc-table .col-order {
+      width: 4rem; text-align: center;
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      color: var(--krds-light-color-text-subtle);
+    }
+    .proc-table .col-action { width: 3rem; text-align: center; color: var(--krds-light-color-text-disabled); cursor: pointer; transition: color var(--krds-transition-base); }
+    .proc-table .col-action:hover { color: var(--krds-light-color-element-danger); }
+    .table-input,
+    .table-select {
+      width: 100%;
+      height: var(--krds-size-height-5);
+      padding: 0 var(--krds-padding-4);
+      border: var(--krds-light-border-width-static-regular) solid transparent;
+      border-radius: var(--krds-radius-small3);
+      background: transparent;
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      font-family: inherit;
+      color: var(--krds-light-color-text-basic);
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color var(--krds-transition-base);
+    }
+    .table-input:hover,
+    .table-select:hover { border-color: var(--krds-light-color-border-gray-light); }
+    .table-input:focus,
+    .table-select:focus { border-color: var(--krds-light-color-action-secondary-active); background: var(--krds-light-color-surface-white); }
+    .btn-add-row {
+      margin-top: var(--krds-gap-3);
+      display: inline-flex;
+      align-items: center;
+      gap: var(--krds-gap-2);
+      height: var(--krds-size-height-5);
+      padding: 0 var(--krds-padding-4);
+      border: var(--krds-light-border-width-static-regular) dashed var(--krds-light-color-border-gray-light);
+      border-radius: var(--krds-radius-medium2);
+      background: transparent;
+      color: var(--krds-light-color-text-subtle);
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      font-family: inherit;
+      cursor: pointer;
+      transition: border-color var(--krds-transition-base), color var(--krds-transition-base);
+    }
+    .btn-add-row:hover { border-color: var(--krds-light-color-action-secondary-active); color: var(--krds-light-color-action-secondary-active); }
+
+    /* ── 파일 업로드 ── */
+    .upload-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--krds-gap-2);
+      padding: var(--krds-padding-7);
+      border: var(--krds-light-border-width-static-regular) dashed var(--krds-light-color-border-gray);
+      border-radius: var(--krds-radius-medium3);
+      background: var(--krds-light-color-background-gray-subtler);
+      text-align: center;
+      cursor: pointer;
+      transition: border-color var(--krds-transition-base), background var(--krds-transition-base);
+    }
+    .upload-area:hover,
+    .upload-area:focus-visible,
+    .upload-area--drag { border-color: var(--krds-light-color-action-secondary-active); background: var(--krds-light-color-action-secondary-hover); }
+    .upload-area:focus-visible { outline: none; box-shadow: var(--krds-box-shadow-outline); }
+    .upload-area__icon { font-size: 2rem; }
+    .upload-area__text { font-size: var(--krds-pc-font-size-label-xsmall); color: var(--krds-light-color-text-basic); }
+    .upload-area__hint { font-size: var(--krds-pc-font-size-label-xsmall); color: var(--krds-light-color-text-subtle); }
+    .file-list { display: flex; flex-direction: column; gap: var(--krds-gap-2); margin-top: var(--krds-gap-3); }
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: var(--krds-gap-3);
+      padding: var(--krds-padding-3) var(--krds-padding-5);
+      border: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-gray-light);
+      border-radius: var(--krds-radius-medium2);
+      background: var(--krds-light-color-surface-white);
+    }
+    .file-name {
+      flex: 1;
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      color: var(--krds-light-color-text-basic);
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .file-meta { font-size: var(--krds-pc-font-size-label-xsmall); color: var(--krds-light-color-text-subtle); white-space: nowrap; }
+    .file-ver {
+      padding: 0 var(--krds-padding-2);
+      border-radius: var(--krds-radius-xsmall1);
+      background: var(--krds-light-color-background-gray-subtler);
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      color: var(--krds-light-color-text-subtle);
+    }
+    .btn-file-del { background: none; border: none; cursor: pointer; color: var(--krds-light-color-text-disabled); font-size: 1.4rem; }
+    .btn-file-del:hover { color: var(--krds-light-color-element-danger); }
+
+    /* ── 문서별 중요도·보안 등급 뱃지 (파일 항목에 인라인으로 표시) ── */
+    .file-tag-select {
+      flex-shrink: 0;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 1.6rem;
+      /* 좌측 여백 · 글자-화살표 간격 · 우측 여백을 모두 0.5rem으로 통일해
+         화살표를 포함한 전체가 대칭으로 보이게 한다. */
+      padding: 0 1.8rem 0 0.5rem;
+      border: none;
+      border-radius: var(--krds-radius-max);
+      background-color: var(--krds-light-color-background-gray-subtler);
+      color: var(--krds-light-color-text-subtle);
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      font-weight: var(--krds-font-weight-bold);
+      font-family: inherit;
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M6 8l4 4 4-4' stroke='%23767676' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.5rem center;
+      transition: filter var(--krds-transition-base);
+    }
+    .file-tag-select:hover   { filter: brightness(0.96); }
+    .file-tag-select:focus-visible { outline: none; box-shadow: var(--krds-box-shadow-outline); }
+
+    /* 중요도: 낮음 → 보통 → 높음 → 긴급 */
+    .file-tag-select[data-role="importance"][data-level="low"]      { background-color: var(--krds-light-color-element-success-lighter); color: var(--krds-light-color-element-success); }
+    .file-tag-select[data-role="importance"][data-level="normal"]   { background-color: var(--krds-light-color-element-primary-light);  color: var(--krds-light-color-element-primary); }
+    .file-tag-select[data-role="importance"][data-level="high"]     { background-color: var(--krds-light-color-element-warning-lighter); color: var(--krds-light-color-element-warning); }
+    .file-tag-select[data-role="importance"][data-level="critical"] { background-color: var(--krds-light-color-element-danger-lighter);  color: var(--krds-light-color-element-danger); }
+
+    /* 보안 등급: 일반 → 대외비 → 비밀 */
+    .file-tag-select[data-role="security"][data-level="normal"]     { background-color: var(--krds-light-color-background-gray-subtler); color: var(--krds-light-color-text-subtle); }
+    .file-tag-select[data-role="security"][data-level="restricted"] { background-color: var(--krds-light-color-element-warning-lighter); color: var(--krds-light-color-element-warning); }
+    .file-tag-select[data-role="security"][data-level="secret"]     { background-color: var(--krds-light-color-element-danger-lighter);  color: var(--krds-light-color-element-danger); }
+
+    /* ── 하단 버튼 ── */
+    .reg-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--krds-gap-3);
+      padding-bottom: var(--krds-padding-7);
+    }
+
+    /* ── inline row (라벨 + 추가버튼 나란히) ── */
+    .inline-row { display: flex; align-items: center; gap: var(--krds-gap-3); }
+    .btn-text-link {
+      display: inline-flex; align-items: center; gap: var(--krds-gap-1);
+      background: none; border: none; cursor: pointer;
+      color: var(--krds-light-color-action-secondary-active);
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      font-family: inherit;
+    }
+    .btn-text-link:hover { text-decoration: underline; }
+    .btn-text-link[hidden] { display: none; }
+
+    /* ── 담당자 검색 드롭다운 ── */
+    .chip-group,
+    .dept-field { position: relative; }
+    .chip-suggest {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      max-height: 14rem;
+      overflow-y: auto;
+      background: var(--krds-light-color-surface-white);
+      border: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-gray-light);
+      border-radius: var(--krds-radius-medium2);
+      box-shadow: 0 4px 16px rgba(0,0,0,.12);
+      z-index: 20;
+    }
+    .chip-suggest__empty {
+      padding: var(--krds-padding-4) var(--krds-padding-5);
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      color: var(--krds-light-color-text-subtle);
+    }
+    .chip-suggest__item {
+      display: flex;
+      align-items: baseline;
+      gap: var(--krds-gap-2);
+      padding: var(--krds-padding-3) var(--krds-padding-5);
+      cursor: pointer;
+      font-size: var(--krds-pc-font-size-label-xsmall);
+    }
+    .chip-suggest__item:hover,
+    .chip-suggest__item.is-active { background: var(--krds-light-color-action-secondary-hover); }
+    .chip-suggest__name { font-weight: var(--krds-font-weight-bold); color: var(--krds-light-color-text-basic); }
+    .chip-suggest__dept { color: var(--krds-light-color-text-subtle); }
+
+    /* ── 소속 부서: 조직도 트리 선택기 ── */
+    .dept-tree { padding: var(--krds-padding-2) 0; }
+    .dept-tree-row {
+      display: flex;
+      align-items: center;
+      gap: var(--krds-gap-2);
+      padding: var(--krds-padding-2) var(--krds-padding-5);
+      padding-left: calc(var(--krds-padding-5) + (var(--depth) * 1.1rem));
+      cursor: pointer;
+      font-size: var(--krds-pc-font-size-label-xsmall);
+    }
+    .dept-tree-row:hover { background: var(--krds-light-color-action-secondary-hover); }
+    .dept-tree-caret {
+      width: 14px;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--krds-light-color-text-subtle);
+      transition: transform var(--krds-transition-base);
+      font-size: 10px;
+    }
+    .dept-tree-row.is-open .dept-tree-caret { transform: rotate(90deg); }
+    .dept-tree-row--group .dept-tree-label { font-weight: var(--krds-font-weight-bold); color: var(--krds-light-color-text-basic); }
+    .dept-tree-row--leaf { color: var(--krds-light-color-text-basic); }
+    .dept-tree-row.is-selected { background: var(--krds-light-color-element-secondary-lighter); }
+    .dept-tree-row.is-selected .dept-tree-label { color: var(--krds-light-color-action-secondary-active); font-weight: var(--krds-font-weight-bold); }
+
+    /* ── 비활성 select ── */
+    .form-select:disabled {
+      background: var(--krds-light-color-background-gray-subtler);
+      color: var(--krds-light-color-text-subtle);
+      cursor: not-allowed;
+    }
+
+    /* ── 필드 보조 설명 ── */
+    .field-hint {
+      font-size: var(--krds-pc-font-size-label-xsmall);
+      color: var(--krds-light-color-text-subtle);
+      margin: 0;
+    }
+
+    /* ── 필수값 누락 강조 ── */
+    .form-field--invalid .form-input,
+    .form-field--invalid .form-select,
+    .form-field--invalid .chip-group,
+    .form-field--invalid .approval-flow {
+      border-color: var(--krds-light-color-element-danger) !important;
+      box-shadow: 0 0 0 1px var(--krds-light-color-element-danger);
+    }
+
+    /* ── 저장/등록 토스트 ── */
+    .reg-toast-wrap {
+      position: fixed;
+      left: 50%;
+      bottom: 2rem;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--krds-gap-2);
+      z-index: 4000;
+      pointer-events: none;
+    }
+    .reg-toast {
+      display: flex;
+      align-items: center;
+      gap: var(--krds-gap-2);
+      padding: var(--krds-padding-4) var(--krds-padding-6);
+      border-radius: var(--krds-radius-medium2);
+      background: var(--krds-light-color-text-basic);
+      color: var(--krds-light-color-text-basic-inverse);
+      font-size: var(--krds-pc-font-size-label-small);
+      box-shadow: 0 6px 20px rgba(0,0,0,.18);
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity .2s ease, transform .2s ease;
+    }
+    .reg-toast.show { opacity: 1; transform: translateY(0); }
+    .reg-toast--error { background: var(--krds-light-color-element-danger); }
+    .reg-toast--success { background: var(--krds-light-color-element-success); }
+  </style>
+</head>
+<body>
+
+  <div class="operating-container">
+
+    <div data-include="/html/code/header.html"></div>
+
+    <div class="organization-container">
+
+      <!-- 사이드 네비게이션 -->
+      <nav class="side-nav" aria-label="업무 네비게이션">
+        <ul class="nav-tree" role="list">
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <a href="/resources/pages/operating.html" class="nav-node__row" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">업무 테이블</span>
+            </a>
+          </li>
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <a href="/resources/pages/operating-registeration.html" class="nav-node__row is-selected" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">업무 등록</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- 메인 콘텐츠 -->
+      <main class="main">
+        <div class="reg-wrap">
+
+          <!-- 페이지 헤더 -->
+          <div class="reg-topbar">
+            <div class="reg-topbar__left">
+              <h1 class="reg-topbar__title">업무 등록</h1>
+              <span class="reg-topbar__id">STD-2026-0142</span>
+            </div>
+            <div class="reg-topbar__actions">
+              <button class="btn-ghost btn-list" type="button">목록</button>
+              <button class="btn-ghost btn-draft" type="button">임시저장</button>
+              <button class="btn-solid btn-submit" type="button">등록</button>
+            </div>
+          </div>
+
+          <!-- Section 1: 기본 정보 -->
+          <div class="reg-section">
+            <div class="reg-section__head">
+              <span class="reg-section__num">1</span>
+              <span class="reg-section__title">기본 정보</span>
+              <span class="reg-section__desc">업무 기본정보</span>
+            </div>
+            <div class="reg-section__body">
+
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-label">업무명<span class="req-mark">*</span></label>
+                  <input type="text" class="form-input" id="fieldTaskName" placeholder="예) 2026년도 예산안 사전 기획 및 지침 수립">
+                </div>
+              </div>
+
+              <div class="form-cols">
+                <div class="form-field">
+                  <label class="form-label">업무 구분<span class="req-mark">*</span></label>
+                  <select class="form-select" id="fieldTaskType">
+                    <option selected>정기 업무</option>
+                    <option>수시 업무</option>
+                    <option>프로젝트 업무</option>
+                    <option>지시사항 처리</option>
+                    <option>협조 요청</option>
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">소속 부서<span class="req-mark">*</span></label>
+                  <div class="dept-field" id="deptField">
+                    <input type="text" class="form-input" id="deptSearch" value="기획조정실 › 정책기획관 › 기획예산담당관" placeholder="부서명으로 검색" autocomplete="off">
+                    <div class="chip-suggest" id="deptSuggest" hidden></div>
+                  </div>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">회계연도</label>
+                  <select class="form-select" id="fieldFiscalYear">
+                    <option>2024년</option>
+                    <option>2025년</option>
+                    <option selected>2026년</option>
+                    <option>2027년</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-cols">
+                <div class="form-field">
+                  <label class="form-label">업무 ID</label>
+                  <input type="text" class="form-input" value="STD-2026-0142" readonly>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">관리 상태</label>
+                  <select class="form-select" id="fieldManageStatus">
+                    <option selected>사용</option>
+                    <option>미사용</option>
+                    <option>보류</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-label">업무 설명</label>
+                  <textarea class="form-textarea" id="fieldTaskDesc" placeholder="예) 2026년도 예산안 편성을 위한 부서별 사전 기획 방향과 제출 지침을 수립한다."></textarea>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Section 2: 업무 담당·주기 -->
+          <div class="reg-section">
+            <div class="reg-section__head">
+              <span class="reg-section__num">2</span>
+              <span class="reg-section__title">업무 담당·주기</span>
+              <span class="reg-section__desc">담당자 및 주기 설정</span>
+            </div>
+            <div class="reg-section__body">
+
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-label">업무 담당<span class="req-mark">*</span></label>
+                  <div class="chip-group" id="assigneeGroup">
+                    <input type="text" class="chip-search" id="assigneeSearch" placeholder="이름으로 검색" autocomplete="off">
+                    <div class="chip-suggest" id="assigneeSuggest" hidden></div>
+                  </div>
+                  <p class="field-hint">이름을 입력하면 조직 내 담당자를 검색해서 추가할 수 있습니다.</p>
+                </div>
+              </div>
+
+              <div class="form-cols">
+                <div class="form-field">
+                  <label class="form-label">업무 주기<span class="req-mark">*</span></label>
+                  <select class="form-select" id="fieldCycle">
+                    <option value="adhoc" selected>수시 (1회성)</option>
+                    <option value="regular">정기 (반복)</option>
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">반복 단위</label>
+                  <select class="form-select" id="fieldFrequency" disabled>
+                    <option value="daily">매일</option>
+                    <option value="weekly">매주</option>
+                    <option value="biweekly">격주</option>
+                    <option value="monthly" selected>매월</option>
+                    <option value="quarterly">분기</option>
+                    <option value="halfyear">반기</option>
+                    <option value="yearly">연 1회</option>
+                  </select>
+                </div>
+                <div class="form-field" id="fieldWeekdayWrap" hidden>
+                  <label class="form-label">반복 요일</label>
+                  <select class="form-select" id="fieldWeekday">
+                    <option>월요일</option>
+                    <option>화요일</option>
+                    <option>수요일</option>
+                    <option>목요일</option>
+                    <option selected>금요일</option>
+                    <option>토요일</option>
+                    <option>일요일</option>
+                  </select>
+                </div>
+                <div class="form-field" id="fieldMonthDayWrap" hidden>
+                  <label class="form-label">반복 기준일</label>
+                  <select class="form-select" id="fieldMonthDay">
+                    <option>1일</option>
+                    <option>5일</option>
+                    <option>10일</option>
+                    <option>15일</option>
+                    <option>20일</option>
+                    <option selected>25일</option>
+                    <option>말일</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-cols">
+                <div class="form-field">
+                  <label class="form-label">시작일<span class="req-mark">*</span></label>
+                  <input type="date" class="form-input" id="fieldStartDate" value="2026-01-15">
+                </div>
+                <div class="form-field">
+                  <label class="form-label">종료일</label>
+                  <input type="date" class="form-input" id="fieldEndDate" value="2026-06-20">
+                </div>
+                <div class="form-field">
+                  <label class="form-label">상시 여부</label>
+                  <div class="toggle-wrap">
+                    <label class="toggle-switch">
+                      <input type="checkbox" id="fieldOngoing">
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                  <p class="field-hint">켜면 종료일 없이 계속 진행되는 업무로 등록됩니다.</p>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">처리기한</label>
+                  <select class="form-select" id="fieldDueRule">
+                    <option>즉시</option>
+                    <option>익일까지</option>
+                    <option>접수 후 3일 이내</option>
+                    <option>접수 후 7일 이내</option>
+                    <option>접수 후 14일 이내</option>
+                    <option selected>반복 주기 종료일까지</option>
+                  </select>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Section 3: 전결사항·절차도 -->
+          <div class="reg-section">
+            <div class="reg-section__head">
+              <span class="reg-section__num">3</span>
+              <span class="reg-section__title">전결사항·절차도</span>
+              <span class="reg-section__desc">결재 경로와 절차 설정</span>
+            </div>
+            <div class="reg-section__body">
+
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-label">전결사항<span class="req-mark">*</span></label>
+                  <div class="approval-flow" id="approvalFlow">
+                    <button class="btn-text-link" type="button" id="btnAddApproval">+ 결재선 추가</button>
+                  </div>
+                  <div class="approval-add-panel" id="approvalAddPanel" hidden>
+                    <select class="form-select approval-add-panel__type" id="approvalStageType">
+                      <option value="draft">기안</option>
+                      <option value="review" selected>검토</option>
+                      <option value="coop">협조</option>
+                      <option value="final">전결 (최종승인)</option>
+                    </select>
+                    <div class="chip-group approval-add-panel__person" id="approvalPersonField">
+                      <input type="text" class="chip-search" id="approvalPersonSearch" placeholder="이름으로 검색" autocomplete="off">
+                      <div class="chip-suggest" id="approvalPersonSuggest" hidden></div>
+                    </div>
+                    <button class="btn-ghost" type="button" id="btnCancelApproval">취소</button>
+                  </div>
+                  <p class="field-hint">기안 → 검토(·협조) → 전결 순으로 결재선을 추가하세요. 기안·전결은 각각 한 명만 지정할 수 있습니다.</p>
+                </div>
+              </div>
+
+              <div class="form-cols">
+                <div class="form-field">
+                  <label class="form-label">전결 구분</label>
+                  <select class="form-select" id="approvalLevel">
+                    <option>담당자 전결</option>
+                    <option selected>팀장 전결</option>
+                    <option>부서장 전결</option>
+                    <option>실장 전결</option>
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">대결자 지정</label>
+                  <div class="toggle-wrap">
+                    <label class="toggle-switch">
+                      <input type="checkbox" id="fieldDelegate">
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-field">
+                  <div class="inline-row">
+                    <label class="form-label">절차도</label>
+                  </div>
+                  <table class="proc-table" id="procTable">
+                    <thead>
+                      <tr>
+                        <th class="col-order">순서</th>
+                        <th>단계명</th>
+                        <th>담당</th>
+                        <th>선행 조건</th>
+                        <th class="col-action"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="col-order">1</td>
+                        <td><input type="text" class="table-input" value="접수"></td>
+                        <td><select class="table-select"><option selected>주담당</option><option>협조담당</option></select></td>
+                        <td><input type="text" class="table-input" value="-"></td>
+                        <td class="col-action btn-row-del" title="이 단계 삭제">✕</td>
+                      </tr>
+                      <tr>
+                        <td class="col-order">2</td>
+                        <td><input type="text" class="table-input" value="검토"></td>
+                        <td><select class="table-select"><option>주담당</option><option selected>협조담당</option></select></td>
+                        <td><input type="text" class="table-input" value="접수 완료"></td>
+                        <td class="col-action btn-row-del" title="이 단계 삭제">✕</td>
+                      </tr>
+                      <tr>
+                        <td class="col-order">3</td>
+                        <td><input type="text" class="table-input" value="승인"></td>
+                        <td><select class="table-select"><option selected>주담당</option><option>협조담당</option></select></td>
+                        <td><input type="text" class="table-input" value="검토 완료"></td>
+                        <td class="col-action btn-row-del" title="이 단계 삭제">✕</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <button class="btn-add-row" type="button" id="btnAddStep">+ 단계 추가</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Section 4: 양식·중요도·보안 -->
+          <div class="reg-section">
+            <div class="reg-section__head">
+              <span class="reg-section__num">4</span>
+              <span class="reg-section__title">양식·중요도·보안</span>
+              <span class="reg-section__desc">첨부 문서마다 중요도와 보안 등급을 지정하세요</span>
+            </div>
+            <div class="reg-section__body">
+
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-label">양식</label>
+                  <div class="upload-area" id="uploadFormArea" tabindex="0" role="button" aria-label="양식 파일 업로드 영역, 클릭하거나 파일을 끌어다 놓으세요">
+                    <input type="file" class="upload-input" id="uploadFormInput" accept=".hwp,.docx,.xlsx,.pdf" multiple hidden>
+                    <span class="upload-area__icon">📎</span>
+                    <p class="upload-area__text">파일을 드래그하거나 클릭하여 업로드</p>
+                    <p class="upload-area__hint">HWP · DOCX · XLSX · PDF · 최대 20MB</p>
+                  </div>
+                  <div class="file-list" id="uploadFormList">
+                    <div class="file-item">
+                      <span>📄</span>
+                      <span class="file-name">업무매뉴얼_표준서식.hwp</span>
+                      <span class="file-ver">v2</span>
+                      <span class="file-meta">128KB · 2026-05-12</span>
+                      <select class="file-tag-select" data-role="importance" title="중요도">
+                        <option selected>낮음</option>
+                        <option>보통</option>
+                        <option>높음</option>
+                        <option>긴급</option>
+                      </select>
+                      <select class="file-tag-select" data-role="security" title="보안 등급">
+                        <option selected>일반</option>
+                        <option>대외비</option>
+                        <option>3급비밀</option>
+                        <option>2급비밀</option>
+                        <option>1급비밀</option>
+                      </select>
+                      <button class="btn-file-del" type="button">✕</button>
+                    </div>
+                    <div class="file-item">
+                      <span>📄</span>
+                      <span class="file-name">경과보고서_양식.xlsx</span>
+                      <span class="file-ver">v1</span>
+                      <span class="file-meta">56KB · 2026-05-12</span>
+                      <select class="file-tag-select" data-role="importance" title="중요도">
+                        <option>낮음</option>
+                        <option selected>보통</option>
+                        <option>높음</option>
+                        <option>긴급</option>
+                      </select>
+                      <select class="file-tag-select" data-role="security" title="보안 등급">
+                        <option selected>일반</option>
+                        <option>대외비</option>
+                        <option>3급비밀</option>
+                        <option>2급비밀</option>
+                        <option>1급비밀</option>
+                      </select>
+                      <button class="btn-file-del" type="button">✕</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-cols">
+                <div class="form-field">
+                  <label class="form-label">공유 범위</label>
+                  <select class="form-select" id="fieldShareScope">
+                    <option>담당자만 열람</option>
+                    <option selected>부서 내 공유</option>
+                    <option>기관 전체 공유</option>
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">다운로드 제약</label>
+                  <div class="toggle-wrap">
+                    <label class="toggle-switch">
+                      <input type="checkbox" id="fieldDownloadLock">
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">워터마크</label>
+                  <div class="toggle-wrap">
+                    <label class="toggle-switch">
+                      <input type="checkbox" id="fieldWatermark" checked>
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Section 5: 관련 규정·계획 -->
+          <div class="reg-section">
+            <div class="reg-section__head">
+              <span class="reg-section__num">5</span>
+              <span class="reg-section__title">관련 규정·계획</span>
+              <span class="reg-section__desc">이 업무의 근거·연계 문서 첨부</span>
+            </div>
+            <div class="reg-section__body">
+
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-label">근거 규정</label>
+                  <div class="upload-area" id="uploadRegulationArea" tabindex="0" role="button" aria-label="근거 규정 파일 업로드 영역, 클릭하거나 파일을 끌어다 놓으세요">
+                    <input type="file" class="upload-input" id="uploadRegulationInput" accept=".hwp,.docx,.pdf" multiple hidden>
+                    <span class="upload-area__icon">📎</span>
+                    <p class="upload-area__text">규정 문서를 드래그하거나 클릭하여 첨부</p>
+                    <p class="upload-area__hint">HWP · DOCX · PDF · 최대 20MB</p>
+                  </div>
+                  <div class="file-list" id="uploadRegulationList">
+                    <div class="file-item">
+                      <span>📄</span>
+                      <span class="file-name">업무처리 운영규정.hwp</span>
+                      <span class="file-ver">v3</span>
+                      <span class="file-meta">84KB · 2026-05-10</span>
+                      <select class="file-tag-select" data-role="importance" title="중요도">
+                        <option>낮음</option>
+                        <option selected>보통</option>
+                        <option>높음</option>
+                        <option>긴급</option>
+                      </select>
+                      <select class="file-tag-select" data-role="security" title="보안 등급">
+                        <option>일반</option>
+                        <option selected>대외비</option>
+                        <option>3급비밀</option>
+                        <option>2급비밀</option>
+                        <option>1급비밀</option>
+                      </select>
+                      <button class="btn-file-del" type="button">✕</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-label">연계 계획</label>
+                  <div class="upload-area" id="uploadPlanArea" tabindex="0" role="button" aria-label="연계 계획 파일 업로드 영역, 클릭하거나 파일을 끌어다 놓으세요">
+                    <input type="file" class="upload-input" id="uploadPlanInput" accept=".hwp,.docx,.pdf,.pptx" multiple hidden>
+                    <span class="upload-area__icon">📎</span>
+                    <p class="upload-area__text">계획 문서를 드래그하거나 클릭하여 첨부</p>
+                    <p class="upload-area__hint">HWP · DOCX · PDF · PPTX · 최대 20MB</p>
+                  </div>
+                  <div class="file-list" id="uploadPlanList">
+                    <div class="file-item">
+                      <span>📄</span>
+                      <span class="file-name">2026년 하반기 조직혁신 추진계획.pdf</span>
+                      <span class="file-ver">v1</span>
+                      <span class="file-meta">3.2MB · 2026-06-01</span>
+                      <select class="file-tag-select" data-role="importance" title="중요도">
+                        <option>낮음</option>
+                        <option>보통</option>
+                        <option selected>높음</option>
+                        <option>긴급</option>
+                      </select>
+                      <select class="file-tag-select" data-role="security" title="보안 등급">
+                        <option>일반</option>
+                        <option selected>대외비</option>
+                        <option>3급비밀</option>
+                        <option>2급비밀</option>
+                        <option>1급비밀</option>
+                      </select>
+                      <button class="btn-file-del" type="button">✕</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- 하단 버튼 -->
+          <div class="reg-footer">
+            <button class="btn-ghost btn-list" type="button">목록</button>
+            <button class="btn-ghost btn-draft" type="button">임시저장</button>
+            <button class="btn-solid btn-submit" type="button">등록</button>
+          </div>
+
+        </div>
+      </main>
+
+    </div>
+  </div>
+
+  <div class="reg-toast-wrap" id="regToastWrap"></div>
+
+<script>
+(function () {
+  /* ── 담당자 검색 ──────────────────────────────────────────── */
+  var DIRECTORY = [
+    { name:'김민준', dept:'기획조정실 · 기획예산담당관', role:'과장' },
+    { name:'이서연', dept:'기획조정실 · 기획예산담당관', role:'담당자' },
+    { name:'박지훈', dept:'기획조정실 · 기획예산담당관', role:'담당자' },
+    { name:'최수아', dept:'기획조정실 · 기획예산담당관', role:'담당자' },
+    { name:'정태양', dept:'기획조정실 · 기획예산담당관', role:'담당자' },
+    { name:'한도윤', dept:'기획조정실 · 기획예산담당관', role:'담당자' },
+    { name:'오시우', dept:'기획조정실 · 기획예산담당관', role:'담당자' },
+    { name:'임나은', dept:'기획조정실 · 기획예산담당관', role:'담당자' },
+    { name:'황민호', dept:'운영지원실 · 인사과', role:'과장' },
+    { name:'천소희', dept:'운영지원실 · 인사과', role:'담당자' },
+    { name:'변준서', dept:'운영지원실 · 인사과', role:'담당자' },
+    { name:'석다은', dept:'운영지원실 · 인사과', role:'담당자' },
+    { name:'진수빈', dept:'운영지원실 · 재무과', role:'과장' },
+    { name:'마이준', dept:'운영지원실 · 재무과', role:'담당자' },
+    { name:'선가람', dept:'운영지원실 · 재무과', role:'담당자' },
+    { name:'용태민', dept:'운영지원실 · 재무과', role:'담당자' },
+    { name:'배민호', dept:'감사실 · 일반감사과', role:'과장' },
+    { name:'신소희', dept:'감사실 · 일반감사과', role:'담당자' },
+    { name:'장준서', dept:'감사실 · 일반감사과', role:'담당자' },
+    { name:'조다은', dept:'감사실 · 일반감사과', role:'담당자' },
+    { name:'박정우', dept:'정책홍보실 · 언론홍보과', role:'과장' },
+    { name:'유서아', dept:'정책홍보실 · 언론홍보과', role:'담당자' },
+    { name:'이수민', dept:'정책홍보실 · 언론홍보과', role:'담당자' },
+    { name:'한여울', dept:'정책홍보실 · 언론홍보과', role:'담당자' },
+  ];
+
+  var assignees = [];
+
+  var groupEl   = document.getElementById('assigneeGroup');
+  var searchEl  = document.getElementById('assigneeSearch');
+  var suggestEl = document.getElementById('assigneeSuggest');
+
+  function renderChips() {
+    groupEl.querySelectorAll('.chip').forEach(function (el) { el.remove(); });
+    assignees.forEach(function (a) {
+      var chip = document.createElement('span');
+      chip.className = 'chip';
+      chip.dataset.name = a.name;
+      chip.textContent = a.name + ' (' + a.role + ') ';
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'chip-close';
+      btn.setAttribute('aria-label', a.name + ' 제거');
+      btn.textContent = '×';
+      chip.appendChild(btn);
+      groupEl.insertBefore(chip, searchEl);
+    });
+  }
+
+  function renderSuggest(query) {
+    var q = query.trim();
+    if (!q) { suggestEl.hidden = true; suggestEl.innerHTML = ''; return; }
+    var picked = assignees.map(function (a) { return a.name; });
+    var matches = DIRECTORY.filter(function (p) {
+      return p.name.indexOf(q) !== -1 && picked.indexOf(p.name) === -1;
+    }).slice(0, 8);
+
+    suggestEl.innerHTML = matches.length
+      ? matches.map(function (p) {
+          return '<div class="chip-suggest__item" data-name="' + p.name + '" data-role="' + p.role + '">' +
+            '<span class="chip-suggest__name">' + p.name + '</span>' +
+            '<span class="chip-suggest__dept">' + p.dept + ' · ' + p.role + '</span>' +
+          '</div>';
+        }).join('')
+      : '<div class="chip-suggest__empty">검색 결과가 없습니다.</div>';
+    suggestEl.hidden = false;
+  }
+
+  searchEl.addEventListener('input', function () { renderSuggest(searchEl.value); });
+  searchEl.addEventListener('focus', function () { if (searchEl.value.trim()) renderSuggest(searchEl.value); });
+
+  suggestEl.addEventListener('click', function (e) {
+    var item = e.target.closest('.chip-suggest__item');
+    if (!item) return;
+    assignees.push({ name: item.dataset.name, role: item.dataset.role });
+    renderChips();
+    searchEl.value = '';
+    suggestEl.hidden = true;
+    suggestEl.innerHTML = '';
+    searchEl.focus();
+  });
+
+  groupEl.addEventListener('click', function (e) {
+    var btn = e.target.closest('.chip-close');
+    if (!btn) return;
+    var name = btn.closest('.chip').dataset.name;
+    assignees = assignees.filter(function (a) { return a.name !== name; });
+    renderChips();
+  });
+
+  document.addEventListener('click', function (e) {
+    if (!groupEl.contains(e.target)) suggestEl.hidden = true;
+  });
+
+  renderChips();
+
+  /* ── 소속 부서: 조직도 트리 선택기 ────────────────────────── */
+  var DEPT_TREE = [
+    { name:'기획조정실', children:[
+      { name:'정책기획관', children:[
+        { name:'기획예산담당관' }, { name:'혁신행정담당관' }, { name:'정보화담당관' },
+      ]},
+      { name:'국제협력관', children:[
+        { name:'국제협력담당관' }, { name:'통상지원담당관' },
+      ]},
+    ]},
+    { name:'운영지원실', children:[
+      { name:'총무국', children:[
+        { name:'인사과' }, { name:'재무과' }, { name:'총무과' },
+      ]},
+      { name:'정보관리국', children:[
+        { name:'시스템운영과' }, { name:'데이터관리과' },
+      ]},
+    ]},
+    { name:'감사실', children:[
+      { name:'감사담당관', children:[
+        { name:'일반감사과' }, { name:'청렴조사과' },
+      ]},
+    ]},
+    { name:'정책홍보실', children:[
+      { name:'홍보전략관', children:[
+        { name:'언론홍보과' }, { name:'뉴미디어담당관' },
+      ]},
+      { name:'대국민소통관', children:[
+        { name:'민원지원과' }, { name:'소통협력과' },
+      ]},
+    ]},
+    { name:'연구기획실', children:[
+      { name:'정책연구관', children:[
+        { name:'정책분석과' }, { name:'입법연구과' },
+      ]},
+      { name:'미래전략관', children:[
+        { name:'미래전략과' },
+      ]},
+    ]},
+  ];
+
+  var deptFieldEl    = document.getElementById('deptField');
+  var deptSearchEl   = document.getElementById('deptSearch');
+  var deptSuggestEl  = document.getElementById('deptSuggest');
+  var deptOpenState  = {};   // node.name -> true/false (기본은 열림)
+  var deptSelected   = deptSearchEl.value;
+  var deptQuery      = '';  // 실제 타이핑한 검색어만 필터링에 사용 (열려있던 값과 분리)
+
+  function deptMatches(node, q, path) {
+    var full = path.concat(node.name).join(' › ');
+    if (!node.children) return full.indexOf(q) !== -1 || node.name.indexOf(q) !== -1;
+    return node.children.some(function (c) { return deptMatches(c, q, path.concat(node.name)); });
+  }
+
+  function renderDeptNode(node, depth, path, q) {
+    if (q && !deptMatches(node, q, path)) return '';
+    var full = path.concat(node.name).join(' › ');
+    if (!node.children) {
+      var isSelected = full === deptSelected;
+      return '<div class="dept-tree-row dept-tree-row--leaf' + (isSelected ? ' is-selected' : '') + '"' +
+        ' style="--depth:' + depth + '" data-full="' + full + '">' +
+        '<span class="dept-tree-caret"></span>' +
+        '<span class="dept-tree-label">' + node.name + '</span>' +
+      '</div>';
+    }
+    var isOpen = q ? true : deptOpenState[node.name] !== false;
+    var childrenHtml = isOpen ? node.children.map(function (c) { return renderDeptNode(c, depth + 1, path.concat(node.name), q); }).join('') : '';
+    var isGroupSelected = full === deptSelected;
+    return '<div class="dept-tree-row dept-tree-row--group' + (isOpen ? ' is-open' : '') + (isGroupSelected ? ' is-selected' : '') + '"' +
+      ' style="--depth:' + depth + '" data-group="' + node.name + '" data-full="' + full + '">' +
+      '<span class="dept-tree-caret">▸</span>' +
+      '<span class="dept-tree-label">' + node.name + '</span>' +
+    '</div>' + childrenHtml;
+  }
+
+  function renderDeptTree(query) {
+    var q = query.trim();
+    var html = DEPT_TREE.map(function (n) { return renderDeptNode(n, 0, [], q); }).join('');
+    deptSuggestEl.innerHTML = html || '<div class="chip-suggest__empty">검색 결과가 없습니다.</div>';
+    deptSuggestEl.hidden = false;
+  }
+
+  deptSearchEl.addEventListener('input', function () { deptQuery = deptSearchEl.value; renderDeptTree(deptQuery); });
+  deptSearchEl.addEventListener('focus', function () { deptQuery = ''; renderDeptTree(deptQuery); });
+
+  deptSuggestEl.addEventListener('click', function (e) {
+    var leaf = e.target.closest('.dept-tree-row--leaf');
+    if (leaf) {
+      deptSelected = leaf.dataset.full;
+      deptSearchEl.value = deptSelected;
+      deptQuery = '';
+      deptSuggestEl.hidden = true;
+      deptSuggestEl.innerHTML = '';
+      return;
+    }
+    var group = e.target.closest('.dept-tree-row--group');
+    if (group) {
+      var name = group.dataset.group;
+      deptOpenState[name] = deptOpenState[name] === false;
+      deptSelected = group.dataset.full;
+      deptSearchEl.value = deptSelected;
+      renderDeptTree(deptQuery);
+    }
+  });
+
+  document.addEventListener('click', function (e) {
+    if (deptFieldEl.contains(e.target)) return;
+    deptSuggestEl.hidden = true;
+    deptSearchEl.value = deptSelected; // 선택 없이 닫으면 마지막으로 확정된 부서로 되돌린다
+  });
+
+  /* ── 업무 주기 ↔ 반복 단위·반복 요일·반복 기준일 ──────────── */
+  var cycleSelect   = document.getElementById('fieldCycle');
+  var freqSelect    = document.getElementById('fieldFrequency');
+  var weekdayWrap   = document.getElementById('fieldWeekdayWrap');
+  var monthDayWrap  = document.getElementById('fieldMonthDayWrap');
+
+  function syncCycleFields() {
+    var isRegular = cycleSelect.value === 'regular';
+    freqSelect.disabled = !isRegular;
+
+    if (!isRegular) {
+      weekdayWrap.hidden = true;
+      monthDayWrap.hidden = true;
+      return;
+    }
+    var unit = freqSelect.value;
+    var isWeekly = unit === 'weekly' || unit === 'biweekly';
+    weekdayWrap.hidden  = !isWeekly;
+    monthDayWrap.hidden = isWeekly || unit === 'daily';
+  }
+
+  cycleSelect.addEventListener('change', syncCycleFields);
+  freqSelect.addEventListener('change', syncCycleFields);
+  syncCycleFields();
+
+  /* ── 시작일 ↔ 종료일·상시 여부 ────────────────────────────── */
+  var startDateInput = document.getElementById('fieldStartDate');
+  var endDateInput    = document.getElementById('fieldEndDate');
+  var ongoingCheck    = document.getElementById('fieldOngoing');
+
+  ongoingCheck.addEventListener('change', function () {
+    endDateInput.disabled = ongoingCheck.checked;
+  });
+
+  startDateInput.addEventListener('change', function () {
+    endDateInput.min = startDateInput.value;
+  });
+  endDateInput.min = startDateInput.value;
+
+  /* ── 전결사항: 결재선 추가·삭제 ───────────────────────────── */
+  var STAGE_LABEL = { draft: '기안', review: '검토', coop: '협조', final: '전결' };
+  var approvalStages = [];   // { type, name, role }
+
+  var approvalFlowEl     = document.getElementById('approvalFlow');
+  var addApprovalBtn     = document.getElementById('btnAddApproval');
+  var addPanelEl         = document.getElementById('approvalAddPanel');
+  var stageTypeSelect    = document.getElementById('approvalStageType');
+  var approvalPersonEl   = document.getElementById('approvalPersonField');
+  var personSearchEl     = document.getElementById('approvalPersonSearch');
+  var personSuggestEl    = document.getElementById('approvalPersonSuggest');
+  var cancelApprovalBtn  = document.getElementById('btnCancelApproval');
+  var approvalLevelSelect = document.getElementById('approvalLevel');
+
+  function finalRoleLabel() {
+    var text = approvalLevelSelect.options[approvalLevelSelect.selectedIndex].text;
+    return text.replace('전결', '').trim() || '전결권자';
+  }
+
+  function renderApprovalFlow() {
+    Array.from(approvalFlowEl.children).forEach(function (el) {
+      if (el !== addApprovalBtn) el.remove();
+    });
+    approvalStages.forEach(function (stage, i) {
+      if (i > 0) {
+        var arrow = document.createElement('span');
+        arrow.className = 'flow-arrow';
+        arrow.textContent = '→';
+        approvalFlowEl.insertBefore(arrow, addApprovalBtn);
+      }
+      var isFinal = stage.type === 'final';
+      var box = document.createElement('div');
+      box.className = 'approval-stage' + (isFinal ? ' active' : '');
+      box.innerHTML =
+        '<button class="approval-stage__remove" type="button" data-i="' + i + '" aria-label="' + stage.name + ' 결재선 삭제">×</button>' +
+        '<span class="stage-label">' + STAGE_LABEL[stage.type] + '</span>' +
+        '<span class="stage-value' + (isFinal ? ' active' : '') + '">' + stage.name + '</span>' +
+        '<span class="stage-role">' + (isFinal ? finalRoleLabel() : stage.role) + '</span>';
+      approvalFlowEl.insertBefore(box, addApprovalBtn);
+    });
+  }
+
+  function openApprovalPanel() {
+    addPanelEl.hidden = false;
+    addApprovalBtn.hidden = true;
+    personSearchEl.value = '';
+    personSearchEl.focus();
+  }
+  function closeApprovalPanel() {
+    addPanelEl.hidden = true;
+    addApprovalBtn.hidden = false;
+    personSuggestEl.hidden = true;
+    personSuggestEl.innerHTML = '';
+  }
+
+  addApprovalBtn.addEventListener('click', openApprovalPanel);
+  cancelApprovalBtn.addEventListener('click', closeApprovalPanel);
+
+  function renderApprovalSuggest(query) {
+    var q = query.trim();
+    if (!q) { personSuggestEl.hidden = true; personSuggestEl.innerHTML = ''; return; }
+    var matches = DIRECTORY.filter(function (p) { return p.name.indexOf(q) !== -1; }).slice(0, 8);
+    personSuggestEl.innerHTML = matches.length
+      ? matches.map(function (p) {
+          return '<div class="chip-suggest__item" data-name="' + p.name + '" data-role="' + p.role + '">' +
+            '<span class="chip-suggest__name">' + p.name + '</span>' +
+            '<span class="chip-suggest__dept">' + p.dept + ' · ' + p.role + '</span>' +
+          '</div>';
+        }).join('')
+      : '<div class="chip-suggest__empty">검색 결과가 없습니다.</div>';
+    personSuggestEl.hidden = false;
+  }
+
+  personSearchEl.addEventListener('input', function () { renderApprovalSuggest(personSearchEl.value); });
+  personSearchEl.addEventListener('focus', function () { renderApprovalSuggest(personSearchEl.value); });
+
+  personSuggestEl.addEventListener('click', function (e) {
+    var item = e.target.closest('.chip-suggest__item');
+    if (!item) return;
+    var type = stageTypeSelect.value;
+    var newStage = { type: type, name: item.dataset.name, role: item.dataset.role };
+
+    if (type === 'draft' || type === 'final') {
+      // 기안·전결은 각각 한 명만 — 기존에 있으면 새로 지정한 사람으로 교체
+      approvalStages = approvalStages.filter(function (s) { return s.type !== type; });
+    }
+    if (type === 'final') {
+      approvalStages.push(newStage); // 전결은 항상 결재선의 마지막
+    } else if (type === 'draft') {
+      approvalStages.unshift(newStage); // 기안은 항상 결재선의 맨 앞
+    } else {
+      // 검토·협조는 기안 다음, 전결 앞에 들어간다
+      var finalIdx = approvalStages.findIndex(function (s) { return s.type === 'final'; });
+      if (finalIdx === -1) approvalStages.push(newStage);
+      else approvalStages.splice(finalIdx, 0, newStage);
+    }
+
+    renderApprovalFlow();
+    closeApprovalPanel();
+  });
+
+  document.addEventListener('click', function (e) {
+    if (!approvalPersonEl.contains(e.target)) personSuggestEl.hidden = true;
+  });
+
+  approvalFlowEl.addEventListener('click', function (e) {
+    var removeBtn = e.target.closest('.approval-stage__remove');
+    if (!removeBtn) return;
+    approvalStages.splice(+removeBtn.dataset.i, 1);
+    renderApprovalFlow();
+  });
+
+  // 전결 구분이 바뀌면 이미 지정된 전결 스테이지의 표시 직급도 함께 갱신
+  approvalLevelSelect.addEventListener('change', renderApprovalFlow);
+
+  renderApprovalFlow(); // 처음엔 결재선이 비어있는 상태로 시작
+
+  /* ── 절차도: 단계 추가·삭제 ───────────────────────────────── */
+  var procBody    = document.querySelector('#procTable tbody');
+  var addStepBtn  = document.getElementById('btnAddStep');
+
+  function renumberSteps() {
+    procBody.querySelectorAll('tr').forEach(function (tr, i) {
+      tr.querySelector('.col-order').textContent = i + 1;
+    });
+  }
+
+  addStepBtn.addEventListener('click', function () {
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td class="col-order"></td>' +
+      '<td><input type="text" class="table-input" placeholder="단계명 입력"></td>' +
+      '<td><select class="table-select"><option>주담당</option><option>협조담당</option></select></td>' +
+      '<td><input type="text" class="table-input" placeholder="선행 조건 입력"></td>' +
+      '<td class="col-action btn-row-del" title="이 단계 삭제">✕</td>';
+    procBody.appendChild(tr);
+    renumberSteps();
+  });
+
+  procBody.addEventListener('click', function (e) {
+    var del = e.target.closest('.btn-row-del');
+    if (!del) return;
+    if (procBody.querySelectorAll('tr').length <= 1) return;
+    del.closest('tr').remove();
+    renumberSteps();
+  });
+
+  /* ── 문서별 중요도·보안 등급 태그 강조 ────────────────────── */
+  var IMPORTANCE_LEVEL = { '낮음': 'low', '보통': 'normal', '높음': 'high', '긴급': 'critical' };
+  var SECURITY_LEVEL = { '일반': 'normal', '대외비': 'restricted', '3급비밀': 'secret', '2급비밀': 'secret', '1급비밀': 'secret' };
+
+  // <select>는 기본적으로 옵션 중 가장 긴 텍스트 기준으로 박스 폭이 정해져서,
+  // "대외비"처럼 더 긴 옵션이 있는 셀렉트는 짧은 값을 골라도 여백이 남아
+  // 뱃지 패딩이 서로 달라 보인다 — 실제로 표시된 글자 폭에 맞춰 폭을 다시 계산한다.
+  var tagMeasureCtx = document.createElement('canvas').getContext('2d');
+  function sizeFileTagSelect(select) {
+    var text = select.options[select.selectedIndex].text;
+    var cs = getComputedStyle(select);
+    tagMeasureCtx.font = cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
+    var textWidth = tagMeasureCtx.measureText(text).width;
+    var padding = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    select.style.width = Math.ceil(textWidth + padding) + 'px';
+  }
+
+  function syncFileTagSelect(select) {
+    var map = select.dataset.role === 'importance' ? IMPORTANCE_LEVEL : SECURITY_LEVEL;
+    select.dataset.level = map[select.value] || '';
+    sizeFileTagSelect(select);
+  }
+
+  document.querySelectorAll('.file-tag-select').forEach(syncFileTagSelect);
+  document.addEventListener('change', function (e) {
+    if (e.target.classList.contains('file-tag-select')) syncFileTagSelect(e.target);
+  });
+
+  /* ── 첨부파일 업로드/삭제 (양식 / 근거 규정 / 연계 계획 공용) ── */
+  var MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+
+  function formatFileSize(bytes) {
+    if (bytes >= 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + 'MB';
+    return Math.max(1, Math.round(bytes / 1024)) + 'KB';
+  }
+  function formatToday() {
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function fileExt(name) {
+    var i = name.lastIndexOf('.');
+    return i === -1 ? '' : name.slice(i).toLowerCase();
+  }
+
+  function initUploader(areaEl, inputEl, listEl) {
+    var allowed = inputEl.accept.split(',').map(function (s) { return s.trim().toLowerCase(); });
+
+    function addFiles(files) {
+      Array.from(files).forEach(function (file) {
+        if (allowed.length && allowed.indexOf(fileExt(file.name)) === -1) {
+          alert(file.name + ': 지원하지 않는 파일 형식입니다. (' + allowed.join(', ') + ')');
+          return;
+        }
+        if (file.size > MAX_FILE_SIZE) {
+          alert(file.name + ': 파일 용량은 20MB를 넘을 수 없습니다.');
+          return;
+        }
+        var item = document.createElement('div');
+        item.className = 'file-item';
+        item.innerHTML =
+          '<span>📄</span>' +
+          '<span class="file-name">' + escapeHtmlLocal(file.name) + '</span>' +
+          '<span class="file-ver">신규</span>' +
+          '<span class="file-meta">' + formatFileSize(file.size) + ' · ' + formatToday() + '</span>' +
+          '<select class="file-tag-select" data-role="importance" title="중요도">' +
+            '<option>낮음</option><option selected>보통</option><option>높음</option><option>긴급</option>' +
+          '</select>' +
+          '<select class="file-tag-select" data-role="security" title="보안 등급">' +
+            '<option selected>일반</option><option>대외비</option><option>3급비밀</option><option>2급비밀</option><option>1급비밀</option>' +
+          '</select>' +
+          '<button class="btn-file-del" type="button">✕</button>';
+        listEl.appendChild(item);
+        item.querySelectorAll('.file-tag-select').forEach(syncFileTagSelect);
+      });
+    }
+
+    areaEl.addEventListener('click', function () { inputEl.click(); });
+    areaEl.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); inputEl.click(); }
+    });
+    inputEl.addEventListener('click', function (e) { e.stopPropagation(); });
+    inputEl.addEventListener('change', function () {
+      addFiles(inputEl.files);
+      inputEl.value = '';
+    });
+
+    areaEl.addEventListener('dragover', function (e) { e.preventDefault(); areaEl.classList.add('upload-area--drag'); });
+    areaEl.addEventListener('dragleave', function () { areaEl.classList.remove('upload-area--drag'); });
+    areaEl.addEventListener('drop', function (e) {
+      e.preventDefault();
+      areaEl.classList.remove('upload-area--drag');
+      addFiles(e.dataTransfer.files);
+    });
+  }
+
+  function escapeHtmlLocal(s) {
+    var div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
+  }
+
+  initUploader(document.getElementById('uploadFormArea'), document.getElementById('uploadFormInput'), document.getElementById('uploadFormList'));
+  initUploader(document.getElementById('uploadRegulationArea'), document.getElementById('uploadRegulationInput'), document.getElementById('uploadRegulationList'));
+  initUploader(document.getElementById('uploadPlanArea'), document.getElementById('uploadPlanInput'), document.getElementById('uploadPlanList'));
+
+  document.addEventListener('click', function (e) {
+    var del = e.target.closest('.btn-file-del');
+    if (!del) return;
+    del.closest('.file-item').remove();
+  });
+
+  /* ── 토스트 ── */
+  function showToast(message, type) {
+    var wrap = document.getElementById('regToastWrap');
+    var t = document.createElement('div');
+    t.className = 'reg-toast' + (type ? ' reg-toast--' + type : '');
+    t.textContent = message;
+    wrap.appendChild(t);
+    requestAnimationFrame(function () { t.classList.add('show'); });
+    setTimeout(function () {
+      t.classList.remove('show');
+      setTimeout(function () { t.remove(); }, 250);
+    }, 2200);
+  }
+
+  /* ── 폼 상태 수집·복원 (임시저장) ─────────────────────────── */
+  var DRAFT_KEY = 'krds_task_draft_STD-2026-0142';
+
+  function collectProcSteps() {
+    return Array.from(procBody.querySelectorAll('tr')).map(function (tr) {
+      var inputs = tr.querySelectorAll('.table-input');
+      var sel = tr.querySelector('.table-select');
+      return {
+        step: inputs[0] ? inputs[0].value : '',
+        role: sel ? sel.value : '',
+        pre: inputs[1] ? inputs[1].value : ''
+      };
+    });
+  }
+
+  function collectFormState() {
+    return {
+      taskName: document.getElementById('fieldTaskName').value,
+      taskType: document.getElementById('fieldTaskType').value,
+      dept: deptSearchEl.value,
+      fiscalYear: document.getElementById('fieldFiscalYear').value,
+      manageStatus: document.getElementById('fieldManageStatus').value,
+      taskDesc: document.getElementById('fieldTaskDesc').value,
+      assignees: assignees.slice(),
+      cycle: cycleSelect.value,
+      frequency: freqSelect.value,
+      weekday: document.getElementById('fieldWeekday').value,
+      monthDay: document.getElementById('fieldMonthDay').value,
+      startDate: startDateInput.value,
+      endDate: endDateInput.value,
+      ongoing: ongoingCheck.checked,
+      dueRule: document.getElementById('fieldDueRule').value,
+      approvalStages: approvalStages.slice(),
+      approvalLevel: approvalLevelSelect.value,
+      delegate: document.getElementById('fieldDelegate').checked,
+      procSteps: collectProcSteps(),
+      shareScope: document.getElementById('fieldShareScope').value,
+      downloadLock: document.getElementById('fieldDownloadLock').checked,
+      watermark: document.getElementById('fieldWatermark').checked
+    };
+  }
+
+  function applyFormState(s) {
+    if (!s) return;
+    document.getElementById('fieldTaskName').value = s.taskName || '';
+    if (s.taskType) document.getElementById('fieldTaskType').value = s.taskType;
+    if (s.dept) { deptSearchEl.value = s.dept; deptSelected = s.dept; }
+    if (s.fiscalYear) document.getElementById('fieldFiscalYear').value = s.fiscalYear;
+    if (s.manageStatus) document.getElementById('fieldManageStatus').value = s.manageStatus;
+    document.getElementById('fieldTaskDesc').value = s.taskDesc || '';
+    if (s.assignees) { assignees = s.assignees.slice(); renderChips(); }
+    if (s.cycle) cycleSelect.value = s.cycle;
+    if (s.frequency) freqSelect.value = s.frequency;
+    syncCycleFields();
+    if (s.weekday) document.getElementById('fieldWeekday').value = s.weekday;
+    if (s.monthDay) document.getElementById('fieldMonthDay').value = s.monthDay;
+    if (s.startDate) startDateInput.value = s.startDate;
+    if (s.endDate) endDateInput.value = s.endDate;
+    if (typeof s.ongoing === 'boolean') { ongoingCheck.checked = s.ongoing; endDateInput.disabled = s.ongoing; }
+    if (s.dueRule) document.getElementById('fieldDueRule').value = s.dueRule;
+    if (s.approvalStages) { approvalStages = s.approvalStages.slice(); renderApprovalFlow(); }
+    if (s.approvalLevel) approvalLevelSelect.value = s.approvalLevel;
+    if (typeof s.delegate === 'boolean') document.getElementById('fieldDelegate').checked = s.delegate;
+    if (s.procSteps && s.procSteps.length) {
+      procBody.innerHTML = '';
+      s.procSteps.forEach(function (step) {
+        var tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td class="col-order"></td>' +
+          '<td><input type="text" class="table-input" value="' + escapeHtmlLocal(step.step) + '"></td>' +
+          '<td><select class="table-select"><option' + (step.role === '주담당' ? ' selected' : '') + '>주담당</option><option' + (step.role === '협조담당' ? ' selected' : '') + '>협조담당</option></select></td>' +
+          '<td><input type="text" class="table-input" value="' + escapeHtmlLocal(step.pre) + '"></td>' +
+          '<td class="col-action btn-row-del" title="이 단계 삭제">✕</td>';
+        procBody.appendChild(tr);
+      });
+      renumberSteps();
+    }
+    if (s.shareScope) document.getElementById('fieldShareScope').value = s.shareScope;
+    if (typeof s.downloadLock === 'boolean') document.getElementById('fieldDownloadLock').checked = s.downloadLock;
+    if (typeof s.watermark === 'boolean') document.getElementById('fieldWatermark').checked = s.watermark;
+  }
+
+  function saveDraft() {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(collectFormState()));
+    showToast('임시저장되었습니다.', 'success');
+  }
+
+  function loadDraft() {
+    var raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return;
+    try {
+      applyFormState(JSON.parse(raw));
+      showToast('임시저장된 내용을 불러왔습니다.');
+    } catch (e) { /* 손상된 임시저장 데이터는 무시하고 새로 시작한다 */ }
+  }
+
+  /* ── 필수값 검증 ── */
+  var REQUIRED_FIELDS = [
+    { el: function () { return document.getElementById('fieldTaskName'); }, check: function () { return document.getElementById('fieldTaskName').value.trim() !== ''; }, label: '업무명' },
+    { el: function () { return deptSearchEl; }, check: function () { return deptSearchEl.value.trim() !== ''; }, label: '소속 부서' },
+    { el: function () { return groupEl; }, check: function () { return assignees.length > 0; }, label: '업무 담당' },
+    { el: function () { return startDateInput; }, check: function () { return !!startDateInput.value; }, label: '시작일' },
+    { el: function () { return approvalFlowEl; }, check: function () { return approvalStages.length > 0; }, label: '전결사항' }
+  ];
+
+  function clearInvalidFields() {
+    document.querySelectorAll('.form-field--invalid').forEach(function (f) { f.classList.remove('form-field--invalid'); });
+  }
+
+  function validateForm() {
+    clearInvalidFields();
+    var firstInvalid = null;
+    REQUIRED_FIELDS.forEach(function (f) {
+      if (f.check()) return;
+      var field = f.el().closest('.form-field');
+      if (field) field.classList.add('form-field--invalid');
+      if (!firstInvalid) firstInvalid = { field: field, label: f.label };
+    });
+    return firstInvalid;
+  }
+
+  /* ── 목록 · 임시저장 · 등록 버튼 ──────────────────────────── */
+  function goToList() {
+    window.location.href = '/resources/pages/operating.html';
+  }
+
+  document.querySelectorAll('.btn-list').forEach(function (b) { b.addEventListener('click', goToList); });
+  document.querySelectorAll('.btn-draft').forEach(function (b) { b.addEventListener('click', saveDraft); });
+  document.querySelectorAll('.btn-submit').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var invalid = validateForm();
+      if (invalid) {
+        showToast(invalid.label + '을(를) 입력해주세요.', 'error');
+        if (invalid.field) invalid.field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+      localStorage.removeItem(DRAFT_KEY);
+      showToast('등록되었습니다.', 'success');
+      setTimeout(goToList, 900);
+    });
+  });
+
+  loadDraft();
+})();
+</script>
+</body>
+</html>

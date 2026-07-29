@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>업무 상세</title>
+    <link rel="stylesheet" href="/resources/css/custom.css">
+    <link href="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.css" type="text/css" rel="stylesheet" />
+    <script src="/resources/js/component/ui-include.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.js"></script>
+</head>
+<body>
+
+  <!-- 드로어 (왼쪽 슬라이드 패널) -->
+  <div class="drawer-backdrop" id="drawer-backdrop">
+    <iframe class="drawer-iframe" id="drawer-frame" src=""></iframe>
+  </div>
+
+  <div class="operating-container">
+
+    <div data-include="/html/code/header.html"></div>
+
+    <div class="organization-container">
+
+      <!-- 사이드 네비게이션 -->
+      <nav class="side-nav" aria-label="업무 상세 네비게이션">
+        <ul class="nav-tree" role="list">
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <a href="/resources/pages/operating-detail-dashboard.html" class="nav-node__row" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">대시보드</span>
+            </a>
+          </li>
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <span class="nav-node__row is-selected" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">과업 리스트 뷰</span>
+            </span>
+          </li>
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <a href="/resources/pages/operating-detail-node.html" class="nav-node__row" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">프로세싱 뷰</span>
+            </a>
+          </li>
+          <li class="nav-node nav-node--leaf nav-node--depth0">
+            <a href="/resources/pages/operating-detail-policy.html" class="nav-node__row" style="--depth: 0">
+              <span class="nav-node__caret"></span>
+              <span class="nav-node__label">규정</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- 메인 콘텐츠 -->
+      <main class="main" style="padding:0; overflow:auto;">
+
+        <!-- 과제 정보 헤더 -->
+        <header class="gnb-sub">
+          <div class="task-id">
+            <span class="krds-badge bg-light-gray" id="detail-badge">종결</span>
+            <div class="task-titles">
+              <strong class="task-name" id="detail-task-name">과제 이름 들어가는 곳</strong>
+              <span class="task-meta" id="detail-task-meta">담당자명 / 담당 부서</span>
+            </div>
+            <span class="chevron" aria-hidden="true">&rsaquo;</span>
+          </div>
+          <button type="button" class="btn-log" onclick="history.back()">
+            <span class="ico" aria-hidden="true">&#8592;</span> 목록으로
+          </button>
+        </header>
+
+        <!-- 본문: 단계별 보드 (JS가 동적 렌더링) -->
+        <div class="layout">
+          <main id="detail-content" class="content">
+            <p style="padding:24px;color:var(--krds-light-color-text-disabled)">업무 정보를 불러오는 중입니다…</p>
+          </main>
+
+          <aside id="detail-sidebar"></aside>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="/resources/js/script.js"></script>
+  <script>
+  /* ── 드로어 열기/닫기 (iframe 기반 왼쪽 슬라이드) ── */
+  (function () {
+    const back  = document.getElementById('drawer-backdrop');
+    const frame = document.getElementById('drawer-frame');
+
+    window.openDrawer = function () {
+      frame.src = '/resources/pages/operating-detail-page.html';
+      back.classList.add('drawer-open');
+    };
+
+    window.closeDrawer = function () {
+      back.classList.remove('drawer-open');
+    };
+
+    back.addEventListener('click', e => {
+      if (e.target === back) closeDrawer();
+    });
+  })();
+
+  (function () {
+    const raw = sessionStorage.getItem('krds_selected_task');
+    const content = document.getElementById('detail-content');
+    const sidebar = document.getElementById('detail-sidebar');
+
+    if (!raw) {
+      content.innerHTML = '<p style="padding:24px;color:var(--krds-light-color-text-disabled)">업무 정보가 없습니다.</p>';
+      return;
+    }
+
+    const task = JSON.parse(raw);
+
+    /* ── 헤더 채우기 ── */
+    const badge = document.getElementById('detail-badge');
+    badge.textContent = STATUS_LABEL[task.status] || task.status;
+    badge.className   = STATUS_CLASS[task.status] || 'krds-badge bg-light-gray';
+    document.getElementById('detail-task-name').textContent = task.title;
+    document.title = task.title + ' · 과업 리스트 뷰';
+
+    let teamLeaf = null;
+    for (const sil of ORG) {
+      for (const leaf of getAllLeaves(sil)) {
+        if ((leaf.tasks || []).some(t => t.title === task.title && t.owner === task.owner)) {
+          teamLeaf = leaf; break;
+        }
+      }
+      if (teamLeaf) break;
+    }
+    const teamName   = teamLeaf ? teamLeaf.name : '';
+    const ownerMember = teamLeaf ? (teamLeaf.members || []).find(m => m.name === task.owner) : null;
+
+    document.getElementById('detail-task-meta').textContent =
+      task.owner + (teamName ? ' / ' + teamName : '') + ' / ' + task.start + ' ~ ' + task.end;
+
+    /* ── 세부과업 생성 & 스테이지별 그룹화 ── */
+    const subtasks  = getSubtasks(task);
+    const STAGE_ORDER = ['접수', '검토', '추천', '완료'];
+    const groups = {};
+    STAGE_ORDER.forEach(s => { groups[s] = []; });
+    subtasks.forEach(st => { (groups[st.stage] || (groups['접수'])).push(st); });
+
+    const PRI_LABEL = { high: '상', mid: '중', low: '하' };
+    const PRI_CLS   = { high: 'pri-high', mid: 'pri-mid', low: 'pri-low' };
+
+    function rowHTML(st) {
+      const idx  = subtasks.indexOf(st);
+      const risks = st.risks.length
+        ? st.risks.map(r => `<span class="tag-risk">${escapeHtml(r)}</span>`).join('')
+        : `<span style="color:var(--krds-light-color-text-subtle);font-size:11px">없음</span>`;
+      return `<tr data-st-idx="${idx}" style="cursor:pointer">
+        <td class="col-name">${escapeHtml(st.name)}</td>
+        <td>${escapeHtml(st.type)}</td>
+        <td><span class="col-assignee"><span class="avatar ${ownerColorClass(st.assignee)}">${escapeHtml(st.assignee.slice(0,1))}</span>${escapeHtml(st.assignee)}</span></td>
+        <td>${escapeHtml(st.deadline)}</td>
+        <td>${escapeHtml(st.stage)}</td>
+        <td>${escapeHtml(st.approval)}</td>
+        <td><span class="pri ${PRI_CLS[st.priority] || ''}">${PRI_LABEL[st.priority] || st.priority}</span></td>
+        <td class="col-risk">${risks}</td>
+      </tr>`;
+    }
+
+    function boardHTML(stage, rows) {
+      if (!rows.length) return '';
+      return `<section class="board" data-open="true">
+        <div class="board-head">
+          <button type="button" class="board-toggle" aria-expanded="true">
+            <span class="caret" aria-hidden="true">&#9662;</span>
+            ${escapeHtml(stage)} <span class="count">(${rows.length}건)</span>
+          </button>
+        </div>
+        <table class="task-table">
+          <thead><tr>
+            <th scope="col">업무명</th><th scope="col">업무유형</th>
+            <th scope="col">담당자</th><th scope="col">마감일</th>
+            <th scope="col">현재 단계</th><th scope="col">결재 상태</th>
+            <th scope="col">우선순위</th><th scope="col">AI 리스크</th>
+          </tr></thead>
+          <tbody>${rows.map(rowHTML).join('')}</tbody>
+        </table>
+      </section>`;
+    }
+
+    /* ── 과제 히스토리 (같은 부서의 이전 연도 유사 사업 이력) ── */
+    const HIST_STOPWORDS = ['수립','검토','보고','편성','개선','개정','점검','분석','제출','관리','운영','계획','기획',
+      '지침','방안','대책','체계','사업','시행','추진','조사','실시','작성','확정','대응','현황','종합',
+      '및','등','상반기','하반기','1차','2차','3차','4차'];
+
+    function coreTokens(title) {
+      return title
+        .replace(/^\d{4}(년도?)?\s*/, '')
+        .split(/\s+/)
+        .filter(w => w && !HIST_STOPWORDS.includes(w) && !/^\d+$/.test(w));
+    }
+    function taskYear(t) {
+      const m = t.title.match(/(\d{4})년도?/);
+      return m ? parseInt(m[1], 10) : new Date(t.start).getFullYear();
+    }
+
+    const currentYear   = taskYear(task);
+    const currentTokens = coreTokens(task.title);
+    const similarPast = (teamLeaf ? (teamLeaf.tasks || []) : [])
+      .filter(t => !(t.title === task.title && t.start === task.start && t.owner === task.owner))
+      .filter(t => taskYear(t) < currentYear)
+      .map(t => ({ t, overlap: coreTokens(t.title).filter(w => currentTokens.includes(w)).length }))
+      .filter(x => x.overlap > 0)
+      .sort((a, b) => a.t.start.localeCompare(b.t.start))
+      .map(x => x.t);
+
+    const HIST_DOT_CLASS   = { done: 'ms-dot-done', progress: 'ms-dot-prog', wait: 'ms-dot-todo' };
+    const HIST_ICON = {
+      done: '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="var(--krds-light-color-text-success)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+      progress: '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="3" stroke="var(--krds-light-color-button-primary-fill)" stroke-width="1.6"/></svg>',
+      wait: '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="3" stroke="var(--krds-light-color-text-subtle)" stroke-width="1.4" stroke-dasharray="2 2"/></svg>',
+    };
+    function historyBoardHTML() {
+      const items = similarPast.length
+        ? similarPast.map(t => `
+          <div class="ms-item" data-hist-title="${escapeHtml(t.title)}" data-hist-owner="${escapeHtml(t.owner)}" style="cursor:pointer">
+            <div class="ms-dot ${HIST_DOT_CLASS[t.status] || 'ms-dot-todo'}">${HIST_ICON[t.status] || HIST_ICON.wait}</div>
+            <div class="ms-body">
+              <div class="ms-name">${taskYear(t)}년 · ${escapeHtml(t.title)}</div>
+              <div class="ms-meta">${escapeHtml(t.start)} ~ ${escapeHtml(t.end)} · 담당 ${escapeHtml(t.owner)}</div>
+            </div>
+            <span class="${STATUS_CLASS[t.status] || 'krds-badge small bg-light-gray'}">${STATUS_LABEL[t.status] || t.status}</span>
+          </div>
+        `).join('')
+        : `<p style="padding:var(--krds-padding-9);color:var(--krds-light-color-text-disabled);font-size:var(--krds-pc-font-size-label-xsmall)">같은 부서에서 진행된 유사한 이전 연도 사업 이력이 없습니다.</p>`;
+      return `<section class="board" data-open="true">
+        <div class="board-head">
+          <button type="button" class="board-toggle" aria-expanded="true">
+            <span class="caret" aria-hidden="true">&#9662;</span> 과제 히스토리 (이전 연도 유사 사업) <span class="count">(${similarPast.length}건)</span>
+          </button>
+        </div>
+        <div class="milestone-line">${items}</div>
+      </section>`;
+    }
+
+    /* ── 담당 / 소요시간 사이드바 ── */
+    function parseYMD(s) { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); }
+    const startD = parseYMD(task.start), endD = parseYMD(task.end), today = new Date();
+    const totalDays     = Math.max(1, Math.round((endD - startD) / 86400000));
+    const elapsedDays   = Math.min(totalDays, Math.max(0, Math.round((today - startD) / 86400000)));
+    const remainingDays = Math.max(0, totalDays - elapsedDays);
+    const elapsedPct    = Math.min(100, Math.round((elapsedDays / totalDays) * 100));
+
+    function sidebarHTML() {
+      return `
+        <div class="card" style="margin:0 0 16px;">
+          <div class="section-header"><span class="section-title">담당</span></div>
+          <div class="info-row">
+            <span class="info-label">담당자</span>
+            <span class="info-val">
+              <span class="avatar-sm ${ownerColorClass(task.owner)}">${escapeHtml(task.owner.slice(0, 1))}</span>
+              ${escapeHtml(task.owner)}${ownerMember ? ' · ' + escapeHtml(ownerMember.position) : ''}
+            </span>
+          </div>
+          <div class="info-row"><span class="info-label">부서</span><span class="info-val">${escapeHtml(teamName || '-')}</span></div>
+          ${ownerMember ? `<div class="info-row"><span class="info-label">이메일</span><span class="info-val">${escapeHtml(ownerMember.email)}</span></div>` : ''}
+          ${ownerMember ? `<div class="info-row"><span class="info-label">연락처</span><span class="info-val">${escapeHtml(ownerMember.phone)}</span></div>` : ''}
+        </div>
+
+        <div class="card" style="margin:0;">
+          <div class="section-header"><span class="section-title">소요시간</span><span class="progress-num">${elapsedPct}%</span></div>
+          <div style="padding:0 var(--krds-padding-9) var(--krds-padding-6)">
+            <div class="progress-track"><div class="progress-fill" style="width:${elapsedPct}%"></div></div>
+          </div>
+          <div class="info-row"><span class="info-label">전체 기간</span><span class="info-val">${task.start} ~ ${task.end}</span></div>
+          <div class="info-row"><span class="info-label">총 소요일</span><span class="info-val">${totalDays}일</span></div>
+          <div class="info-row"><span class="info-label">경과일</span><span class="info-val">${elapsedDays}일</span></div>
+          <div class="info-row"><span class="info-label">잔여일</span><span class="info-val">${remainingDays}일</span></div>
+        </div>
+      `;
+    }
+
+    /* ── 렌더링 ── */
+    content.innerHTML = historyBoardHTML() + STAGE_ORDER.map(s => boardHTML(s, groups[s])).join('');
+    sidebar.innerHTML = sidebarHTML();
+
+    /* ── 접기/펼치기 ── */
+    content.querySelectorAll('.board-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const board = btn.closest('.board');
+        const open  = board.getAttribute('data-open') === 'true';
+        board.setAttribute('data-open', open ? 'false' : 'true');
+        btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+      });
+    });
+
+    /* ── 행 클릭 → 드로어 열기 ── */
+    content.addEventListener('click', e => {
+      const tr = e.target.closest('tr[data-st-idx]');
+      if (!tr) return;
+      const st = subtasks[+tr.dataset.stIdx];
+      if (st) {
+        sessionStorage.setItem('krds_selected_subtask', JSON.stringify(st));
+        openDrawer();
+      }
+    });
+
+    /* ── 히스토리 항목 클릭 → 해당 이전 연도 사업의 상세로 이동 ── */
+    content.addEventListener('click', e => {
+      const item = e.target.closest('.ms-item[data-hist-title]');
+      if (!item) return;
+      const past = similarPast.find(t => t.title === item.dataset.histTitle && t.owner === item.dataset.histOwner);
+      if (past) {
+        sessionStorage.setItem('krds_selected_task', JSON.stringify(past));
+        window.location.reload();
+      }
+    });
+  })();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/resources/css/custom.css">
+    <link href="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.css" type="text/css" rel="stylesheet" />
+    <script src="/resources/js/component/ui-include.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.js"></script>
+</head>
+<body>
+    <div data-include="/html/code/header.html"></div>
+
+<div class="index-shell" id="indexShell">
+  <section class="index-split-section index-split-section--org">
+    <div class="index-section-head">조직도</div>
+    <div class="board" id="orgBoard">
+      <div class="columns" id="columns"></div>
+    </div>
+  </section>
+
+  <!-- 사업 관리 > 업무 차트/업무 캘린더를 조직도와 한 화면에 함께 노출 (조직도 폭에 반응해 남은 폭을 채움) -->
+  <section class="index-split-section index-split-section--gantt">
+    <div class="index-section-head">
+      <span>업무 현황</span>
+      <div class="view-toggle" id="bizViewToggle">
+        <button class="vt-btn active" type="button" data-view="gantt">간트차트 뷰</button>
+        <button class="vt-btn" type="button" data-view="calendar">캘린더 뷰</button>
+      </div>
+    </div>
+    <div class="operating-container" id="bizGanttPanel">
+    <div class="organization-container">
+      <main class="main gantt-page">
+
+        <!-- 간트 툴바: 팀/팀원 선택은 왼쪽 조직도 선택으로 대체되어 현재 선택 범위만 표시 -->
+        <div class="gantt-topbar">
+          <div class="gantt-scope" id="biz-scope">
+            <span class="gantt-scope-text" id="biz-scope-text">조직도에서 팀 또는 근무자를 선택해주세요.</span>
+          </div>
+          <!-- Legend -->
+          <div class="legend">
+            <span class="legend-item"><span class="legend-dot legend-dot--progress"></span> 진행중</span>
+            <span class="legend-item"><span class="legend-dot legend-dot--done"></span> 종결</span>
+            <span class="legend-item"><span class="legend-dot legend-dot--wait"></span> 대기</span>
+            <span class="legend-item"><span class="legend-dot overload"></span> 과부하 (3건+)</span>
+            <span class="legend-item"><span class="legend-dot warning"></span> 주의 (2건)</span>
+            <span class="legend-item"><span class="legend-link-line"></span> 연계관계</span>
+          </div>
+          <div class="tn-right">
+            <div class="gantt-view-selector">
+              <button type="button" data-view="day">일</button>
+              <button type="button" data-view="week" class="active">주</button>
+              <button type="button" data-view="month">월</button>
+              <button type="button" data-view="3month">3개월</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 조직도에서 아무 것도 선택하지 않았을 때 노출되는 안내 화면 -->
+        <div class="gantt-empty" id="biz-gantt-empty">
+          <p>왼쪽 조직도에서 팀 또는 근무자를 선택하면<br>해당 업무 현황이 여기에 표시됩니다.</p>
+        </div>
+
+        <!-- 간트 차트 -->
+        <div class="gantt-wrapper" id="biz-gantt-wrapper" style="display:none">
+          <div class="task-list">
+            <div class="tl-header">
+              <div class="tl-header-labels">
+                <span class="tl-label-task">업무 목록</span>
+                <span class="tl-label-count">건수</span>
+              </div>
+            </div>
+            <div class="tl-body" id="biz-task-list-body"></div>
+          </div>
+
+          <div class="gantt-area">
+            <div class="gantt-header">
+              <div class="gantt-header-weeks" id="biz-gantt-weeks"></div>
+              <div class="gantt-header-days" id="biz-gantt-days"></div>
+            </div>
+            <div class="gantt-body">
+              <svg id="biz-dep-svg" style="position:absolute;top:0;left:0;width:100%;pointer-events:none;z-index:20;overflow:visible"></svg>
+              <div class="gantt-rows" id="biz-gantt-rows"></div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+    </div>
+
+    <!-- 사업 관리 > 업무 캘린더 -->
+    <div class="operating-container" id="bizCalendarPanel" style="display:none;">
+      <div class="organization-container">
+        <main class="main">
+
+          <!-- 툴바: 팀/팀원 선택은 왼쪽 조직도 선택으로 대체 (업무 현황과 동일한 방식) -->
+          <div class="oc-toolbar">
+            <div class="oc-toolbar__row">
+              <div class="oc-toolbar__nav">
+                <button class="oc-nav-btn" title="이전 달">&#8249;</button>
+                <button class="oc-nav-btn" title="다음 달">&#8250;</button>
+              </div>
+              <span class="oc-month-label">1월 2026</span>
+              <div class="gantt-scope" id="biz-cal-scope">
+                <span class="gantt-scope-text" id="biz-cal-scope-text">조직도에서 팀 또는 근무자를 선택해주세요.</span>
+              </div>
+            </div>
+            <div class="oc-toolbar__row">
+              <div class="oc-view-selector">
+                <button data-view="day">일</button>
+                <button data-view="week">주</button>
+                <button data-view="month">월</button>
+                <button data-view="3month">3개월</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 조직도에서 아무 것도 선택하지 않았을 때 노출되는 안내 화면 -->
+          <div class="gantt-empty" id="biz-cal-empty">
+            <p>왼쪽 조직도에서 팀 또는 근무자를 선택하면<br>해당 업무 일정이 여기에 표시됩니다.</p>
+          </div>
+
+          <!-- 달력 그리드 -->
+          <div class="oc-grid" id="biz-cal-grid" style="display:none">
+
+            <!-- 요일 헤더 -->
+            <div class="oc-day-headers">
+              <div class="oc-day-header">월</div>
+              <div class="oc-day-header">화</div>
+              <div class="oc-day-header">수</div>
+              <div class="oc-day-header">목</div>
+              <div class="oc-day-header">금</div>
+              <div class="oc-day-header weekend">토</div>
+              <div class="oc-day-header weekend">일</div>
+            </div>
+
+            <div class="oc-weeks"></div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- 업무 차트 바 호버 팝업 (tooltip) -->
+<div class="gantt-popup" id="biz-bar-popup">
+  <div class="popup-title" id="biz-popup-title"></div>
+  <div class="popup-row"><span class="popup-label">담당자</span><span class="popup-value" id="biz-popup-assignee"></span></div>
+  <div class="popup-row"><span class="popup-label">기간</span><span class="popup-value" id="biz-popup-dates"></span></div>
+  <div class="popup-row"><span class="popup-label">진행률</span><span class="popup-value" id="biz-popup-progress"></span></div>
+  <div class="popup-row" id="biz-popup-load-row" style="display:none"><span class="popup-label">담당자 부하</span><span class="popup-value" id="biz-popup-load"></span></div>
+</div>
+
+<!-- 업무 차트: 업무 미리보기(프로세싱 뷰) 모달 -->
+<div class="pv-modal-backdrop" id="bizPvModalBackdrop">
+  <div class="pv-modal-panel">
+    <div class="pv-modal-head">
+      <div class="pv-modal-titles">
+        <strong class="pv-modal-title" id="bizPvModalTitle"></strong>
+        <span class="pv-modal-sub" id="bizPvModalSub"></span>
+      </div>
+      <button type="button" class="pv-modal-close" id="bizPvModalClose" aria-label="닫기">&times;</button>
+    </div>
+    <div class="pv-modal-body" id="bizPvModalBody"></div>
+  </div>
+</div>
+
+<script src="/resources/js/script.js"></script>
+<script>
+/* 조직/업무 데이터는 /resources/js/script.js의 공유 ORG를 그대로 사용합니다
+   (조직도 · 업무 테이블 · 업무 차트와 동일한 데이터 소스). */
+
+/* ===================== 상태 ===================== */
+let path = [];          // 선택된 org 노드 배열
+let selectedWorker = null;
+let flowZoom = 1;       // 사업 관리 > 업무 차트의 프로세싱 뷰 미리보기 모달에서 사용
+let flowPanX = 40;
+let flowPanY = 30;
+
+const columnsEl = document.getElementById("columns");
+
+/* 업무 현황(간트차트)이 2026년 구간 데이터만 표시하는 것과 동일한 기준으로,
+   조직도 좌측 "업무 목록" 패널도 그 구간 밖의(이미 종료된) 업무는 제외한다.
+   그렇지 않으면 좌측 목록과 간트차트에 보이는 업무 건수가 서로 어긋난다. */
+const GANTT_START_DATE = new Date(2026, 0, 1);
+const GANTT_DATA_DAYS  = 365;
+function isTaskInGanttWindow(t) {
+  const endOff   = Math.round((new Date(t.end)   - GANTT_START_DATE) / 86400000);
+  const startOff = Math.round((new Date(t.start) - GANTT_START_DATE) / 86400000);
+  return endOff >= 0 && startOff < GANTT_DATA_DAYS;
+}
+
+function currentLevelItems() {
+  if (path.length === 0) return { items: ORG, kind: "org" };
+  const last = path[path.length - 1];
+  if (last.children && last.children.length) return { items: last.children, kind: "org" };
+  return { items: last.members || [], kind: "worker" };
+}
+
+function render() {
+  columnsEl.innerHTML = "";
+
+  // 1) 이미 선택된 조상들 -> 좁은 컬럼
+  path.forEach((node, idx) => {
+    const col = document.createElement("div");
+    col.className = "col-narrow";
+    col.title = "다시 선택하려면 클릭";
+    col.innerHTML = `<span>${node.name}</span>`;
+    col.onclick = () => {
+      path = path.slice(0, idx);
+      selectedWorker = null;
+      render();
+    };
+    columnsEl.appendChild(col);
+  });
+
+  // 2) 현재 프론티어 -> 넓은 컬럼
+  const { items, kind } = currentLevelItems();
+  const wide = document.createElement("div");
+  wide.className = "col-wide";
+
+  let headerLabel;
+  if (path.length === 0) {
+    headerLabel = "조직";
+  } else if (kind === "worker") {
+    headerLabel = "소속 근무자";
+  } else {
+    headerLabel = "하위 조직";
+  }
+
+  wide.innerHTML = `
+    <div class="col-header">${headerLabel}</div>
+    <div class="col-divider"></div>
+    <div class="col-rows" id="col-rows"></div>
+  `;
+  columnsEl.appendChild(wide);
+
+  const rowsEl = wide.querySelector("#col-rows");
+  items.forEach(item => {
+    const row = document.createElement("div");
+    row.className = "row";
+    if (kind === "worker" && selectedWorker === item) row.classList.add("selected");
+
+    if (kind === "worker") {
+      row.innerHTML = `
+        <span class="name">${escapeHtml(item.name)}</span>
+        <span class="meta">${escapeHtml(item.role)}</span>
+        <span class="arrow">›</span>
+      `;
+      row.onclick = () => {
+        selectedWorker = item;
+        render();
+      };
+    } else {
+      row.innerHTML = `
+        <span class="name">${escapeHtml(item.name)}</span>
+        <span class="meta">${item.head}명</span>
+        <span class="arrow">›</span>
+      `;
+      row.onclick = () => {
+        path = [...path, item];
+        selectedWorker = null;
+        render();
+      };
+    }
+    rowsEl.appendChild(row);
+  });
+
+  // 근무자를 선택하면 업무 목록은 더 이상 조직도 쪽에 따로 표시하지 않는다 —
+  // 오른쪽 업무 현황(간트차트/캘린더)이 곧바로 그 근무자의 업무 목록으로 좁혀지므로
+  // 화면에 동일한 "업무 목록"이 두 번 나오는 중복을 없앤 것.
+  syncGanttWithOrgSelection();
+}
+
+/* 조직도에서 선택한 조직/근무자에 맞춰 우측 업무 현황(간트차트·업무 캘린더)의
+   범위를 좁힌다. 아무것도 선택하지 않은 초기 상태에서는 둘 다 비워 둔다. */
+function syncGanttWithOrgSelection() {
+  if (typeof window.applyOrgSelectionToGantt === "function") window.applyOrgSelectionToGantt(path, selectedWorker);
+  if (typeof window.applyOrgSelectionToCalendar === "function") window.applyOrgSelectionToCalendar(path, selectedWorker);
+}
+
+/* ===================== 워크플로우(React Flow 스타일) ===================== */
+function buildWorkflow(worker, task) {
+  const doneChain = task.status === "done";
+  const nodes = [
+    { id: "n1", x: 20,  y: 150, type: "node-start",   tag: "시작", title: task.title, sub: "업무 등록" },
+    { id: "n2", x: 250, y: 150, type: "node-normal",  tag: "처리", title: `${worker.name} (${worker.role})`, sub: "담당자 처리" },
+    { id: "n3", x: 500, y: 40,  type: "node-normal",  tag: "협의", title: "팀장 협의", sub: "내부 검토" },
+    { id: "n4", x: 500, y: 260, type: "node-branch",  tag: "협조", title: "관계부서 협조", sub: "타 부서 의견조회" },
+    { id: "n5", x: 750, y: 150, type: "node-branch",  tag: "상신", title: "결재 상신", sub: "전자결재 시스템" },
+    { id: "n6", x: 1000,y: 40,  type: "node-reject",  tag: "반려", title: "반려", sub: "보완 후 재상신" },
+    { id: "n7", x: 1000,y: 260, type: "node-approve", tag: "승인", title: "결재 완료", sub: "최종 승인" },
+    { id: "n8", x: 1220,y: 150, type: doneChain ? "node-end" : "node-normal", tag: doneChain ? "완료" : "예정", title: "시행", sub: doneChain ? "업무 종료" : "시행 대기" },
+  ];
+  const edges = [
+    { from: "n1", to: "n2" },
+    { from: "n2", to: "n3" },
+    { from: "n2", to: "n4" },
+    { from: "n3", to: "n5" },
+    { from: "n4", to: "n5" },
+    { from: "n5", to: "n6", dashed: true, color: "#e0432b" },
+    { from: "n5", to: "n7", color: "#2fa84f" },
+    { from: "n6", to: "n2", dashed: true, color: "#e0432b", loop: true },
+    { from: "n7", to: "n8" },
+  ];
+  return { nodes, edges };
+}
+
+function nodePort(n, side) {
+  const w = 170, h = 54;
+  return side === "right" ? { x: n.x + w, y: n.y + h / 2 } : { x: n.x, y: n.y + h / 2 };
+}
+
+function edgePath(nodes, edge) {
+  const from = nodes.find(n => n.id === edge.from);
+  const to = nodes.find(n => n.id === edge.to);
+  const p1 = nodePort(from, "right");
+  const p2 = edge.loop ? nodePort(to, "left") : nodePort(to, to.x >= from.x ? "left" : "right");
+  if (edge.loop) {
+    // 반려 -> 담당자 처리로 되돌아가는 곡선 (위로 크게 우회)
+    const midY = Math.min(p1.y, p2.y) - 140;
+    return `M ${p1.x} ${p1.y} C ${p1.x} ${midY}, ${p2.x} ${midY}, ${p2.x} ${p2.y}`;
+  }
+  const dx = Math.max(Math.abs(p2.x - p1.x) * 0.5, 40);
+  return `M ${p1.x} ${p1.y} C ${p1.x + dx} ${p1.y}, ${p2.x - dx} ${p2.y}, ${p2.x} ${p2.y}`;
+}
+
+/* renderNodeCanvas/buildWorkflow는 사업 관리 > 업무 차트의 프로세싱 뷰 미리보기 모달에서만 사용 */
+function renderNodeCanvas(host, nodes, edges) {
+  host.innerHTML = `
+    <div class="flow-viewport" id="flow-viewport">
+      <div class="flow-world" id="flow-world">
+        <svg class="flow-edges" id="flow-edges"></svg>
+      </div>
+      <div class="flow-controls">
+        <button id="fz-in">+</button>
+        <button id="fz-out">−</button>
+        <button id="fz-fit">⤢</button>
+      </div>
+    </div>
+  `;
+
+  const world = host.querySelector("#flow-world");
+  const svg = host.querySelector("#flow-edges");
+  svg.innerHTML = `
+    <defs>
+      <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 z" fill="#8b98ac" />
+      </marker>
+    </defs>
+    ${edges.map(e => `<path d="${edgePath(nodes, e)}" fill="none"
+        stroke="${e.color || '#b7c0cf'}" stroke-width="1.8"
+        stroke-dasharray="${e.dashed ? '5,4' : 'none'}"
+        marker-end="url(#arrow)" />`).join("")}
+  `;
+
+  nodes.forEach(n => {
+    const el = document.createElement("div");
+    el.className = `flow-node ${n.type}`;
+    el.style.left = n.x + "px";
+    el.style.top = n.y + "px";
+    el.innerHTML = `
+      <div class="handle left"></div>
+      <div class="fn-tag">${n.tag}</div>
+      <div class="fn-title">${n.title}</div>
+      <div class="fn-sub">${n.sub}</div>
+      <div class="handle right"></div>
+    `;
+    world.appendChild(el);
+  });
+
+  const viewport = host.querySelector("#flow-viewport");
+  function applyTransform() {
+    world.style.transform = `translate(${flowPanX}px, ${flowPanY}px) scale(${flowZoom})`;
+  }
+  applyTransform();
+
+  // 팬(드래그)
+  let dragging = false, lastX = 0, lastY = 0;
+  viewport.addEventListener("mousedown", (e) => {
+    dragging = true; lastX = e.clientX; lastY = e.clientY;
+    viewport.classList.add("grabbing");
+  });
+  window.addEventListener("mousemove", (e) => {
+    if (!dragging) return;
+    flowPanX += (e.clientX - lastX);
+    flowPanY += (e.clientY - lastY);
+    lastX = e.clientX; lastY = e.clientY;
+    applyTransform();
+  });
+  window.addEventListener("mouseup", () => { dragging = false; viewport.classList.remove("grabbing"); });
+
+  // 휠 줌
+  viewport.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.08 : 0.08;
+    flowZoom = Math.min(1.6, Math.max(0.4, flowZoom + delta));
+    applyTransform();
+  }, { passive: false });
+
+  host.querySelector("#fz-in").onclick = () => { flowZoom = Math.min(1.6, flowZoom + 0.15); applyTransform(); };
+  host.querySelector("#fz-out").onclick = () => { flowZoom = Math.max(0.4, flowZoom - 0.15); applyTransform(); };
+  host.querySelector("#fz-fit").onclick = () => { flowZoom = 1; flowPanX = 40; flowPanY = 30; applyTransform(); };
+}
+
+render();
+
+/* ===================== 사업 관리: 간트차트 뷰 / 캘린더 뷰 토글 ===================== */
+document.querySelectorAll("#bizViewToggle .vt-btn[data-view]").forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll("#bizViewToggle .vt-btn[data-view]").forEach(b => b.classList.toggle("active", b === btn));
+    document.getElementById("bizGanttPanel").style.display = btn.dataset.view === "gantt" ? "flex" : "none";
+    document.getElementById("bizCalendarPanel").style.display = btn.dataset.view === "calendar" ? "flex" : "none";
+  };
+});
+</script>
+
+<script>
+/* ===================== 사업 관리 > 업무 차트: 전체 조직 간트 차트 =====================
+   /resources/pages/operating-gantt.html의 로직을 그대로 이식 (DOM id는 biz- 접두사로 분리) */
+(function () {
+  /* ── 설정 ── */
+  // 조직도 좌측 "업무 목록" 패널과 동일한 기준(GANTT_START_DATE/GANTT_DATA_DAYS,
+  // 첫 번째 script 블록에서 정의)을 그대로 사용해 두 패널의 업무 건수가 항상 일치하도록 한다.
+  const START_DATE = GANTT_START_DATE;        // 2026-01-01
+  const DATA_DAYS  = GANTT_DATA_DAYS;         // 전체 데이터 범위 (2026년)
+  const ROW_H      = 36;
+
+  /* ── 날짜 ↔ 오프셋 ── */
+  function dateToOffset(str) {
+    return Math.round((new Date(str) - START_DATE) / 86400000);
+  }
+  function dateFromOffset(off) {
+    const d = new Date(START_DATE);
+    d.setDate(d.getDate() + off);
+    return d;
+  }
+  function formatDate(d) { return (d.getMonth() + 1) + '/' + d.getDate(); }
+  function isWeekend(off) { const day = dateFromOffset(off).getDay(); return day === 0 || day === 6; }
+  function isToday(off)   { return dateFromOffset(off).toDateString() === new Date().toDateString(); }
+
+  const todayOffset = Math.round((new Date() - START_DATE) / 86400000);
+
+  /* ── 뷰 단위 상태 ── */
+  let viewUnit = 'week'; // 'day' | 'week' | 'month' | '3month'
+
+  /* ── 뷰별 설정 ── */
+  function buildGroupHdrs(cols, dtFn) {
+    const groups = [];
+    let cur = '', start = 0;
+    for (let i = 0; i < cols; i++) {
+      const dt  = dtFn(i);
+      const lbl = dt.getFullYear() + '년 ' + (dt.getMonth() + 1) + '월';
+      if (lbl !== cur) {
+        if (cur) groups.push({ label: cur, start, end: i - 1 });
+        cur = lbl; start = i;
+      }
+      if (i === cols - 1) groups.push({ label: cur, start, end: i });
+    }
+    return groups;
+  }
+
+  function getViewConfig() {
+    // 실제 업무 데이터가 끝나는 시점 이후로 '오늘'이 지나가 있으면(더미 데이터 만료),
+    // 빈 화면 대신 마지막 데이터가 보이는 구간을 기준으로 일간 뷰를 띄운다.
+    const dayAnchor = Math.min(todayOffset, maxTaskEndOffset);
+    const dayStart = Math.max(0, dayAnchor - 14);
+
+    switch (viewUnit) {
+      case 'day': return {
+        cols: 90,
+        colW: 32,
+        unitOf:   d => d - dayStart,
+        colClass: i => {
+          const off = dayStart + i;
+          return (isWeekend(off) ? ' weekend' : '') + (isToday(off) ? ' today-col' : '');
+        },
+        colTxt:   i => dateFromOffset(dayStart + i).getDate(),
+        todayCol: todayOffset - dayStart,
+        groupHdrs: buildGroupHdrs(90, i => dateFromOffset(dayStart + i))
+      };
+
+      case 'week': return {
+        cols: 26,
+        colW: 80,
+        unitOf:   d => Math.floor(d / 7),
+        colClass: i => (todayOffset >= i * 7 && todayOffset <= i * 7 + 6) ? ' today-col' : '',
+        colTxt:   i => { const d = dateFromOffset(i * 7); return (d.getMonth() + 1) + '/' + d.getDate(); },
+        todayCol: Math.floor(todayOffset / 7),
+        groupHdrs: buildGroupHdrs(26, i => dateFromOffset(i * 7))
+      };
+
+      case 'month': return {
+        cols: 12,
+        colW: 140,
+        unitOf:   d => { const dt = dateFromOffset(d); return (dt.getFullYear() - 2026) * 12 + dt.getMonth(); },
+        colClass: i => {
+          const now = new Date();
+          return (now.getFullYear() === 2026 && now.getMonth() === i) ? ' today-col' : '';
+        },
+        colTxt:   i => (i + 1) + '월',
+        todayCol: new Date().getFullYear() === 2026 ? new Date().getMonth() : -1,
+        groupHdrs: [{ label: '2026년', start: 0, end: 11 }]
+      };
+
+      case '3month': {
+        const nowQ = new Date().getFullYear() === 2026 ? Math.floor(new Date().getMonth() / 3) : -1;
+        return {
+          cols: 4,
+          colW: 220,
+          unitOf:   d => { const dt = dateFromOffset(d); return Math.floor(((dt.getFullYear() - 2026) * 12 + dt.getMonth()) / 3); },
+          colClass: i => (i === nowQ ? ' today-col' : ''),
+          colTxt:   i => (i * 3 + 1) + '~' + (i * 3 + 3) + '월',
+          todayCol: nowQ,
+          groupHdrs: [{ label: '2026년', start: 0, end: 3 }]
+        };
+      }
+    }
+  }
+
+  /* ── 뷰 전환 ── */
+  function setViewUnit(unit) {
+    viewUnit = unit;
+    document.querySelectorAll('.gantt-view-selector button[data-view]').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.view === unit);
+    });
+    renderHeader();
+    renderAll();
+  }
+
+  /* ── 색상 팔레트 ── */
+  const GROUP_COLORS = [
+    '#3b82f6','#10b981','#8b5cf6','#f59e0b','#ef4444',
+    '#06b6d4','#84cc16','#f97316','#ec4899','#6366f1','#14b8a6','#f43f5e'
+  ];
+  const AVATAR_PALETTE = [
+    '#3b82f6','#10b981','#8b5cf6','#f59e0b','#ef4444',
+    '#06b6d4','#84cc16','#f97316','#ec4899','#6366f1'
+  ];
+
+  const STATUS_BAR = { progress: 'bar-blue', done: 'bar-green', wait: 'bar-gray' };
+  const STATUS_PCT = { progress: 50, done: 100, wait: 0 };
+
+  /* ── ORG → AVATARS ── */
+  const AVATARS = {};
+  let _aci = 0;
+  ORG.forEach(sil => getAllLeaves(sil).forEach(leaf =>
+    (leaf.tasks || []).forEach(t => {
+      if (!AVATARS[t.owner]) {
+        AVATARS[t.owner] = {
+          color: AVATAR_PALETTE[_aci++ % AVATAR_PALETTE.length],
+          abbr:  t.owner.slice(0, 1)
+        };
+      }
+    })
+  ));
+
+  /* ── ORG → TASKS (2026년 전체 기준) ── */
+  function buildAllTasks() {
+    const tasks = [];
+    let tid = 0;
+
+    ORG.forEach((sil, si) => {
+      const silId     = 'g' + si;
+      const silColor  = GROUP_COLORS[si % GROUP_COLORS.length];
+      const silLeaves = getAllLeaves(sil).filter(leaf =>
+        (leaf.tasks || []).some(t => dateToOffset(t.end) >= 0)
+      );
+      if (!silLeaves.length) return;
+
+      let silCount = 0;
+      const subBlocks = [];
+
+      silLeaves.forEach((leaf, li) => {
+        const subId    = silId + '-' + li;
+        const subColor = GROUP_COLORS[(si * 3 + li + 1) % GROUP_COLORS.length];
+        const leafTasks = (leaf.tasks || []).filter(t =>
+          dateToOffset(t.end) >= 0 && dateToOffset(t.start) < DATA_DAYS
+        );
+        if (!leafTasks.length) return;
+
+        const taskItems = leafTasks.map(t => {
+          tid++;
+          return {
+            id:       't' + tid,
+            type:     'task',
+            name:     t.title,
+            parent:   subId,
+            assignee: t.owner,
+            start:    Math.max(0, dateToOffset(t.start)),
+            end:      Math.min(DATA_DAYS - 1, Math.max(0, dateToOffset(t.end))),
+            color:    STATUS_BAR[t.status] || 'bar-blue',
+            progress: STATUS_PCT[t.status] || 0,
+            _silName: sil.name,
+            _orgTask: t,
+          };
+        });
+
+        silCount += taskItems.length;
+        subBlocks.push({ subId, subColor, leaf, taskItems });
+      });
+
+      if (!silCount) return;
+
+      tasks.push({ id: silId, type: 'group', name: sil.name, count: silCount, color: silColor, open: true });
+      subBlocks.forEach(({ subId, subColor, leaf, taskItems }) => {
+        tasks.push({ id: subId, type: 'group', name: leaf.name, count: taskItems.length, color: subColor, parent: silId, open: true, _silName: sil.name });
+        taskItems.forEach(item => tasks.push(item));
+      });
+    });
+
+    return tasks;
+  }
+
+  const TASKS = buildAllTasks();
+  const maxTaskEndOffset = TASKS.reduce((max, t) => t.type === 'task' ? Math.max(max, t.end) : max, 0);
+
+  /* ── 협업/연계 관계 링크 정의 ── */
+  const COLLAB_LINKS = [
+    { from: "디지털 예산관리 시스템 구축 기본계획",    to: "AI 기반 민원처리 시스템 구축 계획",       color: '#6366f1', label: '디지털 협업' },
+    { from: "클라우드 전환 기본계획 수립",              to: "망분리 고도화 사업 추진",                 color: '#6366f1', label: '인프라 연계' },
+    { from: "행정정보시스템 고도화 사업",               to: "정보시스템 통합 보안점검",                color: '#f97316', label: '시스템→보안' },
+    { from: "국제기구 연계 협력과제 발굴",              to: "2026년 통상환경 분석 보고서 작성",        color: '#f97316', label: '국제→통상' },
+    { from: "2026년도 예산안 사전 기획 및 지침 수립",  to: "2025 회계연도 결산 최종 보고",           color: '#14b8a6', label: '예산→결산' },
+    { from: "스마트 행정 혁신방안 수립",                to: "디지털 예산관리 시스템 구축 기본계획",    color: '#14b8a6', label: '혁신→디지털' },
+    { from: "하반기 공개채용 계획 수립",                to: "직급별 역량교육 체계 개편",               color: '#8b5cf6', label: '채용→교육' },
+  ];
+
+  /* ── 조직도 선택 범위 ──
+     팀/팀원 선택 드롭다운 대신, 왼쪽 조직도(index.html)에서 고른 노드/근무자를
+     그대로 간트차트의 표시 범위로 사용한다. scopeOwnerNames가 null이면
+     아무것도 선택되지 않은 초기 상태로, 간트차트 대신 안내 화면을 보여준다. */
+  let scopeOwnerNames = null; // Set<string> | null
+  let orgPath           = []; // 조직도에서 현재 선택된 경로 (실 → 관 → 담당관 ...)
+  let orgSelectedWorker = null;
+
+  // collectMemberNames는 /resources/js/script.js에 정의된 공용 헬퍼를 그대로 사용한다
+  // (업무 캘린더도 동일한 로직으로 조직도 선택 범위를 계산해야 하므로 공유).
+
+  /* 조직도의 "하위 조직" / "소속 근무자" 컬럼이 지금 보여주는 바로 그 목록을
+     간트차트의 그룹 단위로 그대로 사용한다 (실→관, 관→담당관 등 깊이 무관).
+     담당관(leaf, 더 이상 하위 조직 없음)까지 내려가면 그룹 없이 평평한 목록. */
+  function getDisplayGroups(path, selectedWorker) {
+    if (selectedWorker) return null;
+    if (!path.length) return null;
+    const node = path[path.length - 1];
+    if (node.children && node.children.length) {
+      return node.children.map(child => ({ name: child.name, ownerNames: new Set(collectMemberNames(child)) }));
+    }
+    return null;
+  }
+
+  function updateScopeFromOrgSelection(path, selectedWorker) {
+    const emptyEl    = document.getElementById('biz-gantt-empty');
+    const wrapperEl  = document.getElementById('biz-gantt-wrapper');
+    const scopePill  = document.getElementById('biz-scope');
+    const scopeText  = document.getElementById('biz-scope-text');
+
+    orgPath           = path;
+    orgSelectedWorker = selectedWorker;
+
+    if (selectedWorker) {
+      scopeOwnerNames = new Set([selectedWorker.name]);
+      scopeText.textContent = [...path.map(p => p.name), selectedWorker.name].join(' › ');
+    } else if (path.length) {
+      scopeOwnerNames = new Set(collectMemberNames(path[path.length - 1]));
+      scopeText.textContent = path.map(p => p.name).join(' › ');
+    } else {
+      scopeOwnerNames = null;
+      scopeText.textContent = '조직도에서 팀 또는 근무자를 선택해주세요.';
+    }
+
+    const hasSelection = !!scopeOwnerNames;
+    emptyEl.style.display   = hasSelection ? 'none' : 'flex';
+    wrapperEl.style.display = hasSelection ? 'flex' : 'none';
+    scopePill.classList.toggle('is-empty', !hasSelection);
+  }
+
+  document.querySelectorAll('.gantt-view-selector button[data-view]').forEach(btn => {
+    btn.addEventListener('click', () => setViewUnit(btn.dataset.view));
+  });
+
+  /* ── 과부하 계산 ── */
+  function calcWorkload() {
+    const map = new Map();
+    TASKS.filter(t => t.type === 'task').forEach(t => {
+      if (!map.has(t.assignee)) map.set(t.assignee, new Map());
+      const dmap = map.get(t.assignee);
+      for (let d = t.start; d <= t.end; d++) dmap.set(d, (dmap.get(d) || 0) + 1);
+    });
+    return map;
+  }
+  function getMaxLoad(task, wlMap) {
+    const dmap = wlMap.get(task.assignee);
+    if (!dmap) return 0;
+    let max = 0;
+    for (let d = task.start; d <= task.end; d++) max = Math.max(max, dmap.get(d) || 0);
+    return max;
+  }
+  const WORKLOAD = calcWorkload();
+
+  // 그룹(가상 그룹) 펼침 상태 — 이름 기준으로 기억해 재렌더링에도 유지된다.
+  const groupOpenState = {};
+
+  /* ── 표시 업무 목록 (조직도에서 선택된 범위만, 조직도가 보여주는 단계 그대로 그룹핑) ── */
+  function getVisibleTasks() {
+    if (!scopeOwnerNames) return [];
+
+    const scopedTasks = TASKS.filter(t => t.type === 'task' && scopeOwnerNames.has(t.assignee));
+    const groups = getDisplayGroups(orgPath, orgSelectedWorker);
+
+    // 담당관(leaf) 이하로 내려가 더 이상 하위 조직이 없으면 그룹 없이 평평하게 표시.
+    if (!groups) return scopedTasks;
+
+    const rows = [];
+    groups.forEach((g, gi) => {
+      const groupTasks = scopedTasks.filter(t => g.ownerNames.has(t.assignee));
+      if (!groupTasks.length) return;
+      const groupId = 'vg-' + gi;
+      const isOpen  = groupOpenState[g.name] !== false;
+      rows.push({
+        id: groupId, type: 'group', name: g.name, parent: null,
+        count: groupTasks.length, open: isOpen,
+        color: GROUP_COLORS[gi % GROUP_COLORS.length],
+        _span: { start: Math.min(...groupTasks.map(t => t.start)), end: Math.max(...groupTasks.map(t => t.end)) }
+      });
+      if (isOpen) groupTasks.forEach(t => rows.push(Object.assign({}, t, { parent: groupId })));
+    });
+
+    // 남은 그룹이 정확히 하나뿐이면 그 그룹명도 스코프(브레드크럼)와 사실상 중복이므로
+    // 그룹 행은 접고 업무 막대만 평평하게 보여준다. 단, 사용자가 그 그룹을 직접
+    // 접어 둔 상태라면 헤더를 남겨 다시 펼 수 있게 한다 (안 그러면 다시 펼 방법이 없어짐).
+    const groupRows = rows.filter(t => t.type === 'group');
+    if (groupRows.length === 1 && groupRows[0].open) {
+      const onlyId = groupRows[0].id;
+      return rows.filter(t => t.id !== onlyId);
+    }
+
+    return rows;
+  }
+
+  /* ── 헤더 렌더 (뷰 전환 시 재렌더) ── */
+  function renderHeader() {
+    const weeksEl = document.getElementById('biz-gantt-weeks');
+    const daysEl  = document.getElementById('biz-gantt-days');
+    weeksEl.innerHTML = '';
+    daysEl.innerHTML  = '';
+
+    const vc = getViewConfig();
+
+    vc.groupHdrs.forEach(w => {
+      const el = document.createElement('div');
+      el.className   = 'gantt-week-label';
+      el.style.width = ((w.end - w.start + 1) * vc.colW) + 'px';
+      el.textContent = w.label;
+      weeksEl.appendChild(el);
+    });
+
+    for (let i = 0; i < vc.cols; i++) {
+      const el = document.createElement('div');
+      el.className   = 'gantt-day-cell' + vc.colClass(i);
+      el.style.width = vc.colW + 'px';
+      el.textContent = vc.colTxt(i);
+      daysEl.appendChild(el);
+    }
+  }
+
+  /* ── 업무 목록 (왼쪽 패널) 렌더 ── */
+  function renderTaskList() {
+    const body = document.getElementById('biz-task-list-body');
+    body.innerHTML = '';
+    getVisibleTasks().forEach(task => {
+      const isGroup    = task.type === 'group';
+      const isSubGroup = isGroup && !!task.parent;
+      const row = document.createElement('div');
+      row.className  = 'tl-row' + (isGroup ? ' group' : '');
+      row.dataset.id = task.id;
+
+      if (!isGroup) {
+        const maxLoad = getMaxLoad(task, WORKLOAD);
+        row.classList.add(task.color || 'bar-blue');
+        if (maxLoad >= 3) row.classList.add('overload-row');
+        else if (maxLoad >= 2) row.classList.add('warning-row');
+      }
+
+      const toggle = document.createElement('span');
+      toggle.className = 'tl-toggle' + (task.open ? ' open' : '');
+      toggle.innerHTML = isGroup ? '▶' : '';
+      row.appendChild(toggle);
+
+      if (task.parent) {
+        const indent = document.createElement('span');
+        indent.className = 'tl-indent';
+        indent.style.width = isSubGroup ? '8px' : '16px';
+        row.appendChild(indent);
+      }
+
+      if (!isGroup) {
+        const av = AVATARS[task.assignee];
+        if (av) {
+          const dot = document.createElement('span');
+          dot.className   = 'tl-avatar ' + (task.color || 'bar-blue');
+          dot.textContent = av.abbr;
+          row.appendChild(dot);
+        }
+      } else {
+        const dot = document.createElement('span');
+        dot.className        = 'tl-dot';
+        dot.style.background = task.color || '#94a3b8';
+        row.appendChild(dot);
+      }
+
+      const name = document.createElement('span');
+      name.className   = 'tl-name';
+      name.textContent = task.name;
+      row.appendChild(name);
+
+      const count = document.createElement('span');
+      count.className   = 'tl-count';
+      count.textContent = isGroup ? task.count : '';
+      row.appendChild(count);
+
+      if (isGroup) {
+        row.addEventListener('click', () => {
+          groupOpenState[task.name] = !(groupOpenState[task.name] !== false);
+          renderAll();
+        });
+      } else if (task._orgTask) {
+        // 업무 목록에서 개별 업무를 누르면 간트 막대를 눌렀을 때와 동일하게
+        // 곧바로 업무 상세 페이지로 이동한다.
+        row.addEventListener('click', () => {
+          sessionStorage.setItem('krds_selected_task', JSON.stringify(task._orgTask));
+          window.location.href = '/resources/pages/operating-detail-dashboard.html';
+        });
+      }
+      body.appendChild(row);
+    });
+  }
+
+  /* ── 간트 행 렌더 (뷰 인식) ── */
+  function renderGanttRows() {
+    const vc        = getViewConfig();
+    const container = document.getElementById('biz-gantt-rows');
+    container.innerHTML = '';
+    container.style.width = (vc.cols * vc.colW) + 'px';
+
+    const todayCol = vc.todayCol;
+    if (todayCol >= 0 && todayCol < vc.cols) {
+      const line = document.createElement('div');
+      line.className = 'today-line';
+      line.style.left = (todayCol * vc.colW + vc.colW / 2) + 'px';
+      container.appendChild(line);
+    }
+
+    getVisibleTasks().forEach(task => {
+      const row = document.createElement('div');
+      row.className   = 'gantt-row' + (task.type === 'group' ? ' group-row' : '');
+      row.dataset.id  = task.id;
+      row.style.width = '100%';
+
+      for (let i = 0; i < vc.cols; i++) {
+        const col = document.createElement('div');
+        col.className   = 'gantt-col' + vc.colClass(i);
+        col.style.width = vc.colW + 'px';
+        row.appendChild(col);
+      }
+
+      if (task.type === 'group') {
+        const span = task._span;
+        if (span) {
+          const rawS = vc.unitOf(span.start);
+          const rawE = vc.unitOf(span.end);
+          if (rawE >= 0 && rawS < vc.cols) {
+            const sc    = Math.max(0, rawS);
+            const ec    = Math.min(vc.cols - 1, rawE);
+            const isTop = !task.parent;
+            const bw    = document.createElement('div');
+            bw.className    = 'gantt-bar-wrap';
+            bw.style.left   = (sc * vc.colW + 1) + 'px';
+            bw.style.width  = ((ec - sc + 1) * vc.colW - 2) + 'px';
+            bw.style.height = isTop ? '10px' : '8px';
+
+            const bar = document.createElement('div');
+            bar.style.cssText = [
+              'width:100%', 'height:100%',
+              'border-radius:' + (isTop ? '5px' : '4px'),
+              'background:' + (task.color || '#94a3b8'),
+              'opacity:' + (isTop ? '0.2' : '0.13'),
+              'position:relative'
+            ].join(';');
+
+            ['left', 'right'].forEach(side => {
+              const cap = document.createElement('div');
+              cap.style.cssText = [
+                'position:absolute', side + ':0', 'top:0',
+                'width:0', 'height:0',
+                'border-top:' + (isTop ? '10px' : '8px') + ' solid ' + (task.color || '#94a3b8'),
+                'border-' + (side === 'left' ? 'right' : 'left') + ':' + (isTop ? '10px' : '8px') + ' solid transparent',
+                'opacity:' + (isTop ? '0.6' : '0.45')
+              ].join(';');
+              bar.appendChild(cap);
+            });
+
+            bw.appendChild(bar);
+            row.appendChild(bw);
+          }
+        }
+      }
+
+      if (task.type === 'task') {
+        const rawS = vc.unitOf(task.start);
+        const rawE = vc.unitOf(task.end);
+        if (rawE >= 0 && rawS < vc.cols) {
+          const sc      = Math.max(0, rawS);
+          const ec      = Math.min(vc.cols - 1, rawE);
+          const maxLoad = getMaxLoad(task, WORKLOAD);
+
+          const bw = document.createElement('div');
+          bw.className   = 'gantt-bar-wrap';
+          bw.style.left  = (sc * vc.colW + 1) + 'px';
+          bw.style.width = ((ec - sc + 1) * vc.colW - 2) + 'px';
+
+          const bar = document.createElement('div');
+          bar.className   = 'gantt-bar ' + (task.color || 'bar-blue');
+          bar.style.width = '100%';
+          if (maxLoad >= 3) bar.classList.add('bar-overload');
+          else if (maxLoad >= 2) bar.classList.add('bar-warning');
+
+          if (task._orgTask) {
+            const previewBtn = document.createElement('span');
+            previewBtn.className = 'gantt-bar-preview';
+            previewBtn.title = '프로세싱 뷰 미리보기';
+            previewBtn.textContent = '⤢';
+            previewBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              openBizPvModal(task);
+            });
+            bar.appendChild(previewBtn);
+          }
+
+          const av = AVATARS[task.assignee];
+          if (av) {
+            const avEl = document.createElement('span');
+            avEl.className   = 'bar-avatar';
+            avEl.textContent = av.abbr;
+            bar.appendChild(avEl);
+          }
+
+          const nameEl = document.createElement('span');
+          nameEl.style.cssText = 'overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0';
+          nameEl.textContent   = task.name;
+          bar.appendChild(nameEl);
+
+          if (task.progress) {
+            const prog = document.createElement('span');
+            prog.className   = 'bar-progress';
+            prog.textContent = task.progress + '%';
+            bar.appendChild(prog);
+          }
+
+          bar.addEventListener('mouseenter', e => showPopup(e, task, maxLoad));
+          bar.addEventListener('mouseleave', hidePopup);
+          bar.addEventListener('mousemove',  movePopup);
+          if (task._orgTask) {
+            bar.style.cursor = 'pointer';
+            bar.addEventListener('click', () => {
+              sessionStorage.setItem('krds_selected_task', JSON.stringify(task._orgTask));
+              window.location.href = '/resources/pages/operating-detail-dashboard.html';
+            });
+          }
+
+          bw.appendChild(bar);
+          row.appendChild(bw);
+        }
+      }
+
+      container.appendChild(row);
+    });
+  }
+
+  /* ── 팝업 (툴팁) ── */
+  const popup = document.getElementById('biz-bar-popup');
+
+  function showPopup(e, task, maxLoad) {
+    document.getElementById('biz-popup-title').textContent    = task.name;
+    document.getElementById('biz-popup-assignee').textContent = task.assignee || '-';
+    document.getElementById('biz-popup-dates').textContent    =
+      formatDate(dateFromOffset(task.start)) + ' ~ ' + formatDate(dateFromOffset(task.end));
+    document.getElementById('biz-popup-progress').textContent = task.progress + '%';
+
+    const loadEl  = document.getElementById('biz-popup-load');
+    const loadRow = document.getElementById('biz-popup-load-row');
+    if (maxLoad > 1) {
+      loadEl.textContent = maxLoad >= 3 ? '⚠ 과부하 (동시 ' + maxLoad + '건)' : '주의 (동시 ' + maxLoad + '건)';
+      loadEl.className = 'popup-value ' + (maxLoad >= 3 ? 'popup-danger' : 'popup-warning');
+      loadRow.style.display = 'flex';
+    } else {
+      loadRow.style.display = 'none';
+    }
+    popup.classList.add('visible');
+    movePopup(e);
+  }
+  function hidePopup() { popup.classList.remove('visible'); }
+  function movePopup(e) {
+    popup.style.left = (e.clientX + 14) + 'px';
+    popup.style.top  = (e.clientY - 20) + 'px';
+  }
+
+  /* ── 조직도(index.html 좌측) 선택과 업무 현황(간트) 필터 연동 ──
+     조직도에서 근무자까지 선택하면 해당 근무자의 업무만, 팀/부서만
+     선택되어 있으면 그 범위에 속한 인원의 업무만 간트에 남긴다. */
+  window.applyOrgSelectionToGantt = function (path, selectedWorker) {
+    updateScopeFromOrgSelection(path, selectedWorker);
+    renderAll();
+  };
+
+  /* ── 협업 연계 곡선 (SVG) ── */
+  function renderLinks() {
+    const svg = document.getElementById('biz-dep-svg');
+    svg.innerHTML = '';
+
+    const visible = getVisibleTasks();
+    const vc = getViewConfig();
+    const totalW = vc.cols * vc.colW;
+    const totalH = visible.length * ROW_H;
+    svg.style.width  = totalW + 'px';
+    svg.style.height = totalH + 'px';
+
+    // task id → row index (task rows only)
+    const rowIdx = new Map();
+    visible.forEach((t, i) => { if (t.type === 'task') rowIdx.set(t.id, i); });
+
+    // task name → task object
+    const byName = new Map();
+    TASKS.forEach(t => { if (t.type === 'task') byName.set(t.name, t); });
+
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+
+    COLLAB_LINKS.forEach(({ from, to, color, label }, li) => {
+      const ft = byName.get(from);
+      const tt = byName.get(to);
+      if (!ft || !tt) return;
+
+      const fi = rowIdx.get(ft.id);
+      const ti = rowIdx.get(tt.id);
+      if (fi === undefined || ti === undefined) return;
+
+      // 뷰 범위 체크 – 둘 다 보여야 선을 그림
+      const fRawS = vc.unitOf(ft.start);
+      const fRawE = vc.unitOf(ft.end);
+      const tRawS = vc.unitOf(tt.start);
+      const tRawE = vc.unitOf(tt.end);
+      if (fRawE < 0 || fRawS >= vc.cols) return;
+      if (tRawE < 0 || tRawS >= vc.cols) return;
+
+      const fEc = Math.min(vc.cols - 1, fRawE);
+      const tSc = Math.max(0, tRawS);
+
+      const x1 = (fEc + 1) * vc.colW - 3;
+      const x2 = tSc * vc.colW + 3;
+      const y1 = fi * ROW_H + ROW_H / 2;
+      const y2 = ti * ROW_H + ROW_H / 2;
+
+      // 큐빅 베지어 제어점
+      const dx = x2 - x1;
+      const cp = Math.max(50, Math.abs(dx) * 0.45);
+      const cx1 = x1 + cp;
+      const cx2 = x2 - cp;
+
+      // 화살표 마커
+      const mid = 'biz-mk' + li;
+      const mkr = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+      mkr.setAttribute('id', mid);
+      mkr.setAttribute('markerWidth', '8');
+      mkr.setAttribute('markerHeight', '8');
+      mkr.setAttribute('refX', '7');
+      mkr.setAttribute('refY', '4');
+      mkr.setAttribute('orient', 'auto');
+      const tri = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+      tri.setAttribute('points', '0 0, 7 4, 0 8');
+      tri.setAttribute('fill', color);
+      tri.setAttribute('opacity', '0.75');
+      mkr.appendChild(tri);
+      defs.appendChild(mkr);
+
+      // 곡선 경로
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', `M ${x1},${y1} C ${cx1},${y1} ${cx2},${y2} ${x2},${y2}`);
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke', color);
+      path.setAttribute('stroke-width', '1.5');
+      path.setAttribute('stroke-dasharray', '5 3');
+      path.setAttribute('opacity', '0.65');
+      path.setAttribute('marker-end', `url(#${mid})`);
+
+      // 라벨 (중간 지점)
+      if (label) {
+        const mx = (x1 + x2) / 2;
+        const my = (y1 + y2) / 2 - 6;
+        const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        txt.setAttribute('x', mx);
+        txt.setAttribute('y', my);
+        txt.setAttribute('text-anchor', 'middle');
+        txt.setAttribute('font-size', '9');
+        txt.setAttribute('fill', color);
+        txt.setAttribute('opacity', '0.75');
+        txt.setAttribute('font-family', 'inherit');
+        txt.textContent = label;
+        svg.appendChild(txt);
+      }
+
+      svg.appendChild(path);
+    });
+
+    svg.insertBefore(defs, svg.firstChild);
+  }
+
+  /* ── 전체 렌더 ── */
+  function renderAll() {
+    renderTaskList();
+    renderGanttRows();
+    renderLinks();
+  }
+
+  /* ── 스크롤 동기화 (최초 1회) ── */
+  (function initScroll() {
+    const taskBody  = document.getElementById('biz-task-list-body');
+    const ganttBody = document.querySelector('#bizGanttPanel .gantt-body');
+    const ganttHdr  = document.querySelector('#bizGanttPanel .gantt-header');
+    ganttBody.addEventListener('scroll', () => {
+      taskBody.scrollTop   = ganttBody.scrollTop;
+      ganttHdr.scrollLeft  = ganttBody.scrollLeft;
+    });
+    taskBody.addEventListener('scroll', () => { ganttBody.scrollTop = taskBody.scrollTop; });
+  })();
+
+  /* ── 업무 미리보기(프로세싱 뷰) 모달 ── 사업(업무) 바를 클릭하면 기존처럼
+     업무 상세 페이지로 이동하지만, 바 위의 ⤢ 버튼을 누르면 index.html 조직도 탭이
+     쓰는 것과 동일한 노드 흐름도(buildWorkflow/renderNodeCanvas)를 모달로 바로 보여준다 */
+  const pvModalBackdrop = document.getElementById('bizPvModalBackdrop');
+  const pvModalTitle    = document.getElementById('bizPvModalTitle');
+  const pvModalSub      = document.getElementById('bizPvModalSub');
+  const pvModalBody     = document.getElementById('bizPvModalBody');
+  const pvModalClose    = document.getElementById('bizPvModalClose');
+
+  function findOwnerMember(ownerName) {
+    for (const sil of ORG) {
+      for (const leaf of getAllLeaves(sil)) {
+        const m = (leaf.members || []).find(x => x.name === ownerName);
+        if (m) return m;
+      }
+    }
+    return null;
+  }
+
+  function openBizPvModal(task) {
+    const orgTask = task._orgTask;
+    if (!orgTask) return;
+    const member = findOwnerMember(orgTask.owner);
+    const worker = { name: orgTask.owner, role: member ? member.position : '' };
+    pvModalTitle.textContent = orgTask.title;
+    pvModalSub.textContent = `${worker.name}${worker.role ? ' · ' + worker.role : ''} 담당 · 처리 워크플로우`;
+    pvModalBody.innerHTML = '';
+    const { nodes, edges } = buildWorkflow(worker, orgTask);
+    renderNodeCanvas(pvModalBody, nodes, edges);
+    pvModalBackdrop.classList.add('visible');
+  }
+  function closeBizPvModal() {
+    pvModalBackdrop.classList.remove('visible');
+    pvModalBody.innerHTML = '';
+  }
+  pvModalClose.addEventListener('click', closeBizPvModal);
+  pvModalBackdrop.addEventListener('click', e => { if (e.target === pvModalBackdrop) closeBizPvModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeBizPvModal(); });
+
+  // index.html 최초 로드 시 첫 번째 script 블록의 render()가 이 IIFE보다 먼저
+  // 실행되어 조직도 선택 상태(전역 path/selectedWorker)를 반영하지 못했으므로 여기서 동기화한다.
+  updateScopeFromOrgSelection(path, selectedWorker);
+  renderHeader();
+  renderAll();
+})();
+</script>
+
+</body>
+</html>

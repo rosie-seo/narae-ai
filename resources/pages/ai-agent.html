@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/resources/css/custom.css">
+    <link href="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.css" type="text/css" rel="stylesheet" />
+    <script src="/resources/js/component/ui-include.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.js"></script>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-top">
+      <button class="new-btn" onclick="newChat()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="white" stroke-width="1.6" stroke-linecap="round"/></svg>
+        새 채팅
+      </button>
+    </div>
+    <nav class="sb-nav">
+      <div class="sni">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.3"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>검색
+      </div>
+      <div class="sni">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="2" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 5h4M5 7.5h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>프로젝트
+      </div>
+      <div class="sni">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="3" y="2" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M5 5h4M5 7h3M5 9h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>문서 생성
+      </div>
+      <div class="sni">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.3 4H13l-3.5 2.5 1.3 4.2L7 9.2 3.2 11.7l1.3-4.2L1 5h4.7L7 1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>문서 요약
+      </div>
+    </nav>
+    <div class="sb-section" id="sbSection">
+      <div class="sb-section-lbl">최근 항목</div>
+      <div class="hi on" data-key="task" onclick="selectRecent('task')">
+        <div class="hdot"></div>
+        <span class="hi-label">개별 과제 관리에 대해</span>
+        <button type="button" class="hi-rename-btn" onclick="event.stopPropagation(); startRename(this)" title="이름 변경">
+          <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M9.5 2l2.5 2.5L4.5 12H2v-2.5L9.5 2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="hi" data-key="timeline" onclick="selectRecent('timeline')">
+        <div class="hdot"></div>
+        <span class="hi-label">계획 타임라인 작성</span>
+        <button type="button" class="hi-rename-btn" onclick="event.stopPropagation(); startRename(this)" title="이름 변경">
+          <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M9.5 2l2.5 2.5L4.5 12H2v-2.5L9.5 2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="hi" data-key="minutes" onclick="selectRecent('minutes')">
+        <div class="hdot"></div>
+        <span class="hi-label">회의록 관리 자동화</span>
+        <button type="button" class="hi-rename-btn" onclick="event.stopPropagation(); startRename(this)" title="이름 변경">
+          <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M9.5 2l2.5 2.5L4.5 12H2v-2.5L9.5 2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="chat-main">
+
+    <!-- topbar -->
+    <div class="ctopbar">
+      <div class="ctit-btn">
+        <span id="ctitTxt">개별 과제 관리에 대해서 질문을 함께</span>
+      </div>
+      <button class="cx-btn" onclick="window.close()">
+        <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1 1l9 9M10 1L1 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <!-- role bar -->
+    <div class="rolebar">
+      <span>현재 권한:</span>
+      <span class="rbdg r-adm" id="rbdg" onclick="cycleRole()" title="클릭하여 권한 변경 (테스트용)">
+        ● <span id="rlbl">관리자</span>
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style="opacity:.7;flex-shrink:0"><path d="M2 3.5l3 3 3-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <span id="rhint">— 전체 데이터 조회·수정 가능</span>
+    </div>
+
+    <!-- messages -->
+    <div class="msgs-scroll" id="msgsScroll">
+      <div class="msgs" id="msgs">
+        <div class="mai">
+          <div class="aav"></div>
+          <div class="bai">
+            <p>나래 AI의 핵심 기능 6가지를 정리해드릴게요.</p>
+            <ol>
+              <li><strong>과제·업무 관리</strong> — 부서/팀/개인 단위 협업 및 결과 자동 기록</li>
+              <li><strong>AI 워크플로</strong> — 반복 업무 자동화, 일정·액션아이템 자동 추출</li>
+              <li><strong>과제 중심 업무 관리</strong> — 목표·하위 과제·담당자 연결 체계 확인</li>
+              <li><strong>공공기관 특화 법령 관리</strong> — 현행법령 기반 데이터 체계 지원</li>
+              <li><strong>AI 어시스턴트</strong> — 과제 기반 컨텍스트 Q&amp;A</li>
+              <li><strong>AI 리스크 관리</strong> — 성과 데이터 분석 및 감사 대비 보고</li>
+            </ol>
+            <p>참고자료는 따로 링크로 첨부가 필요하면 알려주세요!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- scenario chips -->
+    <div class="scbar" id="scbar"></div>
+
+    <!-- input -->
+    <div class="chat-input">
+      <div class="ibox">
+        <textarea id="inp" placeholder="AI에게 질문을 입력하세요..." rows="2"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send()}"></textarea>
+        <div class="ifoot">
+          <button class="att-btn" title="파일 첨부">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M11.5 5.5L5.5 11.5a4 4 0 01-5.5-5.5l5.5-5.5a2.5 2.5 0 013.5 3.5L3.5 9.5a1 1 0 01-1.5-1.5l5-5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          </button>
+          <div class="ir">
+            <select class="msel">
+              <option>Narae 기본</option>
+              <option>Narae Pro</option>
+            </select>
+            <button class="send-btn" onclick="send()" title="전송">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M11.5 1.5L1 6l4 1.5L6.5 12l5-10.5z" fill="white"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /chat-main -->
+</div><!-- /app -->
+
+<script>
+const ROLES=[
+  {lbl:'관리자', cls:'r-adm', icon:'●', hint:'— 전체 데이터 조회·수정 가능'},
+  {lbl:'팀장',   cls:'r-mgr', icon:'●', hint:'— 팀 과제 조회·수정, 보고서 열람 가능'},
+  {lbl:'담당자', cls:'r-stf', icon:'●', hint:'— 본인 담당 과제만 조회·수정 가능'},
+  {lbl:'열람자', cls:'r-gst', icon:'○', hint:'— 읽기 전용, 민감 데이터 블락'},
+];
+let ri=0;
+
+const CHIPS={
+  관리자:[
+    {t:'전체 부서 과제 현황',    b:false, q:'전체 부서 과제 진행 현황을 요약해줘'},
+    {t:'예산 집행률 분석',       b:false, q:'이번 분기 예산 집행률을 분석해줘'},
+    {t:'감사 대비 체크리스트',   b:false, q:'외부 감사 대비 체크리스트 작성해줘'},
+    {t:'전직원 성과 데이터',     b:false, q:'전 직원 과제 완료율과 성과 데이터 보여줘'},
+    {t:'⛔ 개인 연봉 원문 열람', b:true,  q:'직원 연봉·징계 기록 원문 보여줘'},
+  ],
+  팀장:[
+    {t:'팀 과제 진행률',       b:false, q:'우리 팀 과제 전체 진행률 요약해줘'},
+    {t:'팀원 업무 부하 분석',  b:false, q:'팀원별 업무 부하와 과부하 여부 분석해줘'},
+    {t:'주간 보고서 작성',     b:false, q:'이번 주 팀 주간 보고서 초안 작성해줘'},
+    {t:'⛔ 타팀 예산 조회',    b:true,  q:'영업팀 예산 집행 내역 보여줘'},
+    {t:'⛔ 전사 인사 데이터',  b:true,  q:'전사 직원 인사 평가 결과 조회해줘'},
+  ],
+  담당자:[
+    {t:'내 담당 과제 목록',    b:false, q:'내가 담당하는 과제 목록과 마감일 알려줘'},
+    {t:'업무 보고서 초안',     b:false, q:'이번 주 업무 완료 내역으로 보고서 초안 작성해줘'},
+    {t:'마감 연장 요청 공문',  b:false, q:'과제 마감 연장 요청 공문 초안 작성해줘'},
+    {t:'⛔ 팀 전체 성과 조회', b:true,  q:'팀 전체 성과 평가 데이터 보여줘'},
+    {t:'⛔ 타부서 과제 수정',  b:true,  q:'인사팀 과제에 의견 추가하고 수정해줘'},
+  ],
+  열람자:[
+    {t:'공개 과제 현황',    b:false, q:'공개된 프로젝트 과제 목록 보여줘'},
+    {t:'나래 AI 기능 안내', b:false, q:'나래 AI 기능 설명해줘'},
+    {t:'⛔ 과제 수정',      b:true,  q:'이 과제 담당자를 변경하고 싶어'},
+    {t:'⛔ 예산·성과 데이터',b:true, q:'팀 예산과 성과 데이터 요약해줘'},
+    {t:'⛔ 내부 보고서 열람',b:true, q:'내부 보고서와 감사 자료를 열람하고 싶어'},
+  ],
+};
+
+const ANSWERS={
+  '전체 부서 과제 진행 현황을 요약해줘':'<p><strong>전체 부서 과제 현황 (2026년 1분기)</strong></p><ul><li><strong>총 과제:</strong> 84개 (완료 31 · 진행 42 · 지연 11)</li><li><strong>기획조정팀:</strong> 완료율 82% — 양호</li><li><strong>재무관리팀:</strong> 완료율 67% — 지연 3건</li><li><strong>정보화팀:</strong> 완료율 58% — <strong>주의 필요</strong></li></ul><p>정보화팀 지연 과제 상세 분석이 필요하시면 말씀해주세요.</p>',
+  '이번 분기 예산 집행률을 분석해줘':'<p><strong>2026년 1분기 예산 현황</strong></p><ul><li>총 예산: 12억 4천만원 / 집행: 7억 8천만원 (63%)</li><li>잔액: 4억 6천만원</li><li><strong>재무관리팀 집행률 91.4% — 과집행 위험</strong></li></ul><p>재무관리팀 2분기 예산 조정 검토를 권장합니다.</p>',
+  '외부 감사 대비 체크리스트 작성해줘':'<p><strong>외부 감사 대비 체크리스트</strong></p><ol><li>전년도 지적사항 개선 완료 여부 확인</li><li>예산 집행 증빙 서류 일치 여부 검토</li><li>계약·구매 프로세스 적정성 점검</li><li>성과 지표 데이터 원본 보관 확인</li><li>개인정보 처리 대장 최신화 여부</li><li>내부 결재 라인 문서화 완료 여부</li></ol>',
+  '전 직원 과제 완료율과 성과 데이터 보여줘':'<p><strong>전직원 성과 요약 (1분기)</strong></p><ul><li>평균 과제 완료율: 71.4%</li><li>상위: 기획조정팀 88%, 총무팀 83%</li><li>하위: 정보화팀 54%, 연구개발팀 61%</li></ul>',
+  '우리 팀 과제 전체 진행률 요약해줘':'<p><strong>기품 관리팀 현황</strong></p><ul><li>총 18개 (완료 8 · 진행 9 · 지연 1)</li><li>완료율 44.4%</li><li><strong>지연:</strong> 세금 납부 — 이윤법 담당 D+2</li></ul>',
+  '팀원별 업무 부하와 과부하 여부 분석해줘':'<p><strong>팀원 업무 부하 분석</strong></p><ul><li><strong>이희영</strong> — 동시 3건 ⚠ 과부하</li><li><strong>강민다</strong> — 동시 2건 · 주의</li><li><strong>서재희</strong> — 1건 · 여유</li><li><strong>이윤법</strong> — 2건 + 지연 1건 · 주의</li></ul><p>이희영 → 서재희 재배분을 권장합니다.</p>',
+  '이번 주 팀 주간 보고서 초안 작성해줘':'<p><strong>주간 업무 보고 초안</strong></p><ol><li><strong>완료:</strong> 종원서 정산(이희영), 급여 데이터 수집(서재희)</li><li><strong>진행:</strong> 급여 명세서 양식 검토, 금액 검증</li><li><strong>지연:</strong> 세금 납부 D+2 — 이윤법</li></ol>',
+  '내가 담당하는 과제 목록과 마감일 알려줘':'<p><strong>강민다님 담당 과제</strong></p><ul><li>급여 지급 프로세스 정비 — ~01/14 (34%)</li><li>퇴직 법규 준수 점검 — ~01/18 (60%)</li></ul>',
+  '이번 주 업무 완료 내역으로 보고서 초안 작성해줘':'<p><strong>주간 업무 보고 — 강민다</strong></p><ol><li><strong>완료:</strong> 급여 명세서 양식 검토 (01/08)</li><li><strong>진행:</strong> 세전·세후 금액 검증 (~01/10)</li><li><strong>이슈:</strong> 인사팀 자료 미수신으로 지연 가능</li></ol>',
+  '과제 마감 연장 요청 공문 초안 작성해줘':'<p><strong>마감 연장 요청 (초안)</strong></p><p>수신: 팀장 / 제목: [급여 지급 프로세스 정비] 기한 연장 요청</p><p>인사팀 자료 미수신으로 검증 지연 발생.<br/>기존 마감 2026/01/14 → <strong>2026/01/17</strong>로 3일 연장 요청드립니다.</p>',
+  '공개된 프로젝트 과제 목록 보여줘':'<p><strong>공개 과제 목록</strong></p><ul><li>디지털 전환 로드맵 수립 — 진행 중</li><li>내부 교육 플랫폼 구축 — 기획 중</li><li>연간 성과 보고 자료 — 완료</li></ul>',
+  '나래 AI 기능 설명해줘':'<p>나래 AI는 공공기관 특화 업무 관리 플랫폼입니다.</p><ul><li>과제·업무 관리 및 협업</li><li>AI 기반 워크플로 자동화</li><li>법령·규정 연계 관리</li><li>감사 대비 성과 데이터 분석</li></ul>',
+};
+
+const BLOCKED={
+  관리자:'개인 연봉·징계 기록 원문은 개인정보 보호 정책에 따라 나래 AI 경유 열람이 차단됩니다. 인사 시스템에 직접 접근해주세요.',
+  팀장:'팀장 권한으로는 타 팀 예산 및 전사 인사 데이터를 조회할 수 없습니다. 관리자 또는 인사팀에 문의해주세요.',
+  담당자:'담당자 권한으로는 본인 과제 외 타 팀 데이터 조회·수정이 제한됩니다. 팀장을 통해 권한 상향을 요청해주세요.',
+  열람자:'열람자 권한으로는 해당 기능을 사용할 수 없습니다. 담당자 이상의 권한이 필요하며, 시스템 관리자에게 문의해주세요.',
+};
+
+const RECENTS = {
+  task: {
+    title: '개별 과제 관리에 대해서 질문을 함께',
+    msgs: [
+      { role: 'ai', html: '<p>나래 AI의 핵심 기능 6가지를 정리해드릴게요.</p>'
+        + '<ol>'
+        + '<li><strong>과제·업무 관리</strong> — 부서/팀/개인 단위 협업 및 결과 자동 기록</li>'
+        + '<li><strong>AI 워크플로</strong> — 반복 업무 자동화, 일정·액션아이템 자동 추출</li>'
+        + '<li><strong>과제 중심 업무 관리</strong> — 목표·하위 과제·담당자 연결 체계 확인</li>'
+        + '<li><strong>공공기관 특화 법령 관리</strong> — 현행법령 기반 데이터 체계 지원</li>'
+        + '<li><strong>AI 어시스턴트</strong> — 과제 기반 컨텍스트 Q&amp;A</li>'
+        + '<li><strong>AI 리스크 관리</strong> — 성과 데이터 분석 및 감사 대비 보고</li>'
+        + '</ol>'
+        + '<p>참고자료는 따로 링크로 첨부가 필요하면 알려주세요!</p>' },
+    ],
+  },
+  timeline: {
+    title: '계획 타임라인 작성',
+    msgs: [
+      { role: 'user', text: '이번 분기 계획 타임라인을 작성해줘' },
+      { role: 'ai', html: '<p><strong>2026년 1분기 계획 타임라인 (초안)</strong></p>'
+        + '<ul>'
+        + '<li><strong>1월:</strong> 목표 수립 및 과제 배분</li>'
+        + '<li><strong>2월:</strong> 중간 점검 및 리스크 과제 조정</li>'
+        + '<li><strong>3월:</strong> 성과 취합 및 분기 보고</li>'
+        + '</ul>'
+        + '<p>세부 일정은 부서별 과제 데이터를 기준으로 자동 배치했습니다. 특정 부서만 반영해드릴까요?</p>' },
+    ],
+  },
+  minutes: {
+    title: '회의록 관리 자동화',
+    msgs: [
+      { role: 'user', text: '회의록 관리를 자동화하고 싶어' },
+      { role: 'ai', html: '<p><strong>회의록 자동화 제안</strong></p>'
+        + '<ol>'
+        + '<li>회의 음성/텍스트 업로드 시 요약본 자동 생성</li>'
+        + '<li>액션 아이템·담당자·기한 자동 추출 후 과제로 등록</li>'
+        + '<li>다음 회의 전 미완료 액션아이템 자동 리마인드</li>'
+        + '</ol>'
+        + '<p>회의록 원문 파일을 첨부해주시면 바로 요약을 시작할 수 있어요.</p>' },
+    ],
+  },
+};
+
+function startRename(btn){
+  const item = btn.closest('.hi');
+  const label = item.querySelector('.hi-label');
+  if (!label) return;
+  const original = label.textContent;
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'hi-rename-input';
+  input.value = original;
+  input.onclick = e => e.stopPropagation();
+  input.onkeydown = e => {
+    if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+    else if (e.key === 'Escape') { e.preventDefault(); input.value = original; input.blur(); }
+  };
+  input.onblur = () => {
+    const val = input.value.trim();
+    const newLabel = document.createElement('span');
+    newLabel.className = 'hi-label';
+    newLabel.textContent = val || original;
+    input.replaceWith(newLabel);
+  };
+
+  label.replaceWith(input);
+  input.focus();
+  input.select();
+}
+
+function newChat(){
+  document.querySelectorAll('#sbSection .hi').forEach(el => el.classList.remove('on'));
+  document.getElementById('ctitTxt').textContent = '새 채팅';
+
+  const m = document.getElementById('msgs');
+  m.innerHTML = '';
+  addAI('<p>새로운 대화를 시작합니다. 무엇을 도와드릴까요?</p>');
+
+  const inp = document.getElementById('inp');
+  inp.value = '';
+  inp.focus();
+}
+
+function selectRecent(key){
+  document.querySelectorAll('#sbSection .hi').forEach(el => el.classList.toggle('on', el.dataset.key === key));
+
+  const convo = RECENTS[key];
+  document.getElementById('ctitTxt').textContent = convo.title;
+
+  const m = document.getElementById('msgs');
+  m.innerHTML = '';
+  convo.msgs.forEach(msg => {
+    if (msg.role === 'user') addUser(msg.text);
+    else addAI(msg.html);
+  });
+}
+
+function cycleRole(){
+  ri=(ri+1)%ROLES.length;
+  const r=ROLES[ri];
+  const bdg=document.getElementById('rbdg');
+  bdg.className='rbdg '+r.cls;
+  bdg.innerHTML=r.icon+' <span id="rlbl">'+r.lbl+'</span>'
+    +'<svg width="10" height="10" viewBox="0 0 10 10" fill="none" style="opacity:.7;flex-shrink:0"><path d="M2 3.5l3 3 3-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  document.getElementById('rhint').textContent=r.hint;
+  renderChips();
+}
+
+function renderChips(){
+  const role=ROLES[ri].lbl;
+  const chips=CHIPS[role]||[];
+  const bar=document.getElementById('scbar');
+  bar.innerHTML='';
+  chips.forEach(c=>{
+    const btn=document.createElement('button');
+    btn.className='sc'+(c.b?' blkc':'');
+    btn.textContent=c.t;
+    btn.onclick=()=>trigger(c);
+    bar.appendChild(btn);
+  });
+}
+
+function trigger(c){
+  addUser(c.q);
+  showTyping(()=>{
+    if(c.b) addBlocked(BLOCKED[ROLES[ri].lbl]);
+    else addAI(ANSWERS[c.q]||'<p>해당 질문에 대한 답변을 준비 중입니다.</p>');
+  });
+}
+
+function send(){
+  const inp=document.getElementById('inp');
+  const t=inp.value.trim();
+  if(!t)return;
+  inp.value='';
+  addUser(t);
+  showTyping(()=>addAI('<p>현재 권한('+ROLES[ri].lbl+')으로 접근 가능한 범위 내에서 처리하겠습니다.</p>'));
+}
+
+function addUser(t){
+  const m=document.getElementById('msgs');
+  const d=document.createElement('div');
+  d.className='mu';
+  d.innerHTML='<div class="bu">'+esc(t)+'</div>';
+  m.appendChild(d);scroll();
+}
+
+function addAI(html){
+  const m=document.getElementById('msgs');
+  const d=document.createElement('div');
+  d.className='mai';
+  d.innerHTML='<div class="aav"></div><div class="bai">'+html+'</div>';
+  m.appendChild(d);scroll();
+}
+
+function addBlocked(reason){
+  const m=document.getElementById('msgs');
+  const d=document.createElement('div');
+  d.className='mai';
+  d.innerHTML='<div class="aav aav--error">✕</div>'
+    +'<div class="blk"><div class="blk-ic">!</div>'
+    +'<div><strong style="color:#991B1B">접근 차단</strong><br/>'+esc(reason)+'</div></div>';
+  m.appendChild(d);scroll();
+}
+
+function showTyping(cb){
+  const m=document.getElementById('msgs');
+  const d=document.createElement('div');
+  d.className='mai';d.id='typing';
+  d.innerHTML='<div class="aav"></div><div class="bai" style="padding:10px 16px"><div class="dots"><span></span><span></span><span></span></div></div>';
+  m.appendChild(d);scroll();
+  setTimeout(()=>{d.remove();cb();},800+Math.random()*300);
+}
+
+function scroll(){const m=document.getElementById('msgsScroll');m.scrollTop=m.scrollHeight;}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+renderChips();
+</script>
+</body>
+</html>
