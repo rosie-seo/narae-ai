@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>업무보고 작성</title>
+    <link rel="stylesheet" href="/resources/css/custom.css">
+    <link href="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.css" type="text/css" rel="stylesheet" />
+    <script src="/resources/js/component/ui-include.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.js"></script>
+</head>
+<body data-report-nav="work">
+
+  <div class="operating-container">
+
+    <div data-include="/html/code/header.html"></div>
+
+    <div class="organization-container">
+
+      <!-- 사이드 네비게이션 (보고 공통 LNB) -->
+      <div data-include="/html/code/report-side-nav.html"></div>
+
+      <!-- 메인 콘텐츠 -->
+      <main class="main">
+
+        <div class="page-header">
+          <div class="page-title-group">
+            <div class="page-title">업무보고 작성</div>
+            <div class="page-desc" id="writeDesc">선택한 보고 기간에 나에게 할당된 WBS 항목별로 추진 실적을 작성합니다.</div>
+          </div>
+          <div class="page-header__actions">
+            <a href="/resources/pages/work-report.html" class="krds-btn medium secondary">목록으로</a>
+          </div>
+        </div>
+
+        <!-- AI 안내 -->
+        <div class="ai-notice">
+          <span class="ai-notice__badge">AI</span>
+          <p class="ai-notice__text">
+            여기에 작성한 업무보고를 바탕으로 <strong>주간보고 · 월간보고가 자동으로 작성</strong>됩니다.
+            항목별 추진 실적과 이슈를 적어 두면 요약 · 지연 사유 · 다음 태스크에 그대로 반영됩니다.
+          </p>
+        </div>
+
+        <!-- 보고 기간 선택 -->
+        <div class="report-toolbar">
+          <label class="report-toolbar__label" for="periodSelect">보고 기간</label>
+          <select class="krds-form-select small is-wide" id="periodSelect" title="보고 기간 선택"></select>
+          <span class="report-toolbar__count" id="periodState"></span>
+        </div>
+
+        <!-- 작성자 / 보고 기간 -->
+        <div class="krds-table-wrap report-basic">
+          <table class="tbl col data">
+            <caption>업무보고 기본 정보</caption>
+            <colgroup><col style="width:14%"><col><col style="width:14%"><col></colgroup>
+            <tbody>
+              <tr>
+                <th scope="row">작성자</th><td id="writeAuthor">-</td>
+                <th scope="row">팀</th><td id="writeTeam">-</td>
+              </tr>
+              <tr>
+                <th scope="row">보고 기간</th><td id="writePeriod">-</td>
+                <th scope="row">대상 WBS</th><td id="writeCount">-</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- WBS 항목별 작성 폼 -->
+        <form id="writeForm" class="write-form">
+          <!-- 자유 기술란 -->
+          <section class="write-item write-item--free">
+            <div class="write-item__head">
+              <span class="krds-badge small bg-light-primary">자유 기술</span>
+              <h2 class="write-item__title">주간보고 종합 의견</h2>
+              <span class="write-item__period">선택 입력</span>
+            </div>
+            <div class="form-group">
+              <div class="form-tit">
+                <label for="freeNote">WBS 항목과 별개로 이번 주 보고에 남기고 싶은 내용</label>
+              </div>
+              <div class="form-conts">
+                <div class="textarea-wrap">
+                  <textarea class="krds-input" id="freeNote" maxlength="1000"
+                    placeholder="이번 주 총평, 특이사항, 협조가 필요한 사항, 다음 주 계획 등을 자유롭게 작성해 주세요."></textarea>
+                  <p class="textarea-count">
+                    <span class="count-now">0</span><span class="count-total">/1000</span>
+                  </p>
+                </div>
+              </div>
+              <p class="form-hint">여기에 쓴 내용은 AI 주간·월간보고의 &lsquo;작성자 종합 의견&rsquo;으로 그대로 실립니다.</p>
+            </div>
+          </section>
+
+          <!-- 보고 기간별 WBS 항목 -->
+          <div id="writeList"></div>
+
+          <div class="write-actions">
+            <span class="write-actions__saved" id="writeSaved"></span>
+            <button type="button" class="krds-btn medium secondary" id="btnTempSave">임시저장</button>
+            <button type="submit" class="krds-btn medium primary" id="btnSubmit">보고 제출하고 AI 주간보고 보기</button>
+          </div>
+        </form>
+
+      </main>
+
+    </div>
+  </div>
+
+  <script src="/resources/js/script.js"></script>
+  <script>
+  (function () {
+    const me = getCurrentUser();
+
+    /* ── 보고 기간 선택 ──
+       최근 8주 + 그보다 오래된 저장본이 있는 주까지 고를 수 있게 합친다. */
+    const WEEKS = Array.from({ length: 8 }, (_, i) => {
+      const r = getWeekRange(-i);
+      return {
+        label: i === 0 ? '이번 주' : i === 1 ? '지난 주' : i + '주 전',
+        start: fmtYMD(r.start),
+        end: fmtYMD(r.end),
+      };
+    });
+    loadWorkReports().forEach(rec => {
+      if (!WEEKS.some(w => w.start === rec.periodStart)) {
+        WEEKS.push({ label: '이전 보고', start: rec.periodStart, end: rec.periodEnd });
+      }
+    });
+    WEEKS.sort((a, b) => b.start.localeCompare(a.start));
+
+    const selectEl = document.getElementById('periodSelect');
+    const stateEl  = document.getElementById('periodState');
+
+    // ?period=YYYY-MM-DD 로 특정 주를 열 수 있다 (저장본 수정 진입)
+    const wanted = new URLSearchParams(location.search).get('period');
+    const foundIndex = WEEKS.findIndex(w => w.start === wanted);
+    const weekIndex = foundIndex >= 0 ? foundIndex : 0;
+
+    selectEl.innerHTML = WEEKS.map((w, i) => {
+      const has = getWorkReportOf(w.start, w.end);
+      const md = d => d.slice(5).replace('-', '.');
+      return `<option value="${i}"${i === weekIndex ? ' selected' : ''}>${w.label} · ${md(w.start)} ~ ${md(w.end)}${has ? ' · 저장본' : ''}</option>`;
+    }).join('');
+
+    selectEl.addEventListener('change', () => {
+      location.href = '/resources/pages/work-report-write.html?period=' + encodeURIComponent(WEEKS[+selectEl.value].start);
+    });
+
+    const week    = WEEKS[weekIndex];
+    const saved   = getWorkReportOf(week.start, week.end);
+    const entries = (saved && saved.entries) || {};
+
+    // 선택한 보고 기간의 대상 WBS (기간에 걸친 항목 + 미완료 이월 항목)
+    const tasks = getWbsTasksOfInPeriod(me.name, week.start, week.end);
+
+    stateEl.innerHTML = saved
+      ? `저장본 있음 · 최근 저장 <b>${escapeHtml(String(saved.savedAt))}</b>`
+      : '아직 저장본이 없는 기간입니다.';
+
+    /* ── 기본 정보 ── */
+    document.getElementById('writeAuthor').textContent = me.name + ' ' + me.role + (me.position ? ' (' + me.position + ')' : '');
+    document.getElementById('writeTeam').textContent   = me.sil + ' · ' + me.dept;
+    document.getElementById('writePeriod').textContent = week.start + ' ~ ' + week.end;
+    const carriedCount = tasks.filter(t => isTaskCarriedOver(t, week.start)).length;
+    document.getElementById('writeCount').textContent =
+      tasks.length + '건' + (carriedCount ? ' (이월 ' + carriedCount + '건 포함)' : '');
+    document.getElementById('writeDesc').textContent   =
+      '보고 기간 ' + week.start + ' ~ ' + week.end + ' · ' + me.dept + ' ' + me.name + ' ' + me.role;
+
+    /* ── 항목별 입력 카드 ── */
+    const listEl = document.getElementById('writeList');
+    const asOf = parseISODate(week.end);
+
+    if (!tasks.length) {
+      listEl.innerHTML = '<p class="task-empty">' + week.start + ' ~ ' + week.end + ' 기간에 해당하는 보고 대상 WBS 항목이 없습니다.</p>';
+    } else {
+      listEl.innerHTML = tasks.map((t, i) => {
+        const risk = computeTaskRisk(t, asOf);
+        const key  = workReportTaskKey(t);
+        const val  = entries[key] || '';
+        const delayTag = (t.status !== 'done' && risk.tier !== 'ok')
+          ? `<span class="krds-badge small ${risk.tier === 'danger' ? 'bg-light-danger' : 'bg-light-warning'}">지연</span>`
+          : '';
+        const carryTag = isTaskCarriedOver(t, week.start)
+          ? '<span class="report-tag report-tag--carry">이월</span>'
+          : '';
+        return `
+          <section class="write-item">
+            <div class="write-item__head">
+              <span class="${STATUS_CLASS[t.status]}">${STATUS_LABEL[t.status]}</span>
+              ${delayTag}
+              <h2 class="write-item__title">${escapeHtml(t.title)}${carryTag}</h2>
+              <span class="write-item__period">${t.start} ~ ${t.end}</span>
+            </div>
+            <div class="form-group">
+              <div class="form-tit">
+                <label for="entry-${i}">이번 주 추진 실적 · 이슈</label>
+              </div>
+              <div class="form-conts">
+                <div class="textarea-wrap">
+                  <textarea class="krds-input" id="entry-${i}" data-key="${escapeHtml(key)}" maxlength="300"
+                    placeholder="추진한 내용, 협의 결과, 지연 사유 등을 적어 주세요.">${escapeHtml(val)}</textarea>
+                  <p class="textarea-count">
+                    <span class="count-now">${val.length}</span><span class="count-total">/300</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+        `;
+      }).join('');
+    }
+
+    /* 자유 기술란 — 저장본 내용 불러오기 */
+    const freeEl = document.getElementById('freeNote');
+    freeEl.value = (saved && saved.freeNote) || '';
+    freeEl.closest('.textarea-wrap').querySelector('.count-now').textContent = freeEl.value.length;
+
+    /* 글자 수 카운트 */
+    document.querySelectorAll('.write-form textarea').forEach(ta => {
+      ta.addEventListener('input', () => {
+        ta.closest('.textarea-wrap').querySelector('.count-now').textContent = ta.value.length;
+      });
+    });
+
+    /* ── 저장 ── */
+    function collect() {
+      const next = {};
+      listEl.querySelectorAll('textarea').forEach(ta => {
+        const v = ta.value.trim();
+        if (v) next[ta.dataset.key] = v;
+      });
+      return next;
+    }
+
+    function persist(submitted) {
+      const now = new Date();
+      const stamp = fmtYMD(now) + ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+      upsertWorkReport({
+        id: 'wrs-' + week.start,
+        author: me.name,
+        dept: me.dept,
+        sil: me.sil,
+        periodStart: week.start,
+        periodEnd: week.end,
+        savedAt: stamp,
+        // 이미 제출한 보고를 임시저장으로 되돌리지는 않는다
+        submitted: !!submitted || !!(saved && saved.submitted),
+        entries: collect(),
+        freeNote: freeEl.value.trim(),
+      });
+      return stamp;
+    }
+
+    const savedEl = document.getElementById('writeSaved');
+    if (saved && saved.savedAt) savedEl.textContent = '최근 저장 ' + saved.savedAt + ' · 업무보고 목록에 저장본으로 남습니다.';
+
+    document.getElementById('btnTempSave').addEventListener('click', () => {
+      const stamp = persist(false);
+      savedEl.textContent = '임시저장 완료 · ' + stamp;
+    });
+
+    document.getElementById('writeForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const filled = Object.keys(collect()).length + (freeEl.value.trim() ? 1 : 0);
+      if (!filled) {
+        savedEl.textContent = 'WBS 항목 또는 종합 의견 중 한 곳 이상을 작성해 주세요.';
+        return;
+      }
+      persist(true);
+      // 저장본을 남기고 목록/상세에서 다시 볼 수 있게 한 뒤, 바로 AI 주간보고로 이동
+      const rec = getWorkReportOf(week.start, week.end);
+      if (rec) sessionStorage.setItem('krds_selected_work_report', JSON.stringify(rec));
+      const report = getMyReport('weekly');
+      if (report) sessionStorage.setItem('krds_selected_report', JSON.stringify(report));
+      window.location.href = '/resources/pages/weekly-report-detail.html';
+    });
+  })();
+  </script>
+
+</body>
+</html>

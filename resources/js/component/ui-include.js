@@ -32,9 +32,12 @@
 
     Promise.all(promises).then(function () {
       document.dispatchEvent(new CustomEvent('ui-include:done'));
-      // 헤더가 동적으로 삽입된 후 KRDS GNB 재초기화
+      // 헤더가 동적으로 삽입된 후 KRDS GNB · 드롭다운 재초기화
       if (typeof krds_mainMenuPC !== 'undefined') {
         krds_mainMenuPC.init();
+      }
+      if (typeof krds_dropEvent !== 'undefined') {
+        krds_dropEvent.init();
       }
     });
   }

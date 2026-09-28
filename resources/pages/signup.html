@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입 신청 · Narae AI</title>
+    <link rel="stylesheet" href="/resources/css/custom.css">
+    <link href="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.css" type="text/css" rel="stylesheet" />
+    <script defer src="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.js"></script>
+</head>
+<body class="login-body">
+
+  <main class="login-shell">
+    <section class="login-card login-card--signup" id="signupCard">
+
+      <header class="login-card__head">
+        <h1 class="login-card__title">회원가입 신청</h1>
+      </header>
+
+      <!-- 안내 -->
+      <p class="signup-notice">
+        <span class="signup-notice__mark" aria-hidden="true">★</span>
+        관리자가 승인하면 임시 비밀번호(7일 유효)가 발급됩니다.
+      </p>
+
+      <form class="signup-form" id="signupForm" novalidate>
+        <div class="fieldset">
+
+          <!-- 로그인 ID -->
+          <div class="form-group">
+            <div class="form-tit">
+              <label for="suId">로그인 ID</label>
+            </div>
+            <div class="form-conts" id="suIdConts">
+              <input type="text" id="suId" class="krds-input" placeholder="아이디를 입력해 주세요"
+                autocomplete="username" spellcheck="false" maxlength="30">
+            </div>
+            <p class="form-hint" id="suIdHint"></p>
+          </div>
+
+          <!-- 이름 -->
+          <div class="form-group">
+            <div class="form-tit">
+              <label for="suName">이름</label>
+            </div>
+            <div class="form-conts" id="suNameConts">
+              <input type="text" id="suName" class="krds-input" placeholder="이름을 입력해 주세요"
+                autocomplete="name" maxlength="50">
+            </div>
+            <p class="form-hint" id="suNameHint"></p>
+          </div>
+
+          <!-- 이메일 -->
+          <div class="form-group">
+            <div class="form-tit">
+              <label for="suEmail">이메일</label>
+            </div>
+            <div class="form-conts" id="suEmailConts">
+              <input type="email" id="suEmail" class="krds-input" placeholder="example@gov.kr"
+                autocomplete="email" spellcheck="false">
+            </div>
+            <p class="form-hint" id="suEmailHint"></p>
+          </div>
+
+          <!-- 연락처 -->
+          <div class="form-group">
+            <div class="form-tit">
+              <label for="suPhone">연락처</label>
+            </div>
+            <div class="form-conts" id="suPhoneConts">
+              <input type="tel" id="suPhone" class="krds-input" placeholder="숫자만 입력해 주세요"
+                autocomplete="tel" inputmode="numeric" maxlength="20">
+            </div>
+            <p class="form-hint" id="suPhoneHint"></p>
+          </div>
+
+          <!-- 희망 조직 -->
+          <div class="form-group">
+            <div class="form-tit">
+              <label for="suOrg">희망 조직</label>
+            </div>
+            <div class="form-conts" id="suOrgConts">
+              <div class="select-with-icon">
+                <svg class="select-with-icon__ico" width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                  <path d="M3.5 17V4.5A1 1 0 0 1 4.5 3.5h6a1 1 0 0 1 1 1V17M11.5 8.5h4a1 1 0 0 1 1 1V17M2 17h16M6 6.5h2M6 9.5h2M6 12.5h2M13.5 11.5h1M13.5 14h1"
+                    stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <select id="suOrg" class="krds-form-select" title="희망 조직 선택">
+                  <option value="">조직 트리에서 선택</option>
+                </select>
+              </div>
+            </div>
+            <p class="form-hint" id="suOrgHint"></p>
+          </div>
+
+        </div>
+
+        <div class="signup-actions">
+          <a href="/resources/pages/login.html" class="krds-btn medium text">로그인으로</a>
+          <button type="submit" class="krds-btn medium primary" id="btnSubmitSignup">신청</button>
+        </div>
+      </form>
+
+    </section>
+  </main>
+
+  <script src="/resources/js/script.js"></script>
+  <script>
+  (function () {
+    const form = document.getElementById('signupForm');
+
+    /* ── 희망 조직 : ORG 트리에서 담당관(말단 조직) 목록을 실 단위로 묶어 채운다 ── */
+    const orgSel = document.getElementById('suOrg');
+    ORG.forEach(sil => {
+      const group = document.createElement('optgroup');
+      group.label = sil.name;
+      getAllLeaves(sil).forEach(leaf => {
+        const mid = leaf._parent && leaf._parent !== sil ? leaf._parent.name + ' › ' : '';
+        const opt = document.createElement('option');
+        opt.value = sil.name + '|' + leaf.name;
+        opt.textContent = mid + leaf.name;
+        group.appendChild(opt);
+      });
+      if (group.children.length) orgSel.appendChild(group);
+    });
+
+    /* ── 이미 사용 중인 아이디 (데모) ──
+       ORG 구성원 메일 계정에서 만든 결정적 목록. 실제로는 서버 중복 검사 자리. */
+    const TAKEN_IDS = new Set();
+    ORG.forEach(sil => getAllLeaves(sil).forEach(leaf => (leaf.members || []).forEach(m => {
+      if (m.email) TAKEN_IDS.add(m.email.split('@')[0].replace(/[^a-z0-9]/g, ''));
+    })));
+    TAKEN_IDS.add('admin');
+    TAKEN_IDS.add('naraeai');
+
+    /* ── 필드 상태 표시 (KRDS is-error / is-success / form-hint-*) ── */
+    function setState(name, state, message) {
+      const conts = document.getElementById(name + 'Conts');
+      const hint  = document.getElementById(name + 'Hint');
+      conts.classList.remove('is-error', 'is-success', 'is-information');
+      if (state) conts.classList.add('is-' + state);
+
+      hint.textContent = message || '';
+      hint.className =
+        state === 'error'   ? 'form-hint-invalid' :
+        state === 'success' ? 'form-hint-success' :
+        state === 'information' ? 'form-hint-information' : 'form-hint';
+    }
+
+    /* ── 검사 규칙 ── */
+    const ID_RE    = /^[a-z0-9]{4,30}$/;
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    function checkId(show) {
+      const v = document.getElementById('suId').value.trim();
+      if (!v) { if (show) setState('suId', 'error', '아이디를 입력해 주세요'); else setState('suId', null); return false; }
+      if (!ID_RE.test(v)) { setState('suId', 'error', '영문 소문자와 숫자 4~30자로 입력해 주세요'); return false; }
+      if (TAKEN_IDS.has(v)) { setState('suId', 'error', '이미 사용 중인 아이디입니다'); return false; }
+      setState('suId', 'success', '사용할 수 있는 아이디입니다');
+      return true;
+    }
+
+    function checkName(show) {
+      const v = document.getElementById('suName').value.trim();
+      if (!v) { if (show) setState('suName', 'error', '이름을 입력해 주세요'); else setState('suName', null); return false; }
+      setState('suName', null);
+      return true;
+    }
+
+    function checkEmail(show) {
+      const v = document.getElementById('suEmail').value.trim();
+      if (!v) { if (show) setState('suEmail', 'error', '이메일을 입력해 주세요 (자가 가입은 필수)'); else setState('suEmail', null); return false; }
+      if (!EMAIL_RE.test(v)) { setState('suEmail', 'error', '이메일 형식이 올바르지 않습니다'); return false; }
+      setState('suEmail', null);
+      return true;
+    }
+
+    function checkPhone() {
+      const v = document.getElementById('suPhone').value.trim();
+      if (!v) { setState('suPhone', null); return true; }          // 선택 항목
+      if (!/^[0-9]+$/.test(v)) { setState('suPhone', 'error', '숫자만 입력해 주세요'); return false; }
+      setState('suPhone', null);
+      return true;
+    }
+
+    function checkOrg(show) {
+      const v = orgSel.value;
+      if (!v) { if (show) setState('suOrg', 'error', '희망 조직을 선택해 주세요'); else setState('suOrg', null); return false; }
+      setState('suOrg', 'information', '신청한 조직은 관리자 승인 단계에서 최종 확정됩니다');
+      return true;
+    }
+
+    /* 입력하는 동안 즉시 검사 (아이디는 중복까지) */
+    document.getElementById('suId').addEventListener('input', () => checkId(false));
+    document.getElementById('suName').addEventListener('input', () => checkName(false));
+    document.getElementById('suEmail').addEventListener('input', () => checkEmail(false));
+    document.getElementById('suPhone').addEventListener('input', checkPhone);
+    orgSel.addEventListener('change', () => {
+      // KRDS: 값이 선택되면 completed 클래스로 본문 글자색을 바꾼다
+      orgSel.classList.toggle('completed', !!orgSel.value);
+      checkOrg(false);
+    });
+
+    /* ── 신청 ── */
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+
+      const results = [checkId(true), checkName(true), checkEmail(true), checkPhone(), checkOrg(true)];
+      if (results.some(ok => !ok)) {
+        const firstError = document.querySelector('.form-conts.is-error input, .form-conts.is-error select');
+        if (firstError) firstError.focus();
+        return;
+      }
+
+      const [sil, dept] = orgSel.value.split('|');
+      const now = new Date();
+      const request = {
+        loginId: document.getElementById('suId').value.trim(),
+        name:    document.getElementById('suName').value.trim(),
+        email:   document.getElementById('suEmail').value.trim(),
+        phone:   document.getElementById('suPhone').value.trim(),
+        sil, dept,
+        status: 'pending',
+        requestedAt: fmtYMD(now) + ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0'),
+      };
+
+      // 신청 내역을 브라우저에 남겨 둔다 (관리자 승인 화면이 붙기 전까지의 임시 저장)
+      try {
+        const key = 'krds_signup_requests_v1';
+        const list = JSON.parse(localStorage.getItem(key) || '[]');
+        list.push(request);
+        localStorage.setItem(key, JSON.stringify(list));
+      } catch (err) { /* 저장 실패는 화면 흐름을 막지 않는다 */ }
+
+      document.getElementById('signupCard').innerHTML = `
+        <div class="signup-done">
+          <span class="signup-done__icon" aria-hidden="true">&#10003;</span>
+          <h1 class="signup-done__title">회원가입 신청이 접수되었습니다</h1>
+          <p class="signup-done__desc">
+            관리자가 승인하면 <strong>${escapeHtml(request.email)}</strong>으로
+            임시 비밀번호(7일 유효)를 보내드립니다.
+          </p>
+          <div class="krds-table-wrap report-basic signup-done__table">
+            <table class="tbl col data">
+              <caption>회원가입 신청 내역</caption>
+              <colgroup><col style="width:30%"><col></colgroup>
+              <tbody>
+                <tr><th scope="row">로그인 ID</th><td>${escapeHtml(request.loginId)}</td></tr>
+                <tr><th scope="row">이름</th><td>${escapeHtml(request.name)}</td></tr>
+                <tr><th scope="row">희망 조직</th><td>${escapeHtml(request.sil)} · ${escapeHtml(request.dept)}</td></tr>
+                <tr><th scope="row">신청 일시</th><td>${request.requestedAt}</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <a href="/resources/pages/login.html" class="krds-btn large primary signup-done__btn">로그인으로</a>
+        </div>
+      `;
+    });
+  })();
+  </script>
+
+</body>
+</html>

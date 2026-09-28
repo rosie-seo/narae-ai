@@ -1408,63 +1408,392 @@ function taskCardHTML(t) {
 }
 
 /* ============================================================
-   주간보고 — ORG 데이터 기반 생성 (조직도/업무와 동일한 소스 공유)
+   보고 — 업무보고(직접 작성) → AI 주간·월간보고
+   ------------------------------------------------------------
+   · 업무보고   : 담당자가 자신의 WBS 항목별 추진 실적을 직접 작성한다.
+   · 주간·월간보고 : 작성된 업무보고와 업무 데이터를 근거로 AI가 생성한다.
+   조직도·업무 차트와 동일한 ORG 데이터를 그대로 공유한다.
    ============================================================ */
 const REPORT_STATUS_LABEL = { submitted: "제출완료", draft: "작성중", missing: "미제출" };
+const REPORT_KIND_LABEL = { work: "업무보고", weekly: "주간보고", monthly: "월간보고" };
 const REPORT_STATUS_CLASS = { submitted: "krds-badge bg-light-success", draft: "krds-badge bg-light-secondary", missing: "krds-badge bg-light-gray" };
 
-function getWeekRange(offsetWeeks) {
+/* ── 테스트 계정 ──
+   권한별로 하나씩 발급한 데모 계정. 비밀번호는 모두 1234.
+   실제 인증이 붙기 전까지 이 목록으로 로그인 여부와 권한을 판단한다. */
+const TEST_PASSWORD = "1234";
+const PERMISSION_LABEL = { admin: "관리자", chief: "부서장", manager: "과장", staff: "담당자" };
+const TEST_ACCOUNTS = [
+  { loginId: "admin",   permission: "admin",   userName: "이준혁", note: "시스템 전체 관리" },
+  { loginId: "chief",   permission: "chief",   userName: "김민준", note: "실 단위 보고 총괄" },
+  { loginId: "manager", permission: "manager", userName: "강현우", note: "부서 보고 검토" },
+  // 담당자 계정은 관리자 승인 후 임시 비밀번호로 발급된 상태 → 최초 로그인 시 재설정 안내
+  { loginId: "staff",   permission: "staff",   userName: "류채원", note: "본인 업무보고 작성", temporary: true },
+];
+const DEFAULT_USER_NAME = "류채원";   // 로그인 정보가 없을 때 보여줄 기본 사용자
+
+function findTestAccount(loginId) {
+  const id = String(loginId || "").trim().toLowerCase();
+  return TEST_ACCOUNTS.find(a => a.loginId === id) || null;
+}
+
+/* ── 비밀번호 상태 ──
+   { "staff": { password, changedAt, issuedAt } } 형태로 브라우저에 보관한다.
+   임시 비밀번호로 발급된 계정은 최초 로그인 때 재설정 안내 화면을 지난다. */
+const PW_STATE_KEY = "krds_password_state_v1";
+const TEMP_PASSWORD_DAYS = 7;
+
+function loadPwStates() {
+  try { return JSON.parse(localStorage.getItem(PW_STATE_KEY)) || {}; }
+  catch (e) { return {}; }
+}
+
+function getPwState(loginId) {
+  return loadPwStates()[String(loginId || "").trim().toLowerCase()] || {};
+}
+
+function savePwState(loginId, patch) {
+  const key = String(loginId || "").trim().toLowerCase();
+  const all = loadPwStates();
+  all[key] = Object.assign({}, all[key], patch);
+  try { localStorage.setItem(PW_STATE_KEY, JSON.stringify(all)); } catch (e) {}
+  return all[key];
+}
+
+/* 현재 유효한 비밀번호 — 바꾸지 않았다면 발급된 임시 비밀번호 */
+function passwordOf(loginId) {
+  return getPwState(loginId).password || TEST_PASSWORD;
+}
+
+/* 임시 비밀번호를 아직 바꾸지 않은 계정인지 */
+function isTempPassword(loginId) {
+  const account = findTestAccount(loginId);
+  if (!account || !account.temporary) return false;
+  return !getPwState(loginId).changedAt;
+}
+
+/* 임시 비밀번호 발급일 · 만료일(발급 후 7일) */
+function tempPasswordDates(loginId) {
+  const state = getPwState(loginId);
+  const issued = state.issuedAt ? parseISODate(state.issuedAt) : new Date();
+  const expire = new Date(issued.getFullYear(), issued.getMonth(), issued.getDate() + TEMP_PASSWORD_DAYS);
+  return { issuedAt: fmtYMD(issued), expiresAt: fmtYMD(expire) };
+}
+
+function changePassword(loginId, newPassword) {
   const now = new Date();
-  const day = now.getDay(); // 0=일 ~ 6=토
+  savePwState(loginId, {
+    password: newPassword,
+    changedAt: fmtYMD(now) + " " + String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0"),
+  });
+  clearLoginFails(loginId);
+}
+
+/* 아이디·비밀번호 확인 → { ok, account, reason } */
+function authenticate(loginId, password) {
+  const account = findTestAccount(loginId);
+  if (!account) return { ok: false, reason: "unknown" };
+  if (String(password) !== passwordOf(account.loginId)) return { ok: false, reason: "password" };
+  return { ok: true, account };
+}
+
+function findMemberProfile(name) {
+  let found = null;
+  ORG.forEach(sil => getAllLeaves(sil).forEach(leaf => (leaf.members || []).forEach(m => {
+    if (!found && m.name === name) {
+      found = {
+        name: m.name, role: m.role, position: m.position,
+        email: m.email || "", phone: m.phone || "",
+        dept: leaf.name, sil: sil.name,
+      };
+    }
+  })));
+  return found;
+}
+
+/* 현재 로그인한 사용자 이름 (로그인 전이면 기본 사용자) */
+function getCurrentUserName() {
+  const auth = getAuthState();
+  return (auth && auth.userName) || DEFAULT_USER_NAME;
+}
+
+function getCurrentUser() {
+  const auth = getAuthState();
+  const name = getCurrentUserName();
+  const permission = (auth && auth.permission) || "staff";
+  const profile = findMemberProfile(name) ||
+    { name, role: "담당자", position: "", dept: "", sil: "" };
+  return Object.assign({}, profile, {
+    permission,
+    permissionLabel: PERMISSION_LABEL[permission] || PERMISSION_LABEL.staff,
+    loginId: (auth && auth.loginId) || "",
+  });
+}
+
+/* 권한 확인 — 상위 권한은 하위 권한을 포함한다 */
+const PERMISSION_RANK = { staff: 1, manager: 2, chief: 3, admin: 4 };
+function hasPermission(minPermission) {
+  const me = (PERMISSION_RANK[getCurrentUser().permission] || 0);
+  return me >= (PERMISSION_RANK[minPermission] || 0);
+}
+
+/* ── 내 WBS 항목 ──
+   홈 화면 "업무 현황"(간트)이 보여주는 2026년 구간과 같은 기준을 쓴다.
+   (index.html의 GANTT_START_DATE/GANTT_DATA_DAYS와 동일한 값. 인라인 스크립트의
+    전역 const와 이름이 충돌하지 않도록 별도 이름을 사용한다.) */
+const WBS_WINDOW_START = new Date(2026, 0, 1);
+const WBS_WINDOW_DAYS  = 365;
+
+function isTaskInWbsWindow(t) {
+  const endOff   = Math.round((parseISODate(t.end)   - WBS_WINDOW_START) / 86400000);
+  const startOff = Math.round((parseISODate(t.start) - WBS_WINDOW_START) / 86400000);
+  return endOff >= 0 && startOff < WBS_WINDOW_DAYS;
+}
+
+function getWbsTasksOf(ownerName) {
+  return getAllTasksFlat()
+    .filter(row => row.task.owner === ownerName && isTaskInWbsWindow(row.task))
+    .map(row => row.task)
+    .sort((a, b) => a.start.localeCompare(b.start));
+}
+
+/* 마감일이 보고 기간 시작 전인데 아직 종결되지 않은 항목 = 이월 항목 */
+function isTaskCarriedOver(t, periodStart) {
+  return t.status !== "done" && t.end < periodStart;
+}
+
+/* 보고 기간의 보고 대상 WBS —
+   ① 그 기간에 일정이 걸쳐 있는 항목 ② 마감이 지났지만 아직 끝나지 않아 이월된 항목.
+   기간이 바뀌면 대상 항목도 함께 바뀐다. */
+function getWbsTasksOfInPeriod(ownerName, periodStart, periodEnd) {
+  const inPeriod = [], carried = [];
+  getWbsTasksOf(ownerName).forEach(t => {
+    if (t.start <= periodEnd && t.end >= periodStart) inPeriod.push(t);
+    else if (isTaskCarriedOver(t, periodStart)) carried.push(t);
+  });
+  carried.sort((a, b) => a.end.localeCompare(b.end));
+  return inPeriod.concat(carried);
+}
+
+/* ── 업무보고 저장본 (브라우저 로컬) ──
+   내가 직접 작성해 저장한 업무보고의 보관함. 보고 기간 한 건 = 저장본 한 건.
+   [{ id, author, dept, sil, periodStart, periodEnd, savedAt, submitted,
+      entries: { "담당자|업무명": "작성 내용" } }, ...]
+   주간·월간보고(AI)는 이 저장본을 근거 자료로 읽어가기만 한다. */
+const WORK_REPORT_STORAGE_KEY = "krds_work_reports_v1";
+const WORK_REPORT_LEGACY_KEY  = "krds_work_report_v1";   // 단일 초안을 쓰던 이전 버전
+
+/* 저장본은 로그인한 사용자별로 나눠 보관한다 (계정을 바꾸면 내 보고만 보이도록) */
+function workReportStorageKey() {
+  return WORK_REPORT_STORAGE_KEY + "::" + getCurrentUserName();
+}
+
+function workReportTaskKey(t) { return t.owner + "|" + t.title; }
+
+function loadWorkReports() {
+  let list = [];
+  try { list = JSON.parse(localStorage.getItem(workReportStorageKey())) || []; }
+  catch (e) { list = []; }
+  if (!Array.isArray(list)) list = [];
+
+  // 이전 버전(단일 초안)에 저장해 둔 보고가 있으면 목록으로 옮겨 온다
+  if (!list.length) {
+    try {
+      const legacy = JSON.parse(localStorage.getItem(WORK_REPORT_LEGACY_KEY));
+      if (legacy && legacy.entries && legacy.period) {
+        list = [{
+          id: "wrs-" + legacy.period.start,
+          author: getCurrentUserName(),
+          periodStart: legacy.period.start,
+          periodEnd: legacy.period.end,
+          savedAt: legacy.savedAt || legacy.period.end,
+          submitted: !!legacy.submitted,
+          entries: legacy.entries,
+        }];
+        saveWorkReports(list);
+        localStorage.removeItem(WORK_REPORT_LEGACY_KEY);
+      }
+    } catch (e) { /* 이전 데이터가 없으면 그대로 진행 */ }
+  }
+
+  return list.sort((a, b) => b.periodStart.localeCompare(a.periodStart));
+}
+
+function saveWorkReports(list) {
+  try { localStorage.setItem(workReportStorageKey(), JSON.stringify(list)); return true; }
+  catch (e) { return false; }
+}
+
+/* 해당 보고 기간의 저장본 */
+function getWorkReportOf(periodStart, periodEnd) {
+  return loadWorkReports().find(r => r.periodStart === periodStart && r.periodEnd === periodEnd) || null;
+}
+
+/* 저장본 upsert — 같은 보고 기간이면 덮어쓴다 */
+function upsertWorkReport(record) {
+  const list = loadWorkReports().filter(r => !(r.periodStart === record.periodStart && r.periodEnd === record.periodEnd));
+  list.push(record);
+  saveWorkReports(list);
+  return record;
+}
+
+function deleteWorkReport(periodStart, periodEnd) {
+  saveWorkReports(loadWorkReports().filter(r => !(r.periodStart === periodStart && r.periodEnd === periodEnd)));
+}
+
+/* 보고 기간에 걸치는 저장본들의 작성 내용을 합친다.
+   (주간보고는 저장본 1건, 월간보고는 그 달의 주간 저장본 여러 건을 근거로 삼는다) */
+function getWorkReportEntriesInRange(periodStart, periodEnd) {
+  const merged = {};
+  loadWorkReports()
+    .filter(r => r.periodStart <= periodEnd && r.periodEnd >= periodStart)
+    .sort((a, b) => String(a.savedAt).localeCompare(String(b.savedAt)))  // 최근 저장본이 덮어쓰도록
+    .forEach(r => Object.assign(merged, r.entries || {}));
+  return merged;
+}
+
+/* 보고 기간에 걸치는 저장본 원본 — 최근 기간 순 */
+function getWorkReportRecordsInRange(periodStart, periodEnd) {
+  return loadWorkReports()
+    .filter(r => r.periodStart <= periodEnd && r.periodEnd >= periodStart)
+    .sort((a, b) => b.periodStart.localeCompare(a.periodStart));
+}
+
+/* 보고 기간에 걸치는 저장본들의 자유 기술(종합 의견) 모음 — 최근 기간 순 */
+function getWorkReportFreeNotesInRange(periodStart, periodEnd) {
+  return loadWorkReports()
+    .filter(r => r.periodStart <= periodEnd && r.periodEnd >= periodStart)
+    .filter(r => (r.freeNote || "").trim())
+    .sort((a, b) => b.periodStart.localeCompare(a.periodStart))
+    .map(r => ({ periodStart: r.periodStart, periodEnd: r.periodEnd, savedAt: r.savedAt, text: r.freeNote.trim() }));
+}
+
+/* 보고 기간에 걸치는 저장본 중 가장 최근 저장 시각 */
+function getWorkReportSavedAtInRange(periodStart, periodEnd) {
+  const inRange = loadWorkReports().filter(r => r.periodStart <= periodEnd && r.periodEnd >= periodStart);
+  if (!inRange.length) return null;
+  return inRange.map(r => r.savedAt).sort().pop();
+}
+
+/* 저장본 카드 (업무보고 목록) */
+function workReportSavedCardHTML(rec) {
+  const count = Object.keys(rec.entries || {}).filter(k => (rec.entries[k] || "").trim()).length;
+  const statusClass = rec.submitted ? REPORT_STATUS_CLASS.submitted : REPORT_STATUS_CLASS.draft;
+  const statusLabel = rec.submitted ? "제출완료" : "임시저장";
+  return `<li class="task-card task-card--mine" data-period="${rec.periodStart}|${rec.periodEnd}">
+    <span class="${statusClass}">${statusLabel}</span>
+    <span class="task-card__title">${rec.periodStart} ~ ${rec.periodEnd} 업무보고</span>
+    <span class="task-card__meta">
+      <span class="task-card__owner">작성 항목 ${count}건</span>
+      ${(rec.freeNote || "").trim() ? '<span class="task-card__sep">·</span><span class="task-card__date">종합 의견 포함</span>' : ''}
+      <span class="task-card__sep">·</span>
+      <span class="task-card__date">저장 ${escapeHtml(String(rec.savedAt))}</span>
+    </span>
+    <span class="task-card__arrow">${arrowSVG}</span>
+  </li>`;
+}
+
+/* ── 보고 기준일 ──
+   업무 데이터가 실제 오늘보다 과거에서 끝나는 데모 특성상, 오늘이 데이터 구간을
+   지나 있으면 마지막 업무 종료일을 기준일로 삼는다. (홈 화면 업무 차트의 일간 뷰가
+   maxTaskEnd를 기준으로 움직이는 것과 동일한 방식) */
+let _reportBaseDate = null;
+function getReportBaseDate() {
+  if (_reportBaseDate) return _reportBaseDate;
+  const today = new Date();
+  let maxEnd = null;
+  getAllTasksFlat().forEach(row => {
+    const e = parseISODate(row.task.end);
+    if (!maxEnd || e > maxEnd) maxEnd = e;
+  });
+  _reportBaseDate = (maxEnd && maxEnd < today) ? maxEnd : today;
+  return _reportBaseDate;
+}
+
+/* ── 보고 기간 ── */
+function getWeekRange(offsetWeeks) {
+  const base = getReportBaseDate();
+  const day = base.getDay(); // 0=일 ~ 6=토
   const diffToMonday = (day === 0 ? -6 : 1 - day);
-  const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday + offsetWeeks * 7);
+  const monday = new Date(base.getFullYear(), base.getMonth(), base.getDate() + diffToMonday + offsetWeeks * 7);
   const friday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 4);
   return { start: monday, end: friday };
+}
+
+function getMonthRange(offsetMonths) {
+  const base = getReportBaseDate();
+  const first = new Date(base.getFullYear(), base.getMonth() + offsetMonths, 1);
+  const last  = new Date(first.getFullYear(), first.getMonth() + 1, 0);
+  return { start: first, end: last };
 }
 
 function fmtYMD(d) {
   return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
 }
 
-function buildWeeklyReports() {
-  const { start, end } = getWeekRange(0);
-  const weekStart = fmtYMD(start), weekEnd = fmtYMD(end);
+/* ── 담당자 단위 AI 보고 생성 (주간·월간 공용) ──
+   보고서 한 건 = 담당자 한 명 + 그 사람의 WBS 항목. */
+function buildMemberReports(kind, start, end, opts) {
+  const o = opts || {};
+  const periodStart = fmtYMD(start), periodEnd = fmtYMD(end);
+  // 내가 저장해 둔 업무보고(해당 기간에 걸치는 저장본)를 근거 자료로 읽어 온다
+  const myEntries = getWorkReportEntriesInRange(periodStart, periodEnd);
+  const mySavedAt = getWorkReportSavedAtInRange(periodStart, periodEnd);
   const reports = [];
 
   ORG.forEach(sil => {
     getAllLeaves(sil).forEach(leaf => {
-      if (!leaf.members || !leaf.members.length) return;
+      (leaf.members || []).forEach(m => {
+        const tasks = (leaf.tasks || []).filter(t => t.owner === m.name && isTaskInWbsWindow(t))
+                                        .sort((a, b) => a.start.localeCompare(b.start));
+        if (!tasks.length) return;
 
-      // 부서명을 시드로 한 결정적 제출 상태
-      let h = 0;
-      for (let i = 0; i < leaf.name.length; i++) h = (Math.imul(31, h) + leaf.name.charCodeAt(i)) | 0;
-      const r = Math.abs(h) % 10;
-      const status = r < 6 ? "submitted" : r < 8 ? "draft" : "missing";
+        // 담당자명을 시드로 한 결정적 제출 상태
+        const h = hashSeed(m.name + "|" + leaf.name + (o.salt || ""));
+        const r = h % 10;
+        let status = r < 6 ? "submitted" : r < 8 ? "draft" : "missing";
 
-      const manager = leaf.members.find(m => m.role === "과장") || leaf.members[0];
-      const tasks = (leaf.tasks || []);
-      const doneCount = tasks.filter(t => t.status === "done").length;
-      const progressCount = tasks.filter(t => t.status === "progress").length;
+        // 보고 일자 — 주간은 해당 주(월~금), 월간은 말일 직전 5일 중 결정적으로 배정
+        const submittedDate = kind === "monthly"
+          ? new Date(end.getFullYear(), end.getMonth(), end.getDate() - (h % 5))
+          : new Date(start.getFullYear(), start.getMonth(), start.getDate() + (h % 5));
+        let submittedAt = fmtYMD(submittedDate);
 
-      // 보고 일자 — 해당 주(월~금) 중 결정적으로 배정된 제출일
-      const submittedDate = new Date(start.getFullYear(), start.getMonth(), start.getDate() + (Math.abs(h) % 5));
-      const submittedAt = fmtYMD(submittedDate);
+        // 내가 업무보고를 작성해 두었으면 내 보고는 항상 최신 제출 상태로 반영한다
+        const isMine = m.name === getCurrentUserName();
+        const myNoteCount = isMine
+          ? tasks.filter(t => (myEntries[workReportTaskKey(t)] || "").trim()).length
+          : 0;
+        if (isMine && myNoteCount) {
+          status = "submitted";
+          if (mySavedAt) submittedAt = String(mySavedAt).slice(0, 10);
+        }
 
-      reports.push({
-        id: "wr-" + leaf._id,
-        dept: leaf.name,
-        sil: sil.name,
-        author: manager.name,
-        authorRole: manager.role,
-        weekStart,
-        weekEnd,
-        submittedAt,
-        status,
-        memberCount: leaf.members.length,
-        totalCount: tasks.length,
-        doneCount,
-        progressCount,
-        tasks,
+        reports.push({
+          id: (o.idPrefix || "wr-") + leaf._id + "-" + m.name,
+          kind,
+          scope: "member",
+          author: m.name,
+          authorRole: m.role,
+          authorPosition: m.position,
+          dept: leaf.name,
+          sil: sil.name,
+          // weekStart/weekEnd는 기간 필드(주간·월간 공용)
+          weekStart: periodStart,
+          weekEnd: periodEnd,
+          periodStart,
+          periodEnd,
+          submittedAt,
+          status,
+          isMine,
+          noteCount: myNoteCount,
+          totalCount: tasks.length,
+          doneCount: tasks.filter(t => t.status === "done").length,
+          progressCount: tasks.filter(t => t.status === "progress").length,
+          waitCount: tasks.filter(t => t.status === "wait").length,
+          delayedCount: tasks.filter(t => t.status !== "done" && computeTaskRisk(t, end).tier !== "ok").length,
+          tasks,
+        });
       });
     });
   });
@@ -1472,12 +1801,122 @@ function buildWeeklyReports() {
   return reports;
 }
 
+function buildWeeklyReports() {
+  const { start, end } = getWeekRange(0);
+  return buildMemberReports("weekly", start, end, { idPrefix: "wr-" });
+}
+
+function buildMonthlyReports() {
+  const { start, end } = getMonthRange(0);
+  return buildMemberReports("monthly", start, end, { idPrefix: "mr-", salt: "|month" });
+}
+
+/* 로그인 사용자 본인의 보고 */
+function getMyReport(kind) {
+  const me = getCurrentUser();
+  const list = kind === "monthly" ? buildMonthlyReports() : buildWeeklyReports();
+  return list.find(r => r.author === me.name && r.dept === me.dept) || null;
+}
+
+/* ── AI 보고 본문 생성 ──
+   실제 모델 호출 대신, 담당자가 작성한 업무보고 텍스트와 업무 데이터(진척·마감)를
+   근거로 요약·잘된 점·지연되는 점·다음 태스크를 결정적으로 구성한다. */
+function buildAiReportContent(report, entries, records) {
+  const notes = entries || {};
+  const recs  = records || [];
+
+  // 보고자가 업무보고에 직접 쓴 내용 — 저장본 단위로 항목별 작성 내용 + 종합 의견을 모은다
+  const written = recs.map(rec => ({
+    periodStart: rec.periodStart,
+    periodEnd: rec.periodEnd,
+    savedAt: rec.savedAt,
+    freeNote: (rec.freeNote || "").trim(),
+    items: Object.keys(rec.entries || {})
+      .map(key => ({ title: key.split("|").slice(1).join("|"), text: (rec.entries[key] || "").trim() }))
+      .filter(it => it.text),
+  })).filter(w => w.freeNote || w.items.length);
+
+  const freeform = written.filter(w => w.freeNote)
+    .map(w => ({ periodStart: w.periodStart, periodEnd: w.periodEnd, savedAt: w.savedAt, text: w.freeNote }));
+  // 진척·지연 판정은 보고 기간 종료일 시점을 기준으로 한다
+  const asOf = parseISODate(report.periodEnd);
+  const items = report.tasks.map(t => ({
+    task: t,
+    risk: computeTaskRisk(t, asOf),
+    note: (notes[workReportTaskKey(t)] || "").trim(),
+  }));
+
+  /* 보고자가 쓴 문장이 앞에 오고, 업무 데이터로 확인된 사실이 뒤를 받치도록 한 문단으로 엮는다 */
+  const good = items
+    .filter(it => it.task.status === "done" || it.risk.tier === "ok")
+    .map(it => {
+      const fact = it.task.status === "done"
+        ? "마감 " + it.task.end + " 기준 기간 내 종결했습니다."
+        : it.task.status === "wait"
+          ? "착수 예정일(" + it.task.start + ") 이전으로 일정 이상 없습니다."
+          : "목표 대비 " + (it.risk.diff >= 0 ? "+" : "") + it.risk.diff + "%p로 정상 추진 중입니다.";
+      return {
+        task: it.task,
+        note: it.note,
+        fact,
+        narrative: it.note ? it.note + " " + fact : fact,
+      };
+    });
+
+  const delayed = items
+    .filter(it => it.task.status !== "done" && it.risk.tier !== "ok")
+    .sort((a, b) => (b.risk.severity || 0) - (a.risk.severity || 0))
+    .map(it => {
+      const fact = it.risk.daysToEnd < 0
+        ? "마감 " + it.task.end + " 대비 " + (-it.risk.daysToEnd) + "일 초과했습니다."
+        : "목표 대비 " + Math.abs(it.risk.diff) + "%p 지연, 마감까지 " + it.risk.daysToEnd + "일 남았습니다.";
+      return {
+        task: it.task,
+        note: it.note,
+        tier: it.risk.tier,
+        fact,
+        narrative: it.note ? it.note + " 다만 " + fact : fact,
+      };
+    });
+
+  // 다음 태스크 — 각 업무의 세부 과업 중 아직 끝나지 않은 첫 단계
+  const next = items
+    .filter(it => it.task.status !== "done")
+    .map(it => {
+      const step = getSubtasks(it.task).find(s => s.stage !== "완료");
+      return step ? { task: it.task, step } : null;
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.step.deadline.localeCompare(b.step.deadline));
+
+  const periodWord = report.kind === "monthly" ? "이번 달" : "이번 주";
+  const noteCount = items.filter(it => it.note).length;
+  const sourceCount = noteCount + freeform.length;
+  const overview =
+    report.author + " " + report.authorRole + "는 " + periodWord + "(" + report.periodStart + " ~ " + report.periodEnd + ") " +
+    "WBS " + report.totalCount + "건을 담당했습니다. 완료 " + report.doneCount + "건, 진행중 " + report.progressCount + "건, " +
+    "대기 " + report.waitCount + "건이며 이 중 " + delayed.length + "건이 지연 구간에 있습니다." +
+    (noteCount ? " 제출된 업무보고 " + noteCount + "건" + (freeform.length ? "과 종합 의견" : "") + "을 근거로 요약했습니다."
+               : freeform.length ? " 작성자가 남긴 종합 의견을 함께 반영했습니다." : "");
+
+  return { items, good, delayed, next, overview, noteCount, freeform, written, sourceCount };
+}
+
+/* 주간·월간보고 카드 (담당자 단위) */
 function reportCardHTML(r) {
-  return `<li class="task-card">
+  const kindLabel = REPORT_KIND_LABEL[r.kind] || "주간보고";
+  return `<li class="task-card${r.isMine ? ' task-card--mine' : ''}">
     <span class="${REPORT_STATUS_CLASS[r.status]}">${REPORT_STATUS_LABEL[r.status]}</span>
-    <span class="task-card__title">${escapeHtml(r.dept)} 주간보고</span>
+    <span class="task-card__title">
+      ${escapeHtml(r.author)} ${escapeHtml(r.authorRole)} ${kindLabel}
+      ${r.isMine ? '<span class="report-tag report-tag--mine">내 보고</span>' : ''}
+      <span class="report-tag report-tag--ai">AI 생성</span>
+    </span>
     <span class="task-card__meta">
-      <span class="task-card__owner">${escapeHtml(r.author)} ${escapeHtml(r.authorRole)}</span>
+      <span class="task-card__owner">${escapeHtml(r.dept)}</span>
+      <span class="task-card__sep">·</span>
+      <span class="task-card__date">WBS ${r.totalCount}건</span>
+      ${r.delayedCount ? `<span class="task-card__sep">·</span><span class="task-card__date task-card__date--warn">지연 ${r.delayedCount}건</span>` : ''}
       <span class="task-card__sep">·</span>
       <span class="task-card__date">보고일 ${r.submittedAt}</span>
     </span>
@@ -2644,7 +3083,7 @@ function setGnbActive() {
       (href.includes('operating')      && path.includes('operating')) ||
       (href.includes('goals')          && path.includes('goals')) ||
       (href.includes('policy')         && path.includes('policy')) ||
-      (href.includes('weekly-report')  && path.includes('weekly-report')) ||
+      (href.includes('report')         && /(work|weekly|monthly)-report/.test(path)) ||
       (href.includes('monitoring')     && path.includes('monitoring'));
     if (match) {
       a.classList.add('active');
@@ -2657,6 +3096,149 @@ function setGnbActive() {
 }
 setGnbActive();
 document.addEventListener('ui-include:done', setGnbActive);
+
+/* ============================================================
+   로그인 상태 (데모)
+   ------------------------------------------------------------
+   실제 인증 서버가 붙기 전까지 브라우저 로컬에만 상태를 둔다.
+   기본값은 로그인 상태(ORG의 CURRENT_USER)로, 로그아웃하면 로그인 화면으로 보낸다.
+   ============================================================ */
+const AUTH_STORAGE_KEY = "krds_auth_v1";
+const LOGIN_PAGE_URL   = "/resources/pages/login.html";
+
+function getAuthState() {
+  try {
+    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+    if (!raw) return { loggedIn: true, loginId: "staff", userName: DEFAULT_USER_NAME, permission: "staff" };
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : { loggedIn: true };
+  } catch (e) {
+    return { loggedIn: true, loginId: "staff", userName: DEFAULT_USER_NAME, permission: "staff" };
+  }
+}
+
+function setAuthState(state) {
+  try { localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(state)); return true; }
+  catch (e) { return false; }
+}
+
+function loginUser(account) {
+  const acc = typeof account === "string" ? findTestAccount(account) : account;
+  const now = new Date();
+  if (acc) {
+    clearLoginFails(acc.loginId);
+    // 임시 비밀번호 발급일은 처음 로그인한 날로 기록한다 (유효기간 계산 기준)
+    if (acc.temporary && !getPwState(acc.loginId).issuedAt && !getPwState(acc.loginId).changedAt) {
+      savePwState(acc.loginId, { issuedAt: fmtYMD(now) });
+    }
+  }
+  setAuthState({
+    loggedIn: true,
+    loginId: (acc && acc.loginId) || "staff",
+    userName: (acc && acc.userName) || DEFAULT_USER_NAME,
+    permission: (acc && acc.permission) || "staff",
+    at: fmtYMD(now) + " " + String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0"),
+  });
+}
+
+function logoutUser() {
+  setAuthState({ loggedIn: false });
+}
+
+/* ── 비밀번호 오류 횟수 ──
+   5회 연속 틀리면 계정 담당자에게 초기화를 요청하도록 안내한다. */
+const LOGIN_FAIL_KEY   = "krds_login_fails_v1";
+const LOGIN_FAIL_LIMIT = 5;
+
+function loadLoginFails() {
+  try { return JSON.parse(localStorage.getItem(LOGIN_FAIL_KEY)) || {}; }
+  catch (e) { return {}; }
+}
+
+function getLoginFailCount(loginId) {
+  return loadLoginFails()[String(loginId || "").trim().toLowerCase()] || 0;
+}
+
+function addLoginFail(loginId) {
+  const key  = String(loginId || "").trim().toLowerCase();
+  const fails = loadLoginFails();
+  fails[key] = (fails[key] || 0) + 1;
+  try { localStorage.setItem(LOGIN_FAIL_KEY, JSON.stringify(fails)); } catch (e) {}
+  return fails[key];
+}
+
+function clearLoginFails(loginId) {
+  const key  = String(loginId || "").trim().toLowerCase();
+  const fails = loadLoginFails();
+  delete fails[key];
+  try { localStorage.setItem(LOGIN_FAIL_KEY, JSON.stringify(fails)); } catch (e) {}
+}
+
+function isLoginLocked(loginId) {
+  return getLoginFailCount(loginId) >= LOGIN_FAIL_LIMIT;
+}
+
+/* 비밀번호 초기화를 요청할 계정 담당자 (관리자 권한 계정의 담당자) */
+function getAccountManager() {
+  const adminAccount = TEST_ACCOUNTS.find(a => a.permission === "admin");
+  const profile = adminAccount ? findMemberProfile(adminAccount.userName) : null;
+  return profile || { name: "시스템 관리자", role: "", dept: "정보화담당관", sil: "", email: "", phone: "" };
+}
+
+/* 헤더 사용자 메뉴 — 아바타 + 닉네임, 셀렉터의 로그인/로그아웃 버튼 */
+function initHeaderUserMenu() {
+  const menu = document.getElementById("userMenu");
+  if (!menu || menu.dataset.ready === "1") return;
+  menu.dataset.ready = "1";
+
+  const me   = getCurrentUser();
+  const auth = getAuthState();
+  const loginBtn = document.getElementById("headerLoginBtn");
+
+  // 아바타 · 닉네임 · 권한
+  document.getElementById("userMenuAvatar").textContent   = me.name.slice(0, 1);
+  document.getElementById("userMenuName").textContent     = me.name;
+  document.getElementById("userMenuInfoName").textContent = me.name + " " + me.role;
+  document.getElementById("userMenuInfoDept").textContent = me.sil + " · " + me.dept;
+
+  const permEl = document.getElementById("userMenuPerm");
+  if (permEl) {
+    permEl.textContent = me.permissionLabel + " 권한" + (me.loginId ? " · " + me.loginId : "");
+  }
+
+  // 관리자 설정은 관리자 권한에서만 노출
+  const settingBtn = document.querySelector('#krds-header .krds-btn.icon[aria-label="관리자 설정"]');
+  if (settingBtn) settingBtn.hidden = !(auth.loggedIn && hasPermission("admin"));
+
+  // 로그인 상태에 따라 사용자 메뉴 / 로그인 버튼 노출
+  menu.hidden = !auth.loggedIn;
+  if (loginBtn) loginBtn.hidden = !!auth.loggedIn;
+
+  menu.querySelectorAll("[data-auth]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      if (btn.dataset.auth === "logout") logoutUser();
+      window.location.href = LOGIN_PAGE_URL;
+    });
+  });
+}
+initHeaderUserMenu();
+document.addEventListener("ui-include:done", initHeaderUserMenu);
+
+/* 보고 LNB(/html/code/report-side-nav.html) — 현재 페이지 항목 활성화.
+   페이지는 <body data-report-nav="work|weekly|monthly"> 로 자신을 알린다.
+   LNB는 인클루드로 비동기 삽입되므로 ui-include:done 에서도 한 번 더 실행한다. */
+function setReportNavActive() {
+  const key = document.body && document.body.dataset.reportNav;
+  if (!key) return;
+  document.querySelectorAll('#reportSideNav .nav-node__row').forEach(function (row) {
+    const on = row.dataset.nav === key;
+    row.classList.toggle('is-selected', on);
+    if (on) row.setAttribute('aria-current', 'page');
+    else row.removeAttribute('aria-current');
+  });
+}
+setReportNavActive();
+document.addEventListener('ui-include:done', setReportNavActive);
 
 /* ============================================================
    모니터링 공용 유틸 (부서 대시보드 · 리스크 알림)
@@ -2678,11 +3260,12 @@ function hashSeed(s) {
   return Math.abs(h);
 }
 
-/* 업무명을 시드로 한 결정적 의사난수로 실제 진척률을 만들고, 목표 대비 편차로 리스크 등급을 매김 */
-function computeTaskRisk(task) {
+/* 업무명을 시드로 한 결정적 의사난수로 실제 진척률을 만들고, 목표 대비 편차로 리스크 등급을 매김.
+   baseDate를 주면 그 시점 기준으로 평가한다 (보고서는 보고 기간 종료일 기준으로 판단). */
+function computeTaskRisk(task, baseDate) {
   const start = parseISODate(task.start);
   const end = parseISODate(task.end);
-  const today = new Date();
+  const today = baseDate || new Date();
   const totalSpan = Math.max(1, diffDays(start, end));
   const elapsed = diffDays(start, today);
   const daysToEnd = diffDays(today, end);

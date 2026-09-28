@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>주간보고 상세</title>
+    <title>보고 상세</title>
     <link rel="stylesheet" href="/resources/css/custom.css">
     <link href="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.css" type="text/css" rel="stylesheet" />
     <script src="/resources/js/component/ui-include.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.js"></script>
 </head>
-<body>
+<body data-report-nav="weekly">
 
   <div class="operating-container">
 
@@ -17,23 +17,8 @@
 
     <div class="organization-container">
 
-      <!-- 사이드 네비게이션 -->
-      <nav class="side-nav" aria-label="주간보고 상세 네비게이션">
-        <ul class="nav-tree" role="list">
-          <li class="nav-node nav-node--leaf nav-node--depth0">
-            <a href="/resources/pages/weekly-report.html" class="nav-node__row" style="--depth: 0">
-              <span class="nav-node__caret"></span>
-              <span class="nav-node__label">주간보고 목록</span>
-            </a>
-          </li>
-          <li class="nav-node nav-node--leaf nav-node--depth0">
-            <span class="nav-node__row is-selected" style="--depth: 0">
-              <span class="nav-node__caret"></span>
-              <span class="nav-node__label">보고 상세</span>
-            </span>
-          </li>
-        </ul>
-      </nav>
+      <!-- 사이드 네비게이션 (보고 공통 LNB) -->
+      <div data-include="/html/code/report-side-nav.html"></div>
 
       <!-- 메인 콘텐츠 -->
       <main class="main" style="padding:0; overflow:auto;">
@@ -43,7 +28,7 @@
           <div class="task-id">
             <span class="krds-badge bg-light-gray" id="report-badge">제출완료</span>
             <div class="task-titles">
-              <strong class="task-name" id="report-title">부서명 주간보고</strong>
+              <strong class="task-name" id="report-title">주간보고</strong>
               <span class="task-meta" id="report-meta">작성자 · 보고기간</span>
             </div>
             <span class="chevron" aria-hidden="true">&rsaquo;</span>
@@ -54,24 +39,107 @@
         </header>
 
         <div class="layout" style="grid-template-columns: minmax(0,1fr);">
-          <div>
+          <div id="report-body">
 
-            <!-- 요약 -->
-            <section style="margin-bottom: 32px;">
-              <h2 class="section-title" style="margin-bottom: 12px;">보고 요약</h2>
-              <div class="report-summary" id="report-summary"></div>
+            <!-- AI 생성 안내 -->
+            <div class="ai-notice">
+              <span class="ai-notice__badge">AI</span>
+              <p class="ai-notice__text" id="ai-notice-text">
+                담당자가 작성한 업무보고를 바탕으로 AI가 생성한 보고입니다.
+              </p>
+            </div>
+
+            <!-- 기본 정보 -->
+            <section class="report-section">
+              <h2 class="section-title">기본 정보</h2>
+              <div class="krds-table-wrap report-basic">
+                <table class="tbl col data">
+                  <caption>보고 기본 정보</caption>
+                  <colgroup><col style="width:14%"><col><col style="width:14%"><col></colgroup>
+                  <tbody>
+                    <tr>
+                      <th scope="row">작성자</th><td id="info-author">-</td>
+                      <th scope="row">팀</th><td id="info-team">-</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">생성일</th><td id="info-created">-</td>
+                      <th scope="row">보고 기간</th><td id="info-period">-</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </section>
 
-            <!-- 업무 추진현황 -->
-            <section style="margin-bottom: 32px;">
-              <h2 class="section-title" style="margin-bottom: 12px;">업무 추진현황</h2>
-              <ul class="task-list" id="report-tasks"></ul>
+            <!-- WBS (홈 화면 업무 현황과 동일한 컴포넌트, 작성자 분량만) -->
+            <section class="report-section">
+              <div class="report-section__head">
+                <h2 class="section-title">WBS 추진 현황</h2>
+                <div class="report-section__tools">
+                  <span class="report-section__hint" id="wbs-hint"></span>
+                  <div class="gantt-view-selector" id="wbsViewSelector">
+                    <button type="button" data-view="day">일</button>
+                    <button type="button" data-view="week" class="active">주</button>
+                    <button type="button" data-view="month">월</button>
+                    <button type="button" data-view="3month">3개월</button>
+                  </div>
+                </div>
+              </div>
+              <div id="wbsGanttMount"></div>
             </section>
 
-            <!-- 일일 업무일지 -->
-            <section>
-              <h2 class="section-title" style="margin-bottom: 12px;">일일 업무일지</h2>
-              <div class="daily-log" id="report-daily"></div>
+            <!-- 이번 주 업무 요약 -->
+            <section class="report-section">
+              <h2 class="section-title" id="summary-title">이번 주 업무 요약</h2>
+              <!-- 총평 + 보고자가 업무보고에 남긴 종합 의견을 한 흐름으로 -->
+              <div class="report-overview">
+                <p class="report-overview__text" id="report-overview"></p>
+                <div class="report-overview__voice">
+                  <span class="report-overview__voice-label">보고자 의견</span>
+                  <div id="voice-list"></div>
+                </div>
+              </div>
+              <div class="ai-summary-grid">
+                <div class="ai-summary-card ai-summary-card--good">
+                  <div class="ai-summary-card__head">
+                    <span class="ai-summary-card__icon" aria-hidden="true">&#10003;</span>
+                    <h3 class="ai-summary-card__title">잘 된 점</h3>
+                    <span class="krds-badge small bg-light-success" id="good-count">0건</span>
+                  </div>
+                  <ul class="ai-summary-list" id="good-list"></ul>
+                </div>
+                <div class="ai-summary-card ai-summary-card--delay">
+                  <div class="ai-summary-card__head">
+                    <span class="ai-summary-card__icon" aria-hidden="true">!</span>
+                    <h3 class="ai-summary-card__title">지연되는 점</h3>
+                    <span class="krds-badge small bg-light-warning" id="delay-count">0건</span>
+                  </div>
+                  <ul class="ai-summary-list" id="delay-list"></ul>
+                </div>
+              </div>
+            </section>
+
+            <!-- 다음 태스크 -->
+            <section class="report-section">
+              <div class="report-section__head">
+                <h2 class="section-title">다음 태스크</h2>
+                <span class="report-section__hint">각 WBS 항목의 다음 진행 단계입니다.</span>
+              </div>
+              <div class="krds-table-wrap">
+                <table class="tbl col data">
+                  <caption>다음 태스크 목록</caption>
+                  <colgroup><col style="width:36%"><col style="width:28%"><col style="width:12%"><col style="width:12%"><col style="width:12%"></colgroup>
+                  <thead>
+                    <tr>
+                      <th scope="col">WBS 항목</th>
+                      <th scope="col">다음 단계</th>
+                      <th scope="col">유형</th>
+                      <th scope="col">기한</th>
+                      <th scope="col">우선순위</th>
+                    </tr>
+                  </thead>
+                  <tbody id="next-body"></tbody>
+                </table>
+              </div>
             </section>
 
           </div>
@@ -82,76 +150,124 @@
   </div>
 
   <script src="/resources/js/script.js"></script>
+  <script src="/resources/js/component/wbs-gantt.js"></script>
   <script>
   (function () {
     const raw = sessionStorage.getItem('krds_selected_report');
-    const content = document.querySelector('.layout');
+    const body = document.getElementById('report-body');
 
     if (!raw) {
-      content.innerHTML = '<p style="padding:24px;color:var(--krds-light-color-text-disabled)">보고 정보가 없습니다.</p>';
+      body.innerHTML = '<p style="padding:24px;color:var(--krds-light-color-text-disabled)">보고 정보가 없습니다. 목록에서 보고를 선택해 주세요.</p>';
       return;
     }
 
-    const report = JSON.parse(raw);
+    const report    = JSON.parse(raw);
+    const kind      = report.kind === 'monthly' ? 'monthly' : 'weekly';
+    const kindLabel = REPORT_KIND_LABEL[kind];
+    const isMine    = report.author === getCurrentUserName();
 
-    /* ── 헤더 채우기 ── */
+    /* 보고 종류에 맞춰 LNB(주간보고·월간보고) 활성화 */
+    document.body.dataset.reportNav = kind;
+    setReportNavActive();
+
+    /* ── 헤더 ── */
     const badge = document.getElementById('report-badge');
     badge.textContent = REPORT_STATUS_LABEL[report.status] || report.status;
     badge.className   = REPORT_STATUS_CLASS[report.status] || 'krds-badge bg-light-gray';
-    document.getElementById('report-title').textContent = report.dept + ' 주간보고';
-    document.title = report.dept + ' 주간보고 상세';
+    document.getElementById('report-title').textContent = report.author + ' ' + report.authorRole + ' ' + kindLabel;
+    document.title = report.author + ' ' + kindLabel;
     document.getElementById('report-meta').textContent =
-      report.author + ' ' + report.authorRole + ' · ' + report.sil + ' · ' + report.weekStart + ' ~ ' + report.weekEnd;
+      report.sil + ' · ' + report.dept + ' · ' + report.periodStart + ' ~ ' + report.periodEnd;
 
-    /* ── 요약 ── */
-    document.getElementById('report-summary').innerHTML = `
-      <div class="report-summary__row">
-        <div class="report-summary__stat"><span class="report-summary__num">${report.memberCount}</span><span class="report-summary__label">소속 인원</span></div>
-        <div class="report-summary__stat"><span class="report-summary__num">${report.totalCount}</span><span class="report-summary__label">전체 업무</span></div>
-        <div class="report-summary__stat"><span class="report-summary__num">${report.doneCount}</span><span class="report-summary__label">완료</span></div>
-        <div class="report-summary__stat"><span class="report-summary__num">${report.progressCount}</span><span class="report-summary__label">진행중</span></div>
-      </div>
-      <p class="report-summary__text">
-        ${escapeHtml(report.dept)}는 이번 주(${report.weekStart} ~ ${report.weekEnd}) 총 ${report.totalCount}건의 업무를 진행했으며,
-        그중 ${report.doneCount}건을 완료했습니다. 보고 상태는 <strong>${REPORT_STATUS_LABEL[report.status]}</strong>입니다.
-      </p>
-    `;
+    /* ── 업무보고 저장본 → AI 보고 본문 ── */
+    const entries = isMine ? getWorkReportEntriesInRange(report.periodStart, report.periodEnd) : {};
+    const records = isMine ? getWorkReportRecordsInRange(report.periodStart, report.periodEnd) : [];
+    const content = buildAiReportContent(report, entries, records);
+    const savedAt = isMine ? getWorkReportSavedAtInRange(report.periodStart, report.periodEnd) : null;
 
-    /* ── 업무 추진현황 (실제 업무 카드 재사용) ── */
-    const taskListEl = document.getElementById('report-tasks');
-    if (report.tasks.length) {
-      taskListEl.innerHTML = report.tasks.map(taskCardHTML).join('');
-      taskListEl.querySelectorAll('.task-card').forEach((card, i) => {
-        card.addEventListener('click', () => {
-          sessionStorage.setItem('krds_selected_task', JSON.stringify(report.tasks[i]));
-          window.location.href = '/resources/pages/operating-detail-dashboard.html';
-        });
+    document.getElementById('ai-notice-text').innerHTML = content.sourceCount
+      ? `<strong>${escapeHtml(report.author)} ${escapeHtml(report.authorRole)}</strong>님이 저장한 <a href="/resources/pages/work-report.html">업무보고</a> ${content.noteCount}건${content.freeform.length ? ' · 종합 의견 ' + content.freeform.length + '건' : ''}을 바탕으로 AI가 작성한 ${kindLabel}입니다.`
+      : `업무 추진 데이터를 바탕으로 AI가 작성한 ${kindLabel}입니다. <a href="/resources/pages/work-report-write.html">업무보고를 작성</a>하면 작성 내용이 그대로 반영됩니다.`;
+
+    /* ── 기본 정보 ── */
+    document.getElementById('info-author').textContent =
+      report.author + ' ' + report.authorRole + (report.authorPosition ? ' (' + report.authorPosition + ')' : '');
+    document.getElementById('info-team').textContent    = report.sil + ' · ' + report.dept;
+    document.getElementById('info-created').textContent = savedAt || report.submittedAt;
+    document.getElementById('info-period').textContent  = report.periodStart + ' ~ ' + report.periodEnd;
+
+    /* ── WBS (홈 화면과 동일한 간트 컴포넌트, 작성자 분량만) ── */
+    document.getElementById('wbs-hint').textContent =
+      (isMine ? '내 WBS ' : report.author + ' 담당 WBS ') + report.totalCount + '건';
+
+    const wbs = renderWbsGantt(
+      document.getElementById('wbsGanttMount'),
+      report.tasks,
+      { viewUnit: 'week', baseDate: parseISODate(report.periodEnd), listTitle: 'WBS 항목' }
+    );
+
+    document.querySelectorAll('#wbsViewSelector button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#wbsViewSelector button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        wbs.setViewUnit(btn.dataset.view);
       });
-    } else {
-      taskListEl.innerHTML = '<li class="task-empty">등록된 업무가 없습니다.</li>';
+    });
+
+    /* ── 이번 주(달) 업무 요약 ── */
+    document.getElementById('summary-title').textContent =
+      (kind === 'monthly' ? '이번 달' : '이번 주') + ' 업무 요약';
+    document.getElementById('report-overview').textContent = content.overview;
+    // 보고자가 쓴 문장과 업무 데이터로 확인된 사실을 한 문단으로 이어 붙인다
+    function summaryItemHTML(it, extraClass) {
+      const isDelay = extraClass === 'is-delay';
+      const tail = it.note && isDelay ? '다만 ' + it.fact : it.fact;
+      return `
+        <li class="ai-summary-item">
+          <div class="ai-summary-item__title">
+            ${escapeHtml(it.task.title)}
+            ${it.note ? '<span class="report-tag report-tag--mine">보고 반영</span>' : ''}
+          </div>
+          <p class="ai-summary-item__reason ${extraClass || ''}">${it.note ? `<span class="ai-summary-item__said">${escapeHtml(it.note)}</span> ` : ''}${escapeHtml(tail)}</p>
+        </li>`;
     }
 
-    /* ── 일일 업무일지 (업무를 요일별로 결정적으로 배분해 요약 생성) ── */
-    const DAY_NAMES = ['월요일', '화요일', '수요일', '목요일', '금요일'];
-    const weekStartDate = new Date(report.weekStart);
-    const days = DAY_NAMES.map((name, i) => {
-      const d = new Date(weekStartDate);
-      d.setDate(d.getDate() + i);
-      return { name, date: (d.getMonth() + 1) + '.' + String(d.getDate()).padStart(2, '0'), items: [] };
-    });
-    report.tasks.forEach((t, i) => {
-      const label = t.title + ' — ' + STATUS_LABEL[t.status];
-      days[i % 5].items.push(label);
-    });
+    /* 보고자 의견 — 업무보고 자유 기술을 총평에 이어 그대로 싣는다.
+       (항목별로 쓴 내용은 아래 '잘 된 점 · 지연되는 점' 문장 안에 함께 녹아든다) */
+    const voiceList = document.getElementById('voice-list');
+    voiceList.innerHTML = content.freeform.length
+      ? content.freeform.map(n => {
+          const period = content.freeform.length > 1
+            ? `<span class="report-overview__voice-period">${n.periodStart} ~ ${n.periodEnd}</span>` : '';
+          return `<p class="report-overview__voice-text">${period}${escapeHtml(n.text)}</p>`;
+        }).join('')
+      : '<p class="report-overview__voice-text is-empty">작성된 종합 의견이 없습니다.</p>';
 
-    document.getElementById('report-daily').innerHTML = days.map(d => `
-      <div class="day-col">
-        <div class="day-col__head"><span class="day-col__name">${d.name}</span><span class="day-col__date">${d.date}</span></div>
-        <ul class="day-col__list">
-          ${d.items.length ? d.items.map(t => `<li>${escapeHtml(t)}</li>`).join('') : '<li class="day-col__empty">특이사항 없음</li>'}
-        </ul>
-      </div>
-    `).join('');
+    document.getElementById('good-count').textContent = content.good.length + '건';
+    document.getElementById('good-list').innerHTML = content.good.length
+      ? content.good.map(it => summaryItemHTML(it)).join('')
+      : '<li class="ai-summary-empty">해당 항목이 없습니다.</li>';
+
+    document.getElementById('delay-count').textContent = content.delayed.length + '건';
+    document.getElementById('delay-list').innerHTML = content.delayed.length
+      ? content.delayed.map(it => summaryItemHTML(it, 'is-delay')).join('')
+      : '<li class="ai-summary-empty">지연 중인 항목이 없습니다.</li>';
+
+    /* ── 다음 태스크 ── */
+    const PRIO_LABEL = { high: '높음', mid: '보통', low: '낮음' };
+    const PRIO_CLASS = { high: 'bg-light-danger', mid: 'bg-light-secondary', low: 'bg-light-gray' };
+    const nextBody = document.getElementById('next-body');
+    const asOf = report.periodEnd;
+    nextBody.innerHTML = content.next.length
+      ? content.next.map(n => `
+          <tr>
+            <td class="td-left">${escapeHtml(n.task.title)}</td>
+            <td class="td-left"><strong>${escapeHtml(n.step.name)}</strong></td>
+            <td>${escapeHtml(n.step.type)}</td>
+            <td class="${n.step.deadline < asOf ? 'is-overdue' : ''}">${n.step.deadline}${n.step.deadline < asOf ? ' <span class="next-overdue">기한 경과</span>' : ''}</td>
+            <td><span class="krds-badge small ${PRIO_CLASS[n.step.priority] || 'bg-light-gray'}">${PRIO_LABEL[n.step.priority] || '-'}</span></td>
+          </tr>`).join('')
+      : '<tr><td colspan="5">다음 진행할 태스크가 없습니다.</td></tr>';
   })();
   </script>
 

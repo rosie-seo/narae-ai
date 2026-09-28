@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>업무보고 목록</title>
+    <link rel="stylesheet" href="/resources/css/custom.css">
+    <link href="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.css" type="text/css" rel="stylesheet" />
+    <script src="/resources/js/component/ui-include.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.js"></script>
+</head>
+<body data-report-nav="work">
+
+  <div class="operating-container">
+
+    <div data-include="/html/code/header.html"></div>
+
+    <div class="organization-container">
+
+      <!-- 사이드 네비게이션 (보고 공통 LNB) -->
+      <div data-include="/html/code/report-side-nav.html"></div>
+
+      <!-- 메인 콘텐츠 -->
+      <main class="main">
+
+        <div class="page-header">
+          <div class="page-title-group">
+            <div class="page-title">업무보고 목록</div>
+            <div class="page-desc" id="listDesc">내가 작성해 저장한 업무보고입니다.</div>
+          </div>
+          <div class="page-header__actions">
+            <a href="/resources/pages/work-report-write.html" class="krds-btn medium primary">보고 작성</a>
+          </div>
+        </div>
+
+        <!-- 작성 현황 요약 -->
+        <div class="report-toolbar">
+          <span class="report-toolbar__count" id="listCount"></span>
+        </div>
+
+        <!-- 내 업무보고 저장본 -->
+        <ul class="task-list report-list" id="savedReportList"></ul>
+
+        <!-- 저장된 보고가 없을 때 -->
+        <div class="report-empty" id="emptyState" hidden>
+          <p class="report-empty__title">아직 저장된 업무보고가 없습니다.</p>
+          <p class="report-empty__desc">
+            보고 기간별로 내 WBS 항목의 추진 실적을 작성해 두면 이곳에 저장본이 쌓입니다.
+          </p>
+          <a href="/resources/pages/work-report-write.html" class="krds-btn medium primary">첫 업무보고 작성하기</a>
+        </div>
+
+      </main>
+
+    </div>
+  </div>
+
+  <script src="/resources/js/script.js"></script>
+  <script>
+  (function () {
+    const me    = getCurrentUser();
+    const saved = loadWorkReports();   // 보고 기간 최신순
+
+    const listEl  = document.getElementById('savedReportList');
+    const emptyEl = document.getElementById('emptyState');
+    const countEl = document.getElementById('listCount');
+
+    document.getElementById('listDesc').textContent =
+      me.dept + ' ' + me.name + ' ' + me.role + '님이 작성해 저장한 업무보고입니다.';
+
+    const totalItems = saved.reduce(
+      (n, r) => n + Object.keys(r.entries || {}).filter(k => (r.entries[k] || '').trim()).length, 0);
+    countEl.innerHTML = `저장본 <b>${saved.length}</b>건 · 작성 항목 <b>${totalItems}</b>건`;
+
+    if (!saved.length) {
+      listEl.hidden = true;
+      emptyEl.hidden = false;
+      return;
+    }
+
+    listEl.innerHTML = saved.map(workReportSavedCardHTML).join('');
+    listEl.querySelectorAll('.task-card').forEach((card, i) => {
+      card.addEventListener('click', () => {
+        sessionStorage.setItem('krds_selected_work_report', JSON.stringify(saved[i]));
+        window.location.href = '/resources/pages/work-report-detail.html';
+      });
+    });
+  })();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!--
+  ┌─────────────────────────────────────────────────────────────┐
+  │  보고 섹션 공통 사이드 네비게이션(LNB)                          │
+  │  업무보고 목록 / 주간보고 / 월간보고 페이지에서 공유합니다.        │
+  │                                                              │
+  │  사용법                                                       │
+  │    <body data-report-nav="work|weekly|monthly">              │
+  │    <div data-include="/html/code/report-side-nav.html"></div> │
+  │                                                              │
+  │  현재 페이지 활성화(is-selected)는 script.js의                  │
+  │  setReportNavActive()가 data-report-nav 값으로 처리합니다.      │
+  └─────────────────────────────────────────────────────────────┘
+-->
+<nav class="side-nav" id="reportSideNav" aria-label="보고 네비게이션">
+  <h2 class="side-nav__title">보고</h2>
+  <ul class="nav-tree" role="list">
+
+    <li class="nav-group-label">업무보고</li>
+    <li class="nav-node nav-node--leaf nav-node--depth0">
+      <a href="/resources/pages/work-report.html" class="nav-node__row" data-nav="work" style="--depth: 0">
+        <span class="nav-node__caret"></span>
+        <span class="nav-node__label">업무보고 목록</span>
+      </a>
+    </li>
+
+    <li class="nav-group-label">주간보고 / 월간보고</li>
+    <li class="nav-node nav-node--leaf nav-node--depth0">
+      <a href="/resources/pages/weekly-report.html" class="nav-node__row" data-nav="weekly" style="--depth: 0">
+        <span class="nav-node__caret"></span>
+        <span class="nav-node__label">주간보고</span>
+      </a>
+    </li>
+    <li class="nav-node nav-node--leaf nav-node--depth0">
+      <a href="/resources/pages/monthly-report.html" class="nav-node__row" data-nav="monthly" style="--depth: 0">
+        <span class="nav-node__caret"></span>
+        <span class="nav-node__label">월간보고</span>
+      </a>
+    </li>
+
+  </ul>
+</nav>

@@ -44,7 +44,7 @@
                                         <a href="/resources/pages/policy.html" class="gnb-main-trigger is-link" data-trigger="gnb">규정</a>
                                     </li>
                                     <li>
-                                        <a href="/resources/pages/weekly-report.html" class="gnb-main-trigger is-link" data-trigger="gnb">보고</a>
+                                        <a href="/resources/pages/work-report.html" class="gnb-main-trigger is-link" data-trigger="gnb">보고</a>
                                     </li>
                                     <li>
                                         <a href="/resources/pages/monitoring-dashboard.html" class="gnb-main-trigger is-link" data-trigger="gnb">모니터링</a>
@@ -65,6 +65,31 @@
                             </div>
                         </div>
                         <!-- //폼그룹 -->
+
+                        <!-- 사용자 메뉴 : 아바타 + 닉네임, 셀렉터에 로그인/로그아웃 -->
+                        <div class="krds-drop-wrap user-menu" id="userMenu">
+                            <button type="button" class="krds-btn small text drop-btn user-menu__btn" aria-label="내 계정 메뉴">
+                                <span class="user-menu__avatar" id="userMenuAvatar" aria-hidden="true">·</span>
+                                <span class="user-menu__name" id="userMenuName">사용자</span>
+                                <i class="svg-icon ico-toggle" aria-hidden="true"></i>
+                            </button>
+                            <div class="drop-menu">
+                                <div class="drop-in">
+                                    <div class="drop-top user-menu__info">
+                                        <strong class="user-menu__info-name" id="userMenuInfoName">사용자</strong>
+                                        <span class="user-menu__info-dept" id="userMenuInfoDept"></span>
+                                        <span class="user-menu__perm" id="userMenuPerm"></span>
+                                    </div>
+                                    <ul class="drop-list">
+                                        <li><button type="button" class="item-link" data-auth="login">로그인</button></li>
+                                        <li><button type="button" class="item-link" data-auth="logout">로그아웃</button></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 로그아웃 상태에서 노출 -->
+                        <a href="/resources/pages/login.html" class="krds-btn small secondary user-login-btn" id="headerLoginBtn" hidden>로그인</a>
 
                         <button type="button" class="krds-btn icon" onclick="window.location.href='/resources/pages/admin-settings.html'" aria-label="관리자 설정" title="관리자 설정">
                             <span class="sr-only">관리자 설정</span>

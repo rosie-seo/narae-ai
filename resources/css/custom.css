@@ -18,6 +18,9 @@
  * │  § 15  규정 업로드            (policy.html)
  * │  § 16  AI 에이전트           (ai-agent.html)
  * │  § 17  모니터링              (monitoring-dashboard.html, monitoring-risk.html)
+ * │  § 18  보고 — 목록           (work-report.html, weekly-report.html, monthly-report.html)
+ * │  § 19  보고 — 작성·AI 상세   (work-report-write.html, weekly-report-detail.html)
+ * │  § 20  사용자 메뉴 · 로그인   (header.html, login.html)
  * └──────────────────────────────────────────────────────────────────
  */
 
@@ -132,7 +135,10 @@
     background-image: url(/resources/img/component/icon/ico_logo_narae_ai.svg)!important;
 }
 
-.fieldset {
+/* 헤더의 .fieldset은 GNB·AI 입력·버튼을 한 줄로 배치한다.
+   전역 .fieldset(KRDS 폼 묶음, 기본 세로 배치)에까지 적용되면 다른 화면의 폼이 깨지므로
+   헤더 안으로 범위를 좁힌다. */
+#krds-header .fieldset {
     display: flex;
     align-items: center !important;
     justify-content: flex-start;
@@ -196,6 +202,26 @@ body{
   display:flex;
   flex-direction:column;
   height:100%;
+}
+
+/* 사이드 네비게이션 제목 — 보고 등 섹션 단위 LNB의 1depth 타이틀 */
+.side-nav__title{
+  flex-shrink:0;
+  padding: var(--krds-padding-6) var(--krds-padding-5) var(--krds-padding-5);
+  font-size: var(--krds-pc-font-size-label-medium);
+  font-weight: var(--krds-font-weight-bold);
+  color: var(--krds-light-color-text-basic);
+  border-bottom: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-divider-gray-light);
+}
+
+/* 네비게이션 그룹 라벨 — 메뉴 묶음을 구분하는 소제목 (보고 LNB · 관리자 설정 LNB 공용) */
+.nav-group-label,
+.admin-nav-group-label {
+  padding: var(--krds-padding-6) var(--krds-padding-5) var(--krds-number-3);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--krds-light-color-text-disabled);
 }
 
 /* ===== Search ===== */
@@ -6461,62 +6487,6 @@ label {
   }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   §  14  주간보고 상세  (weekly-report-detail.html)
-          report-summary / day-col (일일 업무일지)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-.report-summary {
-  border: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-gray-light);
-  border-radius: var(--krds-radius-medium2);
-  padding: var(--krds-padding-8) var(--krds-padding-9);
-  background: var(--krds-light-color-surface-white);
-}
-.report-summary__row {
-  display: flex;
-  gap: var(--krds-gap-9);
-  margin-bottom: var(--krds-gap-8);
-  padding-bottom: var(--krds-padding-8);
-  border-bottom: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-divider-gray-light);
-}
-.report-summary__stat { display: flex; flex-direction: column; gap: var(--krds-gap-1); }
-.report-summary__num { font-size: var(--krds-pc-font-size-heading-xsmall); font-weight: var(--krds-font-weight-bold); color: var(--krds-light-color-text-basic); }
-.report-summary__label { font-size: var(--krds-pc-font-size-label-xsmall); color: var(--krds-light-color-text-subtle); }
-.report-summary__text { font-size: var(--krds-pc-font-size-body-small); line-height: 1.6; color: var(--krds-light-color-text-basic); }
-
-.daily-log {
-  display: flex;
-  flex-direction: column;
-  gap: var(--krds-gap-8);
-}
-.day-col {
-  padding: var(--krds-padding-9) var(--krds-padding-9);
-  border: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-gray-light);
-  border-radius: var(--krds-radius-medium2);
-  background: var(--krds-light-color-surface-white);
-}
-.day-col__head {
-  display: flex;
-  align-items: baseline;
-  gap: var(--krds-gap-4);
-  padding-bottom: var(--krds-padding-5);
-  margin-bottom: var(--krds-gap-6);
-  border-bottom: 2px solid var(--krds-light-color-divider-primary);
-}
-.day-col__name { font-size: var(--krds-pc-font-size-heading-xsmall); font-weight: var(--krds-font-weight-bold); color: var(--krds-light-color-text-basic); }
-.day-col__date { font-size: var(--krds-pc-font-size-label-small); color: var(--krds-light-color-text-disabled); }
-.day-col__list { list-style: none; margin: 0; padding: 0; font-size: var(--krds-pc-font-size-body-small); line-height: 1.9; color: var(--krds-light-color-text-basic); }
-.day-col__list > li { position: relative; padding-left: var(--krds-padding-6); margin-bottom: var(--krds-gap-4); }
-.day-col__list > li::before {
-  content: "";
-  position: absolute;
-  left: 0; top: 10px;
-  width: 6px; height: 6px;
-  background: var(--krds-light-color-element-primary);
-  border-radius: 50%;
-}
-.day-col__empty { color: var(--krds-light-color-text-disabled); }
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    §  17  모니터링 — 부서 대시보드 · 리스크 알림
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
@@ -6635,7 +6605,6 @@ label {
 .risk-route.is-sent .risk-route__suggest { color: var(--krds-light-color-text-success); }
 
 .risk-empty { text-align: center; padding: 60px 0; color: var(--krds-light-color-text-disabled); font-size: 13px; }
-.day-col__empty::before { display: none; }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    §  15  관리자 설정  (admin-settings.html)
@@ -6672,14 +6641,6 @@ label {
 .admin-role-item__desc { font-size: 12.5px; color: var(--krds-light-color-text-subtle); }
 
 .admin-user-table { width: 100%; }
-
-.admin-nav-group-label {
-  padding: var(--krds-padding-6) var(--krds-padding-5) var(--krds-number-3);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: var(--krds-light-color-text-disabled);
-}
 
 /* ===========================
    목표 관리 (goals.html)
@@ -6913,3 +6874,832 @@ a.dash-stat-card:hover {
 @media (max-width: 640px) {
   .dash-stat-row { grid-template-columns: repeat(2, 1fr); }
 }
+
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   §  18  보고 — 목록 공통  (work-report.html · weekly-report.html · monthly-report.html)
+         report-toolbar / report-period / task-card 확장
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* 목록 상단 필터 툴바 (부서 선택 · 검색) */
+.report-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--krds-gap-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--krds-gap-5);
+}
+/* 목록·작성 화면의 필터는 KRDS small 사이즈(4rem)로 맞춘다 */
+.report-toolbar .krds-form-select { width: 200px; }
+.report-toolbar .krds-form-select.is-wide { width: 280px; }
+.report-toolbar__search { position: relative; flex: 1 1 220px; max-width: 320px; }
+.report-toolbar__search input {
+  width: 100%;
+  height: var(--krds-size-height-6);
+  padding: 0 var(--krds-padding-6);
+  border: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-gray);
+  border-radius: var(--krds-radius-medium3);
+  font-size: var(--krds-pc-font-size-label-small);
+  font-family: inherit;
+  color: var(--krds-light-color-text-basic);
+  background: var(--krds-light-color-surface-white);
+}
+.report-toolbar__search input:focus {
+  outline: none;
+  border-color: var(--krds-light-color-action-secondary-active);
+  box-shadow: var(--krds-box-shadow-outline);
+}
+.report-toolbar__count {
+  margin-left: auto;
+  font-size: var(--krds-pc-font-size-label-xsmall);
+  color: var(--krds-light-color-text-subtle);
+}
+.report-toolbar__count b {
+  color: var(--krds-light-color-action-secondary-active);
+  font-weight: var(--krds-font-weight-bold);
+}
+
+/* 보고 기간 안내 (이번 주 · 이번 달) */
+.report-period {
+  display: flex;
+  align-items: center;
+  gap: var(--krds-gap-3);
+  margin-bottom: var(--krds-gap-5);
+  font-size: var(--krds-pc-font-size-label-small);
+  color: var(--krds-light-color-text-subtle);
+}
+.report-period__range { font-weight: var(--krds-font-weight-bold); color: var(--krds-light-color-text-basic); }
+
+/* 목록 하단 페이지네이션 여백 */
+.report-list + .krds-pagination { margin-top: var(--krds-gap-7); }
+
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   §  19  보고 — 업무보고 작성 · AI 주간/월간보고 상세
+         ai-notice / write-form / report-basic / ai-summary / WBS 임베드
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* AI 생성 안내 배너 */
+.ai-notice {
+  display: flex;
+  align-items: center;
+  gap: var(--krds-gap-4);
+  padding: var(--krds-padding-6) var(--krds-padding-7);
+  margin-bottom: var(--krds-gap-7);
+  border: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-information-light);
+  border-radius: var(--krds-radius-medium2);
+  background: var(--krds-light-color-surface-information-subtler);
+}
+.ai-notice__badge {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 22px;
+  padding: 0 var(--krds-padding-3);
+  border-radius: var(--krds-radius-medium3);
+  background: var(--krds-light-color-action-secondary-active);
+  color: var(--krds-light-color-text-basic-inverse);
+  font-size: 11px;
+  font-weight: var(--krds-font-weight-bold);
+  letter-spacing: 0.04em;
+}
+.ai-notice__text {
+  flex: 1;
+  font-size: var(--krds-pc-font-size-label-small);
+  line-height: 1.6;
+  color: var(--krds-light-color-text-basic);
+}
+.ai-notice__text strong { font-weight: var(--krds-font-weight-bold); }
+.ai-notice__text a { color: var(--krds-light-color-action-secondary-active); text-decoration: underline; }
+
+/* 목록 카드 위 태그 (내 보고 / AI 생성) */
+.report-tag {
+  display: inline-block;
+  margin-left: var(--krds-gap-2);
+  padding: 0 var(--krds-padding-3);
+  border-radius: var(--krds-radius-medium3);
+  font-size: 11px;
+  font-weight: var(--krds-font-weight-bold);
+  line-height: 18px;
+  vertical-align: 1px;
+}
+.report-tag--mine {
+  background: var(--krds-light-color-surface-primary-subtler);
+  color: var(--krds-light-color-action-secondary-active);
+}
+.report-tag--carry {
+  background: var(--krds-light-color-surface-warning-subtler);
+  color: var(--krds-light-color-text-warning);
+}
+.report-tag--ai {
+  background: var(--krds-light-color-surface-gray-subtler);
+  color: var(--krds-light-color-text-subtle);
+}
+.task-card--mine { border-color: var(--krds-light-color-border-information-light); }
+.task-card__date--warn { color: var(--krds-light-color-text-warning); font-weight: var(--krds-font-weight-bold); }
+
+/* 기본 정보 표 */
+.report-basic { margin-bottom: var(--krds-gap-5); }
+
+/* 보고 화면의 KRDS 표 — 본문 글자를 한 단계 작게 (KRDS 컴포넌트 토큰을 직접 덮어쓴다).
+   custom.css가 krds.min.css보다 먼저 로드되므로 선택자를 한 단계 더 좁혀 명시도를 높인다. */
+.krds-table-wrap.report-basic,
+.report-section .krds-table-wrap {
+  --krds-table--data-tbody-pc-font-size: var(--krds-pc-font-size-label-xsmall);
+  --krds-table--data-tbody-mobile-font-size: var(--krds-pc-font-size-label-xsmall);
+  --krds-table--data-tbody-padding: var(--krds-padding-4);
+}
+
+/* 항목명(작성자 · 팀 · 보고 기간 · 대상 WBS)은 짙게 + 옅은 배경으로 값과 구분한다 */
+.krds-table-wrap.report-basic .tbl.data tbody th {
+  color: var(--krds-light-color-text-bolder);
+  font-weight: var(--krds-font-weight-bold);
+  background: var(--krds-light-color-surface-gray-subtler);
+}
+.krds-table-wrap.report-basic .tbl.data tbody td {
+  color: var(--krds-light-color-text-basic);
+}
+
+/* 보고 상세 섹션 */
+.report-section { margin-bottom: var(--krds-gap-9); }
+.report-section__head {
+  display: flex;
+  align-items: center;
+  gap: var(--krds-gap-4);
+  margin-bottom: var(--krds-gap-4);
+}
+.report-section__head .section-title { margin-bottom: 0; }
+.report-section__tools {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--krds-gap-4);
+}
+.report-section__hint {
+  font-size: var(--krds-pc-font-size-label-xsmall);
+  color: var(--krds-light-color-text-subtle);
+}
+.report-overview {
+  padding: var(--krds-padding-6) var(--krds-padding-7);
+  margin-bottom: var(--krds-gap-6);
+  border-radius: var(--krds-radius-medium2);
+  background: var(--krds-light-color-surface-gray-subtler);
+}
+.report-overview__text {
+  font-size: var(--krds-pc-font-size-body-small);
+  line-height: 1.7;
+  color: var(--krds-light-color-text-basic);
+}
+
+/* 보고자가 업무보고에 남긴 종합 의견 — 총평에 이어지는 같은 흐름 */
+.report-overview__voice {
+  margin-top: var(--krds-gap-5);
+  padding-top: var(--krds-gap-5);
+  border-top: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-divider-gray-light);
+}
+.report-overview__voice-label {
+  display: block;
+  margin-bottom: var(--krds-gap-2);
+  font-size: var(--krds-pc-font-size-label-xsmall);
+  font-weight: var(--krds-font-weight-bold);
+  color: var(--krds-light-color-action-secondary-active);
+}
+.report-overview__voice-text {
+  font-size: var(--krds-pc-font-size-body-small);
+  line-height: 1.7;
+  color: var(--krds-light-color-text-basic);
+  white-space: pre-wrap;
+}
+.report-overview__voice-text + .report-overview__voice-text { margin-top: var(--krds-gap-3); }
+.report-overview__voice-text.is-empty { color: var(--krds-light-color-text-disabled); }
+.report-overview__voice-period {
+  display: inline-block;
+  margin-right: var(--krds-gap-3);
+  font-size: var(--krds-pc-font-size-label-xsmall);
+  font-weight: var(--krds-font-weight-bold);
+  color: var(--krds-light-color-text-subtle);
+}
+
+/* 보고 안에 들어가는 WBS 간트 (홈 화면과 동일한 컴포넌트) */
+.gantt-wrapper--embed {
+  flex: none;
+  margin: 0;
+  width: 100%;
+}
+.gantt-wrapper--embed .tl-label-count { width: auto; min-width: 44px; }
+.gantt-wrapper--embed .tl-count { width: auto; min-width: 44px; }
+
+/* 잘 된 점 / 지연되는 점 */
+.ai-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--krds-gap-5);
+}
+@media (max-width: 1100px) {
+  .ai-summary-grid { grid-template-columns: minmax(0, 1fr); }
+}
+.ai-summary-card {
+  border: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-gray-light);
+  border-radius: var(--krds-radius-medium2);
+  background: var(--krds-light-color-surface-white);
+  padding: var(--krds-padding-7);
+}
+.ai-summary-card__head {
+  display: flex;
+  align-items: center;
+  gap: var(--krds-gap-3);
+  padding-bottom: var(--krds-padding-5);
+  margin-bottom: var(--krds-gap-5);
+  border-bottom: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-divider-gray-light);
+}
+.ai-summary-card__title {
+  font-size: var(--krds-pc-font-size-label-large);
+  font-weight: var(--krds-font-weight-bold);
+  color: var(--krds-light-color-text-basic);
+}
+.ai-summary-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: var(--krds-font-weight-bold);
+  color: var(--krds-light-color-text-basic-inverse);
+}
+.ai-summary-card--good .ai-summary-card__icon  { background: var(--krds-light-color-icon-success); }
+.ai-summary-card--delay .ai-summary-card__icon { background: var(--krds-light-color-icon-warning); }
+.ai-summary-card--good  { border-top: 3px solid var(--krds-light-color-icon-success); }
+.ai-summary-card--delay { border-top: 3px solid var(--krds-light-color-icon-warning); }
+
+.ai-summary-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--krds-gap-5); }
+.ai-summary-item { padding-left: var(--krds-padding-5); border-left: 2px solid var(--krds-light-color-divider-gray-light); }
+.ai-summary-item__title {
+  font-size: var(--krds-pc-font-size-label-small);
+  font-weight: var(--krds-font-weight-bold);
+  color: var(--krds-light-color-text-basic);
+  margin-bottom: 2px;
+}
+.ai-summary-item__reason {
+  font-size: var(--krds-pc-font-size-label-xsmall);
+  line-height: 1.6;
+  color: var(--krds-light-color-text-subtle);
+}
+.ai-summary-item__reason.is-delay { color: var(--krds-light-color-text-warning); }
+/* 문장 안에서 보고자가 직접 쓴 부분 */
+.ai-summary-item__said {
+  color: var(--krds-light-color-text-basic);
+  font-weight: var(--krds-font-weight-medium);
+}
+.ai-summary-item__note {
+  margin-top: var(--krds-gap-3);
+  padding: var(--krds-padding-4) var(--krds-padding-5);
+  border-radius: var(--krds-radius-medium1);
+  background: var(--krds-light-color-surface-gray-subtler);
+  font-size: var(--krds-pc-font-size-label-xsmall);
+  line-height: 1.6;
+  color: var(--krds-light-color-text-basic);
+}
+.ai-summary-item__note-label {
+  display: inline-block;
+  margin-right: var(--krds-gap-2);
+  font-weight: var(--krds-font-weight-bold);
+  color: var(--krds-light-color-action-secondary-active);
+}
+.ai-summary-empty {
+  font-size: var(--krds-pc-font-size-label-xsmall);
+  color: var(--krds-light-color-text-disabled);
+}
+
+/* 업무보고 작성 폼 */
+/* .main이 세로 flex 컨테이너라 폼을 flex로 두면 항목이 눌려(flex-shrink) 높이가 잘린다.
+   항목은 block + margin으로 쌓는다. */
+.write-form { display: block; }
+.write-item + .write-item { margin-top: var(--krds-gap-8); }
+/* 항목은 테두리 없이 여백으로만 구분한다 (입력 필드 자체가 경계를 만들어 준다) */
+.write-item {
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+.write-item__head {
+  display: flex;
+  align-items: center;
+  gap: var(--krds-gap-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--krds-gap-5);
+}
+.write-item__title {
+  font-size: var(--krds-pc-font-size-label-medium);
+  font-weight: var(--krds-font-weight-bold);
+  color: var(--krds-light-color-text-basic);
+}
+.write-item__period {
+  margin-left: auto;
+  font-size: var(--krds-pc-font-size-label-xsmall);
+  color: var(--krds-light-color-text-subtle);
+}
+.write-item .form-tit label {
+  font-size: var(--krds-pc-font-size-label-small);
+  font-weight: var(--krds-font-weight-bold);
+  color: var(--krds-light-color-text-basic);
+}
+/* §1의 헤더 전용 .form-conts{height:40px}가 전역 선택자라, 작성 폼에서는 높이를 되돌린다 */
+.write-item .form-conts { height: auto; }
+.write-item textarea.krds-input { height: 9.6rem; }
+
+.write-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--krds-gap-3);
+  padding: var(--krds-padding-6) 0 var(--krds-padding-9);
+}
+.write-actions__saved {
+  margin-right: auto;
+  font-size: var(--krds-pc-font-size-label-xsmall);
+  color: var(--krds-light-color-text-subtle);
+}
+
+/* 다음 태스크 — 기한이 지난 단계 표시 */
+.tbl td.is-overdue { color: var(--krds-light-color-text-warning); font-weight: var(--krds-font-weight-bold); }
+.next-overdue {
+  display: inline-block;
+  margin-left: var(--krds-gap-2);
+  padding: 0 var(--krds-padding-3);
+  border-radius: var(--krds-radius-medium3);
+  background: var(--krds-light-color-surface-warning-subtler);
+  color: var(--krds-light-color-text-warning);
+  font-size: 11px;
+  font-weight: var(--krds-font-weight-bold);
+}
+
+/* 업무보고 목록 — 저장본이 없을 때 */
+.report-empty {
+  border: 1px dashed var(--krds-light-color-border-gray);
+  border-radius: var(--krds-radius-medium2);
+  background: var(--krds-light-color-surface-gray-subtler);
+  padding: var(--krds-padding-10) var(--krds-padding-7);
+  text-align: center;
+}
+.report-empty__title {
+  font-size: var(--krds-pc-font-size-label-medium);
+  font-weight: var(--krds-font-weight-bold);
+  color: var(--krds-light-color-text-basic);
+  margin-bottom: var(--krds-gap-2);
+}
+.report-empty__desc {
+  font-size: var(--krds-pc-font-size-label-small);
+  color: var(--krds-light-color-text-subtle);
+  line-height: 1.6;
+  margin-bottom: var(--krds-gap-6);
+}
+
+/* 보고 기간 선택 라벨 */
+.report-toolbar__label {
+  font-size: var(--krds-pc-font-size-label-small);
+  font-weight: var(--krds-font-weight-bold);
+  color: var(--krds-light-color-text-basic);
+}
+
+/* 업무보고 저장본 상세 — 읽기 전용 항목 */
+.write-item--read .write-item__title { font-size: var(--krds-pc-font-size-label-medium); }
+.write-item__text {
+  font-size: var(--krds-pc-font-size-body-small);
+  line-height: 1.7;
+  color: var(--krds-light-color-text-basic);
+  padding: var(--krds-padding-5) var(--krds-padding-6);
+  border-radius: var(--krds-radius-medium1);
+  background: var(--krds-light-color-surface-gray-subtler);
+  white-space: pre-wrap;
+}
+
+
+/* 작성 폼 — 자유 기술란 (WBS 항목 목록 위에 위치) */
+.write-item--free {
+  padding-bottom: var(--krds-padding-8);
+  margin-bottom: var(--krds-gap-8);
+  border-bottom: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-divider-gray-light);
+}
+.write-item--free textarea.krds-input { height: 16rem; }
+.write-item--free .form-hint { margin-top: var(--krds-gap-3); font-size: var(--krds-pc-font-size-label-xsmall); color: var(--krds-light-color-text-subtle); }
+
+
+/* 작성된 내용이 없을 때 */
+.write-item__text.is-empty {
+  color: var(--krds-light-color-text-disabled);
+  background: transparent;
+  padding-left: 0;
+}
+
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   §  20  헤더 사용자 메뉴 · 로그인 화면
+         user-menu (아바타 + 닉네임 + 로그인/로그아웃) / login-card
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* ===== 헤더 사용자 메뉴 ===== */
+.user-menu { position: relative; flex-shrink: 0; }
+#krds-header .user-menu__btn {
+  display: flex;
+  align-items: center;
+  gap: var(--krds-gap-3);
+  height: 40px;
+  padding: 0 var(--krds-padding-4);
+  border-radius: var(--krds-radius-medium3);
+  color: var(--krds-light-color-text-basic);
+  text-decoration: none;
+}
+#krds-header .user-menu__btn:hover { background: var(--krds-light-color-action-secondary-hover); }
+
+.user-menu__avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--krds-light-color-action-secondary-active);
+  color: var(--krds-light-color-text-basic-inverse);
+  font-size: var(--krds-pc-font-size-label-xsmall);
+  font-weight: var(--krds-font-weight-bold);
+  flex-shrink: 0;
+}
+.user-menu__name {
+  font-size: var(--krds-pc-font-size-label-small);
+  font-weight: var(--krds-font-weight-bold);
+  color: var(--krds-light-color-text-basic);
+  white-space: nowrap;
+}
+
+/* 드롭다운(KRDS krds-drop-wrap) 안 계정 정보
+   KRDS가 .krds-drop-wrap .drop-menu{min-width:13rem}을 나중에 선언하므로 선택자를 한 단계 좁힌다 */
+.krds-drop-wrap.user-menu .drop-menu { min-width: 24rem; }
+.user-menu__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--krds-padding-5) var(--krds-padding-6) !important;
+  white-space: nowrap;
+}
+.user-menu__info-name {
+  font-size: var(--krds-pc-font-size-label-small);
+  font-weight: var(--krds-font-weight-bold);
+  color: var(--krds-light-color-text-basic);
+}
+.user-menu__info-dept {
+  font-size: var(--krds-pc-font-size-label-xsmall);
+  color: var(--krds-light-color-text-subtle);
+}
+.user-menu__perm {
+  display: inline-block;
+  align-self: flex-start;
+  margin-top: var(--krds-gap-2);
+  padding: 0 var(--krds-padding-3);
+  border-radius: var(--krds-radius-medium3);
+  background: var(--krds-light-color-surface-primary-subtler);
+  color: var(--krds-light-color-action-secondary-active);
+  font-size: 11px;
+  font-weight: var(--krds-font-weight-bold);
+  line-height: 18px;
+}
+/* 관리자 설정 버튼은 권한에 따라 감춘다 (KRDS 버튼의 display 선언 때문에 !important 필요) */
+#krds-header .krds-btn.icon[hidden] { display: none !important; }
+
+/* 드롭다운 항목이 button이어도 링크 항목과 같게 보이도록 */
+.user-menu .drop-list button.item-link {
+  display: block;
+  width: 100%;
+  padding: var(--krds-padding-4) var(--krds-padding-6);
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: var(--krds-pc-font-size-label-small);
+  color: var(--krds-light-color-text-basic);
+  text-align: left;
+  cursor: pointer;
+}
+
+.user-login-btn { flex-shrink: 0; }
+/* KRDS 버튼의 display 선언이 UA의 [hidden]을 덮으므로 명시적으로 숨긴다 */
+.user-login-btn[hidden],
+.user-menu[hidden] { display: none !important; }
+
+/* ===== 로그인 화면 =====
+   로고는 카드 위, 카드 안은 타이틀·입력·로그인 버튼, 카드 아래는 안내 링크. */
+.login-body {
+  display: flex;
+  min-height: 100%;
+  background: var(--krds-color-light-primary-5);
+}
+.login-shell {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--krds-padding-9);
+  overflow-y: auto;
+}
+.login-wrap {
+  width: 100%;
+  max-width: 420px;
+}
+.login-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--krds-gap-8);
+}
+.login-logo img { height: 48px; width: auto; }
+
+.login-card {
+  width: 100%;
+  padding: var(--krds-padding-10) var(--krds-padding-9);
+  border-radius: var(--krds-radius-medium4);
+  background: var(--krds-light-color-surface-white);
+  box-shadow: 0 1px 2px var(--krds-light-color-alpha-shadow1), 0 8px 24px var(--krds-light-color-alpha-shadow2);
+}
+.login-card--center { text-align: center; }
+
+.login-card__head { margin-bottom: var(--krds-gap-8); }
+.login-card__title {
+  font-size: var(--krds-pc-font-size-heading-small);
+  font-weight: var(--krds-font-weight-bold);
+  color: var(--krds-light-color-text-basic);
+  margin-bottom: var(--krds-gap-2);
+}
+.login-card__desc {
+  font-size: var(--krds-pc-font-size-label-small);
+  color: var(--krds-light-color-text-subtle);
+}
+
+/* 아이콘이 들어간 입력 필드 */
+.login-field {
+  position: relative;
+  text-align: left;
+}
+.login-field + .login-field { margin-top: var(--krds-gap-4); }
+.login-field__ico {
+  position: absolute;
+  top: 50%;
+  left: var(--krds-padding-6);
+  transform: translateY(-50%);
+  z-index: 1;
+  color: var(--krds-light-color-text-subtle);
+  pointer-events: none;
+}
+.login-field .krds-input {
+  width: 100%;
+  padding-left: calc(var(--krds-padding-6) + 26px);
+}
+
+/* KRDS .krds-btn.large 가 나중에 로드되므로 선택자를 한 단계 좁혀 전체 폭을 적용 */
+.login-submit.krds-btn.large { width: 100%; margin-top: var(--krds-gap-5); }
+
+/* 권한별 테스트 계정 */
+.login-accounts {
+  margin-top: var(--krds-gap-7);
+  padding-top: var(--krds-gap-6);
+  border-top: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-divider-gray-light);
+  text-align: left;
+}
+.login-accounts__title {
+  display: flex;
+  align-items: baseline;
+  gap: var(--krds-gap-3);
+  margin-bottom: var(--krds-gap-4);
+  font-size: var(--krds-pc-font-size-label-xsmall);
+  font-weight: var(--krds-font-weight-bold);
+  color: var(--krds-light-color-text-basic);
+}
+.login-accounts__title span {
+  font-weight: var(--krds-font-weight-regular);
+  color: var(--krds-light-color-text-subtle);
+}
+.login-accounts__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--krds-gap-2); }
+.login-accounts__item {
+  display: flex;
+  align-items: center;
+  gap: var(--krds-gap-3);
+  width: 100%;
+  padding: var(--krds-padding-4) var(--krds-padding-5);
+  border: var(--krds-light-border-width-static-regular) solid var(--krds-light-color-border-gray-light);
+  border-radius: var(--krds-radius-medium2);
+  background: var(--krds-light-color-surface-white);
+  font: inherit;
+  font-size: var(--krds-pc-font-size-label-xsmall);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--krds-transition-base), background-color var(--krds-transition-base);
+}
+.login-accounts__item:hover {
+  border-color: var(--krds-light-color-border-information-light);
+  background: var(--krds-light-color-surface-primary-subtler);
+}
+.login-accounts__perm {
+  flex: 0 0 auto;
+  min-width: 46px;
+  padding: 0 var(--krds-padding-3);
+  border-radius: var(--krds-radius-medium3);
+  background: var(--krds-light-color-action-secondary-active);
+  color: var(--krds-light-color-text-basic-inverse);
+  font-size: 11px;
+  font-weight: var(--krds-font-weight-bold);
+  line-height: 18px;
+  text-align: center;
+}
+.login-accounts__id {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: var(--krds-font-weight-bold);
+  color: var(--krds-light-color-text-basic);
+}
+.login-accounts__who {
+  margin-left: auto;
+  color: var(--krds-light-color-text-subtle);
+}
+.login-accounts__state {
+  padding: 0 var(--krds-padding-3);
+  border-radius: var(--krds-radius-medium1);
+  background: var(--krds-light-color-surface-warning-subtler);
+  color: var(--krds-light-color-text-warning);
+  font-size: 10.5px;
+  font-weight: var(--krds-font-weight-bold);
+  line-height: 18px;
+}
+
+/* ===== 비밀번호 재설정 안내 (password-reset.html) ===== */
+.login-card--reset { max-width: 460px; text-align: left; }
+.reset-info { margin-bottom: var(--krds-gap-7); }
+
+.reset-choice { display: flex; flex-direction: column; gap: var(--krds-gap-3); }
+.reset-choice__btn.krds-btn.large { width: 100%; }
+.reset-choice__hint {
+  margin-top: var(--krds-gap-2);
+  font-size: var(--krds-pc-font-size-label-xsmall);
+  line-height: 1.6;
+  color: var(--krds-light-color-text-subtle);
+}
+.reset-choice[hidden] { display: none; }
+
+.reset-form .fieldset { display: flex; flex-direction: column; gap: var(--krds-gap-6); width: 100%; }
+.reset-form .form-group { width: 100%; }
+.reset-form .form-conts { height: auto; }
+.reset-form .krds-input { width: 100%; }
+.reset-form .form-tit label {
+  font-size: var(--krds-pc-font-size-label-small);
+  font-weight: var(--krds-font-weight-bold);
+  color: var(--krds-light-color-text-basic);
+}
+.reset-form [class^="form-hint"]:empty { display: none; }
+.reset-form[hidden] { display: none; }
+
+.reset-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--krds-gap-4);
+  margin-top: var(--krds-gap-7);
+}
+
+/* 카드 아래 안내 */
+.login-foot {
+  margin-top: var(--krds-gap-7);
+  text-align: center;
+  font-size: var(--krds-pc-font-size-label-xsmall);
+  color: var(--krds-light-color-text-subtle);
+}
+.login-foot a {
+  margin-left: var(--krds-gap-2);
+  color: var(--krds-light-color-action-secondary-active);
+  font-weight: var(--krds-font-weight-bold);
+  text-decoration: none;
+}
+.login-foot a:hover { text-decoration: underline; }
+
+.login-form .fieldset { display: flex; flex-direction: column; gap: var(--krds-gap-6); width: 100%; }
+.login-form .form-group { width: 100%; }
+.login-form .form-conts { height: auto; }
+.login-form .krds-input { width: 100%; }
+.login-form .form-tit label {
+  font-size: var(--krds-pc-font-size-label-small);
+  font-weight: var(--krds-font-weight-bold);
+  color: var(--krds-light-color-text-basic);
+}
+
+.login-form__msg {
+  min-height: 18px;
+  margin-top: var(--krds-gap-4);
+  text-align: center;
+  font-size: var(--krds-pc-font-size-label-xsmall);
+  line-height: 1.6;
+  color: var(--krds-light-color-text-subtle);
+}
+.login-form__msg.is-error   { color: var(--krds-light-color-text-danger); }
+.login-form__msg.is-success { color: var(--krds-light-color-text-success); }
+.login-form__msg.is-info    { color: var(--krds-light-color-action-secondary-active); }
+
+/* ===== 회원가입 신청 (signup.html) ===== */
+.login-card--signup { max-width: 520px; }
+.login-card--signup .login-card__head { margin-bottom: var(--krds-gap-6); }
+
+/* 안내 문구 */
+.signup-notice {
+  display: flex;
+  gap: var(--krds-gap-3);
+  padding: var(--krds-padding-6);
+  margin-bottom: var(--krds-gap-7);
+  border-radius: var(--krds-radius-medium2);
+  background: var(--krds-light-color-surface-gray-subtler);
+  font-size: var(--krds-pc-font-size-label-xsmall);
+  line-height: 1.6;
+  color: var(--krds-light-color-text-basic);
+}
+.signup-notice__mark { color: var(--krds-light-color-action-secondary-active); }
+
+/* 라벨 + 설명 한 줄 배치 */
+.signup-form .fieldset { display: flex; flex-direction: column; gap: var(--krds-gap-6); width: 100%; }
+.signup-form .form-group { width: 100%; }
+.signup-form .form-conts { height: auto; }
+.signup-form .krds-input { width: 100%; }
+.signup-form .form-tit {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--krds-gap-3);
+}
+.signup-form .form-tit label {
+  font-size: var(--krds-pc-font-size-label-small);
+  font-weight: var(--krds-font-weight-bold);
+  color: var(--krds-light-color-text-basic);
+}
+.signup-form [class^="form-hint"]:empty { display: none; }
+
+/* 조직 선택 (아이콘 + KRDS select) */
+.select-with-icon { position: relative; width: 100%; }
+.select-with-icon__ico {
+  position: absolute;
+  top: 50%;
+  left: var(--krds-padding-6);
+  transform: translateY(-50%);
+  /* KRDS select이 position:relative라 DOM 순서상 위에 깔린다. z-index로 아이콘을 올린다 */
+  z-index: 1;
+  color: var(--krds-light-color-text-subtle);
+  pointer-events: none;
+}
+.select-with-icon .krds-form-select {
+  width: 100%;
+  padding-left: calc(var(--krds-padding-6) + 26px);
+}
+/* 조직을 고르면 본문 글자색으로 (선택 전 placeholder 색과 구분) */
+.select-with-icon .krds-form-select.completed { color: var(--krds-light-color-text-basic); }
+
+/* 하단 액션 */
+.signup-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--krds-gap-4);
+  margin-top: var(--krds-gap-8);
+}
+
+/* 신청 완료 */
+.signup-done { text-align: center; }
+.signup-done__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: var(--krds-gap-5);
+  border-radius: 50%;
+  background: var(--krds-light-color-surface-success-subtler);
+  color: var(--krds-light-color-icon-success);
+  font-size: 20px;
+  font-weight: var(--krds-font-weight-bold);
+}
+.signup-done__title {
+  font-size: var(--krds-pc-font-size-heading-xsmall);
+  font-weight: var(--krds-font-weight-bold);
+  color: var(--krds-light-color-text-basic);
+  margin-bottom: var(--krds-gap-3);
+}
+.signup-done__desc {
+  font-size: var(--krds-pc-font-size-label-small);
+  line-height: 1.6;
+  color: var(--krds-light-color-text-subtle);
+  margin-bottom: var(--krds-gap-7);
+}
+.signup-done__table { text-align: left; margin-bottom: var(--krds-gap-7); }
+/* KRDS .krds-btn.large 가 나중에 로드되므로 선택자를 한 단계 좁힌다 */
+.signup-done .krds-btn.large { width: 100%; }
+
+/* 비밀번호 5회 오류 안내 모달 */
+.pw-lock__desc {
+  font-size: var(--krds-pc-font-size-label-small);
+  line-height: 1.7;
+  color: var(--krds-light-color-text-basic);
+  margin-bottom: var(--krds-gap-6);
+}
+.pw-lock__table { margin-bottom: 0; }

@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>주간보고</title>
+    <title>월간보고</title>
     <link rel="stylesheet" href="/resources/css/custom.css">
     <link href="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.css" type="text/css" rel="stylesheet" />
     <script src="/resources/js/component/ui-include.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/krds-uiux@1.0.3/resources/cdn/krds.min.js"></script>
 </head>
-<body data-report-nav="weekly">
+<body data-report-nav="monthly">
 
   <div class="operating-container">
 
@@ -25,8 +25,8 @@
 
         <div class="page-header">
           <div class="page-title-group">
-            <div class="page-title">주간보고</div>
-            <div class="page-desc">담당자가 제출한 업무보고를 바탕으로 AI가 작성한 주간보고입니다.</div>
+            <div class="page-title">월간보고</div>
+            <div class="page-desc">담당자가 제출한 업무보고를 바탕으로 AI가 작성한 월간보고입니다.</div>
           </div>
           <div class="page-header__actions">
             <a href="/resources/pages/work-report-write.html" class="krds-btn medium secondary">업무보고 작성</a>
@@ -41,15 +41,15 @@
 
         <!-- 내 보고 -->
         <section class="report-section" id="myReportSection" hidden>
-          <h2 class="section-title">내 주간보고</h2>
+          <h2 class="section-title">내 월간보고</h2>
           <ul class="task-list report-list" id="myReportList"></ul>
         </section>
 
         <!-- 탭 (실별 보기) -->
         <div class="tab-bar" id="teamTabBar"></div>
 
-        <!-- 주간보고 목록 -->
-        <ul class="task-list report-list" id="weeklyReportList"></ul>
+        <!-- 월간보고 목록 -->
+        <ul class="task-list report-list" id="monthlyReportList"></ul>
       </main>
 
     </div>
@@ -59,7 +59,7 @@
   <script>
   (function () {
     // 제출완료된 보고만 노출
-    const ALL     = buildWeeklyReports();
+    const ALL     = buildMonthlyReports();
     const REPORTS = ALL.filter(r => r.status === 'submitted');
 
     // 보고 기간 표시
@@ -68,7 +68,7 @@
     }
 
     /* ── 내 보고 (제출 상태와 무관하게 항상 노출) ── */
-    const myReport = getMyReport('weekly');
+    const myReport = getMyReport('monthly');
     if (myReport) {
       const sec = document.getElementById('myReportSection');
       const el  = document.getElementById('myReportList');
@@ -85,7 +85,7 @@
     // 실(팀) 단위 탭 · 부서 단위 그룹
     const SIL_NAMES = [...new Set(REPORTS.map(r => r.sil))];
     const tabBar = document.getElementById('teamTabBar');
-    const listEl = document.getElementById('weeklyReportList');
+    const listEl = document.getElementById('monthlyReportList');
     let currentTeam = 'all';
 
     tabBar.innerHTML = [
@@ -119,7 +119,7 @@
         listEl.classList.remove('task-list--grouped');
         listEl.innerHTML = flatReports.length
           ? flatReports.map(reportCardHTML).join('')
-          : '<li class="task-empty">제출완료된 주간보고가 없습니다.</li>';
+          : '<li class="task-empty">제출완료된 월간보고가 없습니다.</li>';
       } else {
         // 특정 실: 부서 단위로 묶어서 표시
         const scoped = REPORTS.filter(r => r.sil === currentTeam);
@@ -129,7 +129,7 @@
         listEl.classList.add('task-list--grouped');
         listEl.innerHTML = groups.length
           ? groups.map(groupHTML).join('')
-          : '<li class="task-empty">제출완료된 주간보고가 없습니다.</li>';
+          : '<li class="task-empty">제출완료된 월간보고가 없습니다.</li>';
       }
 
       listEl.querySelectorAll('.task-card').forEach((card, i) => {
