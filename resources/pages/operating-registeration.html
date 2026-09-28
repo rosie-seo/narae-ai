@@ -665,7 +665,7 @@
                 <div class="form-field">
                   <label class="form-label">소속 부서<span class="req-mark">*</span></label>
                   <div class="dept-field" id="deptField">
-                    <input type="text" class="form-input" id="deptSearch" value="기획조정실 › 정책기획관 › 기획예산담당관" placeholder="부서명으로 검색" autocomplete="off">
+                    <input type="text" class="form-input" id="deptSearch" value="AI 기획" placeholder="부서명으로 검색" autocomplete="off">
                     <div class="chip-suggest" id="deptSuggest" hidden></div>
                   </div>
                 </div>
@@ -1099,30 +1099,20 @@
 (function () {
   /* ── 담당자 검색 ──────────────────────────────────────────── */
   var DIRECTORY = [
-    { name:'김민준', dept:'기획조정실 · 기획예산담당관', role:'과장' },
-    { name:'이서연', dept:'기획조정실 · 기획예산담당관', role:'담당자' },
-    { name:'박지훈', dept:'기획조정실 · 기획예산담당관', role:'담당자' },
-    { name:'최수아', dept:'기획조정실 · 기획예산담당관', role:'담당자' },
-    { name:'정태양', dept:'기획조정실 · 기획예산담당관', role:'담당자' },
-    { name:'한도윤', dept:'기획조정실 · 기획예산담당관', role:'담당자' },
-    { name:'오시우', dept:'기획조정실 · 기획예산담당관', role:'담당자' },
-    { name:'임나은', dept:'기획조정실 · 기획예산담당관', role:'담당자' },
-    { name:'황민호', dept:'운영지원실 · 인사과', role:'과장' },
-    { name:'천소희', dept:'운영지원실 · 인사과', role:'담당자' },
-    { name:'변준서', dept:'운영지원실 · 인사과', role:'담당자' },
-    { name:'석다은', dept:'운영지원실 · 인사과', role:'담당자' },
-    { name:'진수빈', dept:'운영지원실 · 재무과', role:'과장' },
-    { name:'마이준', dept:'운영지원실 · 재무과', role:'담당자' },
-    { name:'선가람', dept:'운영지원실 · 재무과', role:'담당자' },
-    { name:'용태민', dept:'운영지원실 · 재무과', role:'담당자' },
-    { name:'배민호', dept:'감사실 · 일반감사과', role:'과장' },
-    { name:'신소희', dept:'감사실 · 일반감사과', role:'담당자' },
-    { name:'장준서', dept:'감사실 · 일반감사과', role:'담당자' },
-    { name:'조다은', dept:'감사실 · 일반감사과', role:'담당자' },
-    { name:'박정우', dept:'정책홍보실 · 언론홍보과', role:'과장' },
-    { name:'유서아', dept:'정책홍보실 · 언론홍보과', role:'담당자' },
-    { name:'이수민', dept:'정책홍보실 · 언론홍보과', role:'담당자' },
-    { name:'한여울', dept:'정책홍보실 · 언론홍보과', role:'담당자' },
+    { name:'권영준', dept:'경영진',    role:'대표' },
+    { name:'박석준', dept:'경영진',    role:'고문' },
+    { name:'전하나', dept:'경영지원',  role:'과장' },
+    { name:'윤정현', dept:'영업',      role:'부장' },
+    { name:'홍길동', dept:'영업',      role:'매니저' },
+    { name:'김수현', dept:'AI 기획',   role:'사원' },
+    { name:'서지애', dept:'AI 기획',   role:'사원' },
+    { name:'이동학', dept:'AI 연구소', role:'이사' },
+    { name:'조기정', dept:'AI 연구소', role:'과장' },
+    { name:'권자영', dept:'AI 연구소', role:'연구원' },
+    { name:'김영지', dept:'AI 연구소', role:'연구원' },
+    { name:'김기운', dept:'미들웨어',  role:'이사' },
+    { name:'송진혁', dept:'미들웨어',  role:'과장' },
+    { name:'조민국', dept:'미들웨어',  role:'연구원' },
   ];
 
   var assignees = [];
@@ -1197,43 +1187,12 @@
 
   /* ── 소속 부서: 조직도 트리 선택기 ────────────────────────── */
   var DEPT_TREE = [
-    { name:'기획조정실', children:[
-      { name:'정책기획관', children:[
-        { name:'기획예산담당관' }, { name:'혁신행정담당관' }, { name:'정보화담당관' },
-      ]},
-      { name:'국제협력관', children:[
-        { name:'국제협력담당관' }, { name:'통상지원담당관' },
-      ]},
-    ]},
-    { name:'운영지원실', children:[
-      { name:'총무국', children:[
-        { name:'인사과' }, { name:'재무과' }, { name:'총무과' },
-      ]},
-      { name:'정보관리국', children:[
-        { name:'시스템운영과' }, { name:'데이터관리과' },
-      ]},
-    ]},
-    { name:'감사실', children:[
-      { name:'감사담당관', children:[
-        { name:'일반감사과' }, { name:'청렴조사과' },
-      ]},
-    ]},
-    { name:'정책홍보실', children:[
-      { name:'홍보전략관', children:[
-        { name:'언론홍보과' }, { name:'뉴미디어담당관' },
-      ]},
-      { name:'대국민소통관', children:[
-        { name:'민원지원과' }, { name:'소통협력과' },
-      ]},
-    ]},
-    { name:'연구기획실', children:[
-      { name:'정책연구관', children:[
-        { name:'정책분석과' }, { name:'입법연구과' },
-      ]},
-      { name:'미래전략관', children:[
-        { name:'미래전략과' },
-      ]},
-    ]},
+    { name:'경영진' },
+    { name:'경영지원' },
+    { name:'영업' },
+    { name:'AI 기획' },
+    { name:'AI 연구소' },
+    { name:'미들웨어' },
   ];
 
   var deptFieldEl    = document.getElementById('deptField');

@@ -177,7 +177,7 @@
     document.getElementById('report-title').textContent = report.author + ' ' + report.authorRole + ' ' + kindLabel;
     document.title = report.author + ' ' + kindLabel;
     document.getElementById('report-meta').textContent =
-      report.sil + ' · ' + report.dept + ' · ' + report.periodStart + ' ~ ' + report.periodEnd;
+      teamLabel(report.sil, report.dept) + ' · ' + report.periodStart + ' ~ ' + report.periodEnd;
 
     /* ── 업무보고 저장본 → AI 보고 본문 ── */
     const entries = isMine ? getWorkReportEntriesInRange(report.periodStart, report.periodEnd) : {};
@@ -192,7 +192,7 @@
     /* ── 기본 정보 ── */
     document.getElementById('info-author').textContent =
       report.author + ' ' + report.authorRole + (report.authorPosition ? ' (' + report.authorPosition + ')' : '');
-    document.getElementById('info-team').textContent    = report.sil + ' · ' + report.dept;
+    document.getElementById('info-team').textContent    = teamLabel(report.sil, report.dept);
     document.getElementById('info-created').textContent = savedAt || report.submittedAt;
     document.getElementById('info-period').textContent  = report.periodStart + ' ~ ' + report.periodEnd;
 

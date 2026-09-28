@@ -112,12 +112,12 @@
     badge.textContent = rec.submitted ? '제출완료' : '임시저장';
     badge.className   = rec.submitted ? REPORT_STATUS_CLASS.submitted : REPORT_STATUS_CLASS.draft;
     document.getElementById('wr-title').textContent = rec.periodStart + ' ~ ' + rec.periodEnd + ' 업무보고';
-    document.getElementById('wr-meta').textContent  = me.sil + ' · ' + me.dept + ' · ' + me.name + ' ' + me.role;
+    document.getElementById('wr-meta').textContent  = teamLabel(me.sil, me.dept) + ' · ' + me.name + ' ' + me.role;
     document.title = rec.periodStart + ' 업무보고';
 
     /* ── 기본 정보 ── */
     document.getElementById('wr-author').textContent = me.name + ' ' + me.role + (me.position ? ' (' + me.position + ')' : '');
-    document.getElementById('wr-team').textContent   = me.sil + ' · ' + me.dept;
+    document.getElementById('wr-team').textContent   = teamLabel(me.sil, me.dept);
     document.getElementById('wr-period').textContent = rec.periodStart + ' ~ ' + rec.periodEnd;
     document.getElementById('wr-saved').textContent  = rec.savedAt || '-';
 

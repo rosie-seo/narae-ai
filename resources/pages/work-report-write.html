@@ -161,7 +161,7 @@
 
     /* ── 기본 정보 ── */
     document.getElementById('writeAuthor').textContent = me.name + ' ' + me.role + (me.position ? ' (' + me.position + ')' : '');
-    document.getElementById('writeTeam').textContent   = me.sil + ' · ' + me.dept;
+    document.getElementById('writeTeam').textContent   = teamLabel(me.sil, me.dept);
     document.getElementById('writePeriod').textContent = week.start + ' ~ ' + week.end;
     const carriedCount = tasks.filter(t => isTaskCarriedOver(t, week.start)).length;
     document.getElementById('writeCount').textContent =

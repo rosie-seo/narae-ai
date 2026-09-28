@@ -164,7 +164,7 @@
         '비밀번호를 ' + LOGIN_FAIL_LIMIT + '회 잘못 입력했습니다. 보안을 위해 로그인이 제한되었습니다. ' +
         '아래 계정 담당자에게 비밀번호 초기화를 요청해 주세요.';
       document.getElementById('pwLockPerson').textContent = mgr.name + (mgr.role ? ' ' + mgr.role : '');
-      document.getElementById('pwLockDept').textContent   = (mgr.sil ? mgr.sil + ' · ' : '') + mgr.dept;
+      document.getElementById('pwLockDept').textContent   = teamLabel(mgr.sil, mgr.dept);
       document.getElementById('pwLockEmail').textContent  = mgr.email || '-';
       document.getElementById('pwLockPhone').textContent  = mgr.phone || '-';
 
